@@ -25,13 +25,10 @@ void nino_styles_init(void)
 
     // ---- App button base ----
     lv_style_init(&nino_style_app_btn);
-    lv_style_set_radius(&nino_style_app_btn, 12);
+    lv_style_set_radius(&nino_style_app_btn, 20);
     lv_style_set_bg_opa(&nino_style_app_btn, LV_OPA_COVER);
     lv_style_set_border_width(&nino_style_app_btn, 0);
-    lv_style_set_shadow_width(&nino_style_app_btn, 12);
-    lv_style_set_shadow_color(&nino_style_app_btn, lv_color_hex(0x000000));
-    lv_style_set_shadow_opa(&nino_style_app_btn, LV_OPA_40);
-    lv_style_set_shadow_ofs_y(&nino_style_app_btn, 4);
+    lv_style_set_shadow_width(&nino_style_app_btn, 0);
     lv_style_set_pad_all(&nino_style_app_btn, 4);
     lv_style_set_align(&nino_style_app_btn, LV_ALIGN_CENTER);
     lv_style_set_layout(&nino_style_app_btn, LV_LAYOUT_FLEX);
@@ -40,8 +37,7 @@ void nino_styles_init(void)
     lv_style_set_flex_cross_place(&nino_style_app_btn, LV_FLEX_ALIGN_CENTER);
 
     lv_style_init(&nino_style_app_btn_pressed);
-    lv_style_set_transform_scale(&nino_style_app_btn_pressed, 230); // squash on press
-    lv_style_set_shadow_width(&nino_style_app_btn_pressed, 4);
+    lv_style_set_shadow_width(&nino_style_app_btn_pressed, 0);
 
     // ---- Header bar (colored by app, set per object) ----
     lv_style_init(&nino_style_header_bar);

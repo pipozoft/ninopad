@@ -1,6 +1,3 @@
-/**
- * scr_boot.h — boot screen build (colored "NinoPad" letters, pulse anim, 2s/tap skip).
- */
 #pragma once
 #include <lvgl.h>
 
@@ -8,6 +5,8 @@
 extern "C" {
 #endif
 void scr_boot_create(lv_obj_t *scr);
+void scr_boot_set_status(const char *text);
+void scr_boot_advance_home(void);
 #ifdef __cplusplus
 }
 #endif

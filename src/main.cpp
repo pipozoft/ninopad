@@ -1,7 +1,3 @@
-/**
- * main.cpp — NinoPad entry point (called from ninopad.ino).
- * Initializes display, touch, LVGL, styles, then loads the boot screen.
- */
 #include <Arduino.h>
 #include <lvgl.h>
 
@@ -21,6 +17,63 @@
 
 #include "ui/nino_styles.h"
 #include "ui/screen_manager.h"
+#include "ui/screens/scr_boot.h"
+#include "utils/sd_utils.h"
+#include "utils/wifi_utils.h"
+
+#ifndef NINO_TZ_OFFSET
+#define NINO_TZ_OFFSET -5
+#endif
+
+static void pump_lvgl(void)
+{
+    lv_timer_handler();
+    lv_display_t *d = lv_display_get_next(NULL);
+    if (d) lv_refr_now(d);
+}
+
+static void run_loading_sequence(void)
+{
+    scr_boot_set_status("Starting...");
+    pump_lvgl();
+    delay(100);
+
+    bool ok = nino_sd_mount();
+    if (ok)
+    {
+        scr_boot_set_status("SD card ready");
+        pump_lvgl();
+        delay(300);
+
+        scr_boot_set_status("Connecting to WiFi...");
+        pump_lvgl();
+        ok = nino_wifi_connect_from_sd();
+
+        if (ok)
+        {
+            scr_boot_set_status("WiFi connected");
+            pump_lvgl();
+            delay(300);
+
+            scr_boot_set_status("Syncing time...");
+            pump_lvgl();
+            nino_ntp_sync(NINO_TZ_OFFSET);
+
+            scr_boot_set_status("Ready");
+            pump_lvgl();
+            delay(200);
+        }
+    }
+
+    if (!ok)
+    {
+        scr_boot_set_status("Continuing offline");
+        pump_lvgl();
+        delay(800);
+    }
+
+    scr_boot_advance_home();
+}
 
 static void nino_lv_log_cb(lv_log_level_t level, const char *buf)
 {
@@ -44,22 +97,28 @@ void setup(void)
     lv_log_register_print_cb((lv_log_print_g_cb_t)nino_lv_log_cb);
 #endif
 
-    // Hardware
     nino_display_init();
     NINO_TOUCH_INIT();
     lv_indev_t *indev = lv_indev_create();
     lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(indev, NINO_TOUCH_READ_CB);
 
-    // Styles + first screen
     nino_styles_init();
     nino_screen_show_boot();
+    pump_lvgl();
+
+    run_loading_sequence();
 
     Serial.println("[NinoPad] ready");
 }
 
 void loop(void)
 {
+    static uint32_t loop_cnt = 0;
+    loop_cnt++;
+    if ((loop_cnt % 100) == 0) Serial.print(".");
     lv_timer_handler();
-    delay(5);
+    lv_display_t *d = lv_display_get_next(NULL);
+    if (d) lv_refr_now(d);
+    delay(2);
 }

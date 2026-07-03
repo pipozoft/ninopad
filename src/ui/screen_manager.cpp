@@ -8,22 +8,24 @@
 
 void nino_screen_show_boot(void)
 {
-    lv_obj_t *scr = lv_obj_create(NULL);
+    lv_obj_t *scr = lv_scr_act();
+    lv_obj_clean(scr);
     scr_boot_create(scr);
-    lv_screen_load(scr);
 }
 
 void nino_screen_show_home(void)
 {
-    lv_obj_t *scr = lv_obj_create(NULL);
+    nino_home_stop();
+    lv_obj_t *scr = lv_scr_act();
+    lv_obj_clean(scr);
     scr_home_create(scr);
-    lv_screen_load(scr);
 }
 
 void nino_screen_show_app(nino_app_id_t id)
 {
     if (id < 0 || id >= APP_COUNT) return;
-    lv_obj_t *scr = lv_obj_create(NULL);
+    nino_home_stop();
+    lv_obj_t *scr = lv_scr_act();
+    lv_obj_clean(scr);
     scr_app_base_create(scr, id);
-    lv_screen_load(scr);
 }

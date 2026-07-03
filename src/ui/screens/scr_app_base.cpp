@@ -10,14 +10,15 @@
 
 static void on_back(lv_event_t * /*e*/)
 {
-    nino_screen_show_home();
+    lv_async_call([](void*) { nino_screen_show_home(); }, NULL);
 }
 
 void scr_app_base_create(lv_obj_t *scr, nino_app_id_t id)
 {
     const nino_app_t *app = nino_app_get(id);
 
-    lv_obj_add_style(scr, &nino_style_bg, 0);
+    lv_obj_set_style_bg_color(scr, NINO_COLOR_BG, 0);
+    lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
     lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
 
     // ---- Header bar ----

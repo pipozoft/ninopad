@@ -20,8 +20,8 @@
  * PSRAM-only pools and want to override lv_malloc, set LV_USE_STDLIB_MALLOC
  * to LV_STDLIB_CUSTOM and provide lv_malloc/lv_realloc/lv_free externally.
  *================*/
-#define LV_USE_STDLIB_MALLOC    LV_STDLIB_BUILTIN
-#define LV_MEM_SIZE             (64U * 1024U)  /* used only when MALLOC = BUILTIN */
+#define LV_USE_STDLIB_MALLOC    LV_STDLIB_CLIB
+/* LV_MEM_SIZE not needed when using CLIB (uses system heap) */
 
 /* LVGL's stdlib providers (use libc defaults). */
 #define LV_USE_STDLIB_STRING    LV_STDLIB_CLIB
@@ -37,7 +37,8 @@
 #define LV_USE_ASSERT_STYLE     1
 #define LV_USE_ASSERT_OBJ       0
 
-#define LV_USE_PERF_MONITOR      0
+#define LV_USE_PERF_MONITOR      1
+#define LV_USE_PERF_MONITOR_POS  LV_ALIGN_BOTTOM_RIGHT
 #define LV_USE_MEM_MONITOR       0
 #define LV_USE_REFR_DEBUG         0
 
@@ -144,7 +145,7 @@
 #define LV_INDEV_DEF_READ_PERIOD 30
 #define LV_USE_PROFILER     0
 #define LV_PROFILER_INCLUDE  "lvgl_profiler.h"
-#define LV_USE_SYSMON       0
+#define LV_USE_SYSMON       1
 #define LV_USE_OBSERVER     1
 #define LV_USE_MSG          0
 #define LV_USE_IME_TYPES 0

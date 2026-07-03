@@ -3,10 +3,14 @@
  * Scale uses LVGL v9 style transform_scale (256 = 100%).
  */
 #include "anim_utils.h"
+#include <Arduino.h>
 
 // LVGL v9 helper: set transform_scale via style. The exec_cb receives int32_t.
 static void anim_exec_scale(void *obj, int32_t v)
 {
+    static int anim_cnt = 0;
+    anim_cnt++;
+    if ((anim_cnt % 10) == 0) Serial.print("S");
     lv_obj_set_style_transform_scale((lv_obj_t *)obj, v, 0);
 }
 

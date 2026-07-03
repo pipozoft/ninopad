@@ -1,49 +1,21 @@
-/**
- * scr_boot.cpp — NinoPad boot screen.
- * - Dark bg (#1A1A1A)
- * - 7 individually colored letters forming "NinoPad"
- * - Subtle pulse anim on the row
- * - Auto-advance to home after 2s, or tap anywhere to skip
- */
 #include "scr_boot.h"
 #include "screen_manager.h"
 #include "nino_colors.h"
 #include "nino_styles.h"
-#include "../utils/anim_utils.h"
+#include <Arduino.h>
 
-static bool advanced = false;
-
-static void advance_home(void)
-{
-    if (advanced) return;
-    advanced = true;
-    nino_screen_show_home();
-}
-
-static void on_tap_skip(lv_event_t * /*e*/)
-{
-    advance_home();
-}
-
-static void on_boot_timer(lv_timer_t * /*t*/)
-{
-    advance_home();
-}
+static lv_obj_t *status_label = NULL;
 
 void scr_boot_create(lv_obj_t *scr)
 {
-    advanced = false;
-    lv_obj_add_style(scr, &nino_style_bg, 0);
-
-    bool clickable_prev = true;
+    lv_obj_set_style_bg_color(scr, NINO_COLOR_BG, 0);
+    lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
     lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
-    (void)clickable_prev;
 
-    // ---- centered letter row ----
     lv_obj_t *row = lv_obj_create(scr);
     lv_obj_remove_style_all(row);
     lv_obj_set_size(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_align(row, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(row, LV_ALIGN_CENTER, 0, -20);
     lv_obj_set_layout(row, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -61,11 +33,27 @@ void scr_boot_create(lv_obj_t *scr)
         lv_obj_set_style_text_font(lab, &lv_font_montserrat_28, 0);
     }
 
-    // pulse on the row (slight scale up/down, infinite)
-    nino_anim_pulse(row, 700, 280, -1);
+    status_label = lv_label_create(scr);
+    lv_label_set_text(status_label, "");
+    lv_obj_set_width(status_label, 400);
+    lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_color(status_label, lv_color_hex(0x888888), 0);
+    lv_obj_set_style_text_font(status_label, &lv_font_montserrat_14, 0);
+    lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 30);
 
-    // tap-anywhere skip + 2s auto-advance
-    lv_obj_add_event_cb(scr, on_tap_skip, LV_EVENT_CLICKED, NULL);
-    lv_timer_t *t = lv_timer_create(on_boot_timer, 2000, NULL);
-    lv_timer_set_repeat_count(t, 1);
+    lv_obj_invalidate(scr);
+}
+
+void scr_boot_set_status(const char *text)
+{
+    if (status_label)
+    {
+        lv_label_set_text(status_label, text);
+        lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 30);
+    }
+}
+
+void scr_boot_advance_home(void)
+{
+    nino_screen_show_home();
 }
