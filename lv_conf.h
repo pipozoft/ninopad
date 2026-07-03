@@ -43,7 +43,7 @@
 #define LV_USE_MEM_MONITOR       0
 #define LV_USE_REFR_DEBUG         0
 
-#define LV_DRAW_BUF_STRIDE_ALIGN 4
+#define LV_DRAW_BUF_STRIDE_ALIGN 2
 #define LV_DRAW_BUF_ALIGN        4
 
 /*================
@@ -55,7 +55,7 @@
 #define LV_FONT_MONTSERRAT_14    1
 #define LV_FONT_MONTSERRAT_16    1
 #define LV_FONT_MONTSERRAT_18    0
-#define LV_FONT_MONTSERRAT_20    0
+#define LV_FONT_MONTSERRAT_20    1
 #define LV_FONT_MONTSERRAT_22    0
 #define LV_FONT_MONTSERRAT_24    1
 #define LV_FONT_MONTSERRAT_26    0
@@ -75,34 +75,34 @@
 /*================
  * WIDGETS
  *================*/
-#define LV_USE_ANIMIMG    1
-#define LV_USE_ARC        1
+#define LV_USE_ANIMIMG    0
+#define LV_USE_ARC        0
 #define LV_USE_BAR        1
 #define LV_USE_BTN        1
 #define LV_USE_BTNMATRIX  1
-#define LV_USE_CANVAS     1
-#define LV_USE_CHECKBOX   1
+#define LV_USE_CANVAS     0
+#define LV_USE_CHECKBOX   0
 #define LV_USE_DROPDOWN   1
-#define LV_USE_IMG        1
-#define LV_USE_IMGBUTTON  1
+#define LV_USE_IMG        0
+#define LV_USE_IMGBUTTON  0
 #define LV_USE_KEYBOARD   1
 #define LV_USE_LABEL      1
-#define LV_USE_LED        1
+#define LV_USE_LED        0
 #define LV_USE_LINE       1
 #define LV_USE_LIST       1
-#define LV_USE_MENU       1
+#define LV_USE_MENU       0
 #define LV_USE_METER      0
 #define LV_USE_MSGBOX     1
-#define LV_USE_ROLLER     1
+#define LV_USE_ROLLER     0
 #define LV_USE_SCALE      0
 #define LV_USE_SLIDER     1
-#define LV_USE_SPAN       1
-#define LV_USE_SPINBOX    1
-#define LV_USE_SPINNER    1
+#define LV_USE_SPAN       0
+#define LV_USE_SPINBOX    0
+#define LV_USE_SPINNER    0
 #define LV_USE_SWITCH     1
 #define LV_USE_TEXTAREA   1
 #define LV_USE_TABLE      0
-#define LV_USE_TABVIEW    0
+#define LV_USE_TABVIEW    1
 #define LV_USE_TILEVIEW   0
 #define LV_USE_WIN        0
 

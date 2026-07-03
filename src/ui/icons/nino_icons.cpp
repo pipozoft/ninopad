@@ -1,17 +1,60 @@
-/**
- * nino_icons.cpp — simple recognizable line-art icons via lv_line primitives.
- * Coordinates assume a 50x50 parent (canvas-anchored into a flex column btn).
- */
 #include "nino_icons.h"
+#include "nino_svg.h"
 #include <math.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-static const int ICON_BOX = 50;
+// ---- SVG-based app icons (Heroicons style, rendered via lightweight parser) ----
 
-// Add one straight line to parent.
+void nino_icon_smiley(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75s9.75-4.365 9.75-9.75S17.385 2.25 12 2.25m-2.625 6c-.54 0-.828.419-.936.634a1.96 1.96 0 0 0-.189.866c0 .298.059.605.189.866c.108.215.395.634.936.634c.54 0 .828-.419.936-.634c.13-.26.189-.568.189-.866s-.059-.605-.189-.866c-.108-.215-.395-.634-.936-.634m4.314.634c.108-.215.395-.634.936-.634c.54 0 .828.419.936.634c.13.26.189.568.189.866s-.059.605-.189.866c-.108.215-.395.634-.936.634c-.54 0-.828-.419-.936-.634a1.96 1.96 0 0 1-.189-.866c0-.298.059-.605.189-.866m2.023 6.828a.75.75 0 1 0-1.06-1.06a3.75 3.75 0 0 1-5.304 0a.75.75 0 0 0-1.06 1.06a5.25 5.25 0 0 0 7.424 0", ink, 2, 24.0f);
+}
+
+void nino_icon_flame(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M12.963 2.286a.75.75 0 0 0-1.071-.136a9.742 9.742 0 0 0-3.539 6.177A7.547 7.547 0 0 1 6.648 6.61a.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.545a3.75 3.75 0 0 1 3.255 3.717Z", ink, 2, 24.0f);
+}
+
+void nino_icon_eye(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M10 12.5a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5 M.664 10.59a1.65 1.65 0 0 1 0-1.186A10 10 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41c.147.381.146.804 0 1.186A10 10 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41M14 10a4 4 0 1 1-8 0a4 4 0 0 1 8 0", ink, 2, 20.0f);
+}
+
+void nino_icon_money(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M1 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4Zm12 4a3 3 0 1 1-6 0a3 3 0 0 1 6 0ZM4 9a1 1 0 1 0 0-2a1 1 0 0 0 0 2Zm13-1a1 1 0 1 1-2 0a1 1 0 0 1 2 0ZM1.75 14.5a.75.75 0 0 0 0 1.5c4.417 0 8.693.603 12.749 1.73c1.111.309 2.251-.512 2.251-1.696v-.784a.75.75 0 0 0-1.5 0v.784a.272.272 0 0 1-.35.25A49.043 49.043 0 0 0 1.75 14.5Z", ink, 2, 20.0f);
+}
+
+void nino_icon_sun(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0a4.5 4.5 0 0 1-9 0Zm11.394-5.834a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75Zm-3.916 6.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18Zm-4.242-.697a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12Zm.697-4.243a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z", ink, 2, 24.0f);
+}
+
+void nino_icon_brush(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M20.599 1.5c-.376 0-.743.111-1.055.32l-5.08 3.385a18.747 18.747 0 0 0-3.471 2.987a10.04 10.04 0 0 1 4.815 4.815a18.748 18.748 0 0 0 2.987-3.472l3.386-5.079A1.902 1.902 0 0 0 20.599 1.5Zm-8.3 14.025a18.76 18.76 0 0 0 1.896-1.207a8.026 8.026 0 0 0-4.513-4.513A18.75 18.75 0 0 0 8.475 11.7l-.278.5a5.26 5.26 0 0 1 3.601 3.602l.502-.278ZM6.75 13.5A3.75 3.75 0 0 0 3 17.25a1.5 1.5 0 0 1-1.601 1.497a.75.75 0 0 0-.7 1.123a5.25 5.25 0 0 0 9.8-2.62a3.75 3.75 0 0 0-3.75-3.75Z", ink, 2, 24.0f);
+}
+
+void nino_icon_scissors(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M1.469 3.75a3.5 3.5 0 0 0 5.617 4.11l.883.51c.025.092.147.116.21.043a3.75 3.75 0 0 1 .5-.484c.286-.23.3-.709-.018-.892l-.825-.477A3.501 3.501 0 0 0 1.47 3.75Zm2.03 3.482a2 2 0 1 1 2-3.464a2 2 0 0 1-2 3.464Zm6.457 1.09a2.75 2.75 0 0 0-1.588 1.822L7.97 11.63l-.884.51a3.501 3.501 0 1 0 .75 1.3l10.68-6.166a.75.75 0 0 0-.182-1.374l-.703-.189a2.75 2.75 0 0 0-1.78.123L9.955 8.322ZM2.768 15.5a2 2 0 1 1 3.464-2a2 2 0 0 1-3.464 2Z M12.52 11.89a.5.5 0 0 0 .056.894l3.274 1.381a2.75 2.75 0 0 0 1.78.123l.704-.188a.75.75 0 0 0 .18-1.374l-3.47-2.004a.5.5 0 0 0-.5 0L12.52 11.89Z", ink, 2, 20.0f);
+}
+
+void nino_icon_book(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M10.75 16.82A7.462 7.462 0 0 1 15 15.5a7.5 7.5 0 0 1 2.046.282a.75.75 0 0 0 .954-.722v-11a.75.75 0 0 0-.546-.721A9.006 9.006 0 0 0 15 3a8.963 8.963 0 0 0-4.25 1.065V16.82ZM9.25 4.065A8.963 8.963 0 0 0 5 3a9 9 0 0 0-2.454.339A.75.75 0 0 0 2 4.06v11a.75.75 0 0 0 .954.721A7.506 7.506 0 0 1 5 15.5c1.579 0 3.042.487 4.25 1.32V4.065Z", ink, 2, 20.0f);
+}
+
+void nino_icon_gear(lv_obj_t *p, lv_color_t ink)
+{
+    nino_svg_draw(p, "M11.828 2.25c-.916 0-1.699.663-1.85 1.567l-.091.549a.798.798 0 0 1-.517.608a7.45 7.45 0 0 0-.478.198a.798.798 0 0 1-.796-.064l-.453-.324a1.875 1.875 0 0 0-2.416.2l-.243.243a1.875 1.875 0 0 0-.2 2.416l.324.453a.798.798 0 0 1 .064.796a7.448 7.448 0 0 0-.198.478a.798.798 0 0 1-.608.517l-.55.092a1.875 1.875 0 0 0-1.566 1.849v.344c0 .916.663 1.699 1.567 1.85l.549.091c.281.047.508.25.608.517c.06.162.127.321.198.478a.798.798 0 0 1-.064.796l-.324.453a1.875 1.875 0 0 0 .2 2.416l.243.243c.648.648 1.67.733 2.416.2l.453-.324a.798.798 0 0 1 .796-.064c.157.071.316.137.478.198c.267.1.47.327.517.608l.092.55c.15.903.932 1.566 1.849 1.566h.344c.916 0 1.699-.663 1.85-1.567l.091-.549a.798.798 0 0 1 .517-.608a7.52 7.52 0 0 0 .478-.198a.798.798 0 0 1 .796.064l.453.324a1.875 1.875 0 0 0 2.416-.2l.243-.243c.648-.648.733-1.67.2-2.416l-.324-.453a.798.798 0 0 1-.064-.796c.071-.157.137-.316.198-.478c.1-.267.327-.47.608-.517l.55-.091a1.875 1.875 0 0 0 1.566-1.85v-.344c0-.916-.663-1.699-1.567-1.85l-.549-.091a.798.798 0 0 1-.608-.517a7.507 7.507 0 0 0-.198-.478a.798.798 0 0 1 .064-.796l.324-.453a1.875 1.875 0 0 0-.2-2.416l-.243-.243a1.875 1.875 0 0 0-2.416-.2l-.453.324a.798.798 0 0 1-.796.064a7.462 7.462 0 0 0-.478-.198a.798.798 0 0 1-.517-.608l-.091-.55a1.875 1.875 0 0 0-1.85-1.566h-.344ZM12 15.75a3.75 3.75 0 1 0 0-7.5a3.75 3.75 0 0 0 0 7.5Z", ink, 2, 24.0f);
+}
+
+// ---- Status bar icons (procedural — no SVGs for these) ----
+
 static lv_obj_t *add_line(lv_obj_t *parent, const lv_point_precise_t *pts, int cnt,
                           lv_color_t color, int width)
 {
@@ -25,7 +68,6 @@ static lv_obj_t *add_line(lv_obj_t *parent, const lv_point_precise_t *pts, int c
     return ln;
 }
 
-// Build an arc as N short straight segments into parent.
 static void add_arc(lv_obj_t *parent, float cx, float cy, float r,
                     float a0_deg, float a1_deg, int segs,
                     lv_color_t color, int width)
@@ -43,118 +85,8 @@ static void add_arc(lv_obj_t *parent, float cx, float cy, float r,
     lv_free(pts);
 }
 
-// Smiley: circle face, two eyes, smiling arc.
-void nino_icon_smiley(lv_obj_t *p, lv_color_t ink)
-{
-    (void)ICON_BOX;
-    add_arc(p, 25, 25, 18, 0, 360, 40, ink, 2);
-    lv_point_precise_t eye_l[2] = {{18, 16}, {22, 16}};
-    lv_point_precise_t eye_r[2] = {{28, 16}, {32, 16}};
-    add_line(p, eye_l, 2, ink, 2);
-    add_line(p, eye_r, 2, ink, 2);
-    add_arc(p, 25, 22, 10, 30, 150, 12, ink, 2);
-}
-
-// Flame: stylized teardrop made of arcs.
-void nino_icon_flame(lv_obj_t *p, lv_color_t ink)
-{
-    lv_point_precise_t outer[8] = {
-        {25, 8}, {35, 25}, {33, 33}, {33, 40},
-        {25, 44}, {17, 40}, {17, 33}, {15, 25}
-    };
-    add_line(p, outer, 8, ink, 2);
-    add_arc(p, 25, 30, 8, 30, 150, 10, ink, 2);
-}
-
-// Eye: almond + pupil.
-void nino_icon_eye(lv_obj_t *p, lv_color_t ink)
-{
-    add_arc(p, 25, 24, 16, -20, 200, 16, ink, 2);
-    add_arc(p, 25, 24, 14, 200, -20, 16, ink, 2);
-    add_arc(p, 25, 24, 4, 0, 360, 16, ink, 2);
-}
-
-// Money jar: trapezoid jar outline.
-void nino_icon_money(lv_obj_t *p, lv_color_t ink)
-{
-    lv_point_precise_t lip[5] = {{17, 12}, {33, 12}, {33, 16}, {17, 16}, {17, 12}};
-    add_line(p, lip, 5, ink, 2);
-    lv_point_precise_t jar[5] = {
-        {19, 16}, {31, 16}, {33, 40}, {17, 40}, {19, 16}
-    };
-    add_line(p, jar, 5, ink, 2);
-    // $ icon as two arcs + line (approx).
-    add_arc(p, 25, 28, 6, 70, 290, 10, ink, 2);
-    lv_point_precise_t s_stem[2] = {{25, 22}, {25, 34}};
-    add_line(p, s_stem, 2, ink, 2);
-}
-
-// Sun: center circle + 8 spokes.
-void nino_icon_sun(lv_obj_t *p, lv_color_t ink)
-{
-    add_arc(p, 25, 25, 8, 0, 360, 24, ink, 2);
-    for (int i = 0; i < 8; ++i) {
-        float a = i * 45.0f * (float)M_PI / 180.0f;
-        lv_point_precise_t sp[2];
-        sp[0].x = (int)(25 + 12 * cosf(a));
-        sp[0].y = (int)(25 + 12 * sinf(a));
-        sp[1].x = (int)(25 + 18 * cosf(a));
-        sp[1].y = (int)(25 + 18 * sinf(a));
-        add_line(p, sp, 2, ink, 2);
-    }
-}
-
-// Paintbrush: diagonal handle + tip.
-void nino_icon_brush(lv_obj_t *p, lv_color_t ink)
-{
-    lv_point_precise_t handle[2] = {{15, 35}, {33, 17}};
-    add_line(p, handle, 2, ink, 3);
-    lv_point_precise_t tip[4] = {{12, 38}, {16, 38}, {17, 33}, {13, 33}};
-    add_line(p, tip, 4, ink, 2);
-}
-
-// Scissors: two finger loops + crossing blades.
-void nino_icon_scissors(lv_obj_t *p, lv_color_t ink)
-{
-    add_arc(p, 14, 16, 6, 0, 360, 16, ink, 2);
-    add_arc(p, 36, 16, 6, 0, 360, 16, ink, 2);
-    lv_point_precise_t blade_a[2] = {{14, 22}, {38, 36}};
-    lv_point_precise_t blade_b[2] = {{36, 22}, {12, 36}};
-    add_line(p, blade_a, 2, ink, 2);
-    add_line(p, blade_b, 2, ink, 2);
-}
-
-// Book: rectangle outline + spine.
-void nino_icon_book(lv_obj_t *p, lv_color_t ink)
-{
-    lv_point_precise_t rect[5] = {
-        {14, 12}, {36, 12}, {36, 40}, {14, 40}, {14, 12}
-    };
-    add_line(p, rect, 5, ink, 2);
-    lv_point_precise_t spine[2] = {{25, 12}, {25, 40}};
-    add_line(p, spine, 2, ink, 2);
-}
-
-// Gear: center circle with 8 teeth as short lines around the rim.
-void nino_icon_gear(lv_obj_t *p, lv_color_t ink)
-{
-    add_arc(p, 25, 25, 9, 0, 360, 28, ink, 2);
-    add_arc(p, 25, 25, 3, 0, 360, 16, ink, 2);
-    for (int i = 0; i < 8; ++i) {
-        float a = (i * 45.0f + 22.5f) * (float)M_PI / 180.0f;
-        lv_point_precise_t t[2];
-        t[0].x = (int)(25 + 9 * cosf(a));
-        t[0].y = (int)(25 + 9 * sinf(a));
-        t[1].x = (int)(25 + 14 * cosf(a));
-        t[1].y = (int)(25 + 14 * sinf(a));
-        add_line(p, t, 2, ink, 3);
-    }
-}
-
-// Status: wifi — three arcs + dot.
 void nino_icon_wifi(lv_obj_t *p, lv_color_t ink)
 {
-    (void)ICON_BOX;
     add_arc(p, 14, 14, 9, 200, 340, 10, ink, 1);
     add_arc(p, 14, 14, 6, 200, 340, 10, ink, 1);
     add_arc(p, 14, 14, 3, 200, 340, 8, ink, 1);
@@ -162,17 +94,12 @@ void nino_icon_wifi(lv_obj_t *p, lv_color_t ink)
     add_line(p, dot, 1, ink, 2);
 }
 
-// Status: battery — body rect + terminal nub.
 void nino_icon_battery(lv_obj_t *p, lv_color_t ink)
 {
-    (void)ICON_BOX;
-    lv_point_precise_t body[5] = {
-        {4, 6}, {20, 6}, {20, 22}, {4, 22}, {4, 6}
-    };
+    lv_point_precise_t body[5] = {{4, 6}, {20, 6}, {20, 22}, {4, 22}, {4, 6}};
     add_line(p, body, 5, ink, 1);
     lv_point_precise_t nub[2] = {{22, 11}, {22, 17}};
     add_line(p, nub, 2, ink, 1);
-    // inner fill bar
     lv_point_precise_t fill[5] = {{6, 9}, {6, 19}, {13, 19}, {13, 9}, {6, 9}};
     add_line(p, fill, 5, ink, 1);
 }

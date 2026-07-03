@@ -1,9 +1,7 @@
 /**
  * scr_home.cpp — home screen: status bar (logo, time, wifi) + 3×3 app grid.
  *
- * Timer lifecycle: a 5-second LVGL timer (status_timer) updates time, wifi,
- * and (optionally) dumps LVGL sysmon data, then invalidates the entire screen
- * to avoid label bending from partial-buffer flush misalignment.
+ * Timer lifecycle: a 5-second LVGL timer (status_timer) updates time and wifi.
  *
  * On screen transition away, nino_home_stop() destroys the timer and nulls
  * static pointers BEFORE lv_obj_clean() — essential to prevent dangling
@@ -11,8 +9,7 @@
  *
  * Debug overlay: when ENABLE_DEBUG_OVERLAY=1, LVGL sysmon is shown with its
  * auto-refresh timer paused. lv_sysmon_performance_dump() is called manually
- * from update_status_cb, synced with the full-screen invalidation to avoid
- * bending.
+ * from update_status_cb.
  */
 #include "scr_home.h"
 #include "screen_manager.h"
@@ -73,7 +70,7 @@ static void update_status_cb(lv_timer_t *t)
     }
 #endif
 
-    if (time_label || wifi_label) lv_obj_invalidate(lv_scr_act());
+    if (status_bar_ref) lv_obj_invalidate(lv_scr_act());
 }
 
 static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino_app_id_t id,
@@ -86,7 +83,6 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
 
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_layout(btn, LV_LAYOUT_NONE);
     lv_obj_add_event_cb(btn, on_app_tap, LV_EVENT_CLICKED, (void *)(intptr_t)id);
 
     lv_obj_t *lab = lv_label_create(btn);
