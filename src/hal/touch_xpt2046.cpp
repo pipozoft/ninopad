@@ -1,11 +1,15 @@
 /**
  * touch_xpt2046.cpp — XPT2046 resistive touch via GPIO bit-bang.
  *
- * Shares the same SPI pins as the display (SCK=14, MOSI=13, MISO=12).
+ * Shares the same SPI3 pins as the display (SCK=14, MOSI=13, MISO=12).
  * Takes them over as plain GPIOs, bit-bangs 24 SCLK cycles (8 cmd + 16
  * read) continuously, then reattaches them to SPI3 via GPIO matrix.
  *
- * CS=33, IRQ=36.
+ * CS=33, IRQ=36 — NOT on SPI3 CS (that's GPIO15 for the display).
+ *
+ * Raw ADC values (480×320 panel):
+ *   X: 315 (right) to 3910 (left)  — inverted
+ *   Y: 278 (bottom) to 3746 (top)  — inverted
  */
 #include "touch_xpt2046.h"
 #ifdef NINO_TOUCH_XPT2046

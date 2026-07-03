@@ -1,10 +1,25 @@
+/**
+ * scr_home.cpp — home screen: status bar (logo, time, wifi) + 3×3 app grid.
+ *
+ * Timer lifecycle: a 5-second LVGL timer (status_timer) updates time, wifi,
+ * and (optionally) dumps LVGL sysmon data, then invalidates the entire screen
+ * to avoid label bending from partial-buffer flush misalignment.
+ *
+ * On screen transition away, nino_home_stop() destroys the timer and nulls
+ * static pointers BEFORE lv_obj_clean() — essential to prevent dangling
+ * pointer crashes.
+ *
+ * Debug overlay: when ENABLE_DEBUG_OVERLAY=1, LVGL sysmon is shown with its
+ * auto-refresh timer paused. lv_sysmon_performance_dump() is called manually
+ * from update_status_cb, synced with the full-screen invalidation to avoid
+ * bending.
+ */
 #include "scr_home.h"
 #include "screen_manager.h"
 #include "nino_colors.h"
 #include "nino_styles.h"
 #include "apps/app_registry.h"
 #include "utils/wifi_utils.h"
-#include "hal/display_driver.h"
 #include <Arduino.h>
 #include <time.h>
 

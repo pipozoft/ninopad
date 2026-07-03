@@ -1,6 +1,7 @@
 /**
- * lv_conf.h — NinoPad (ESP32-S3 + ST7796 480x320 + XPT2046)
- * LVGL v9 config. Tuned for PSRAM, 16bpp, moderate feature surface for MVP.
+ * lv_conf.h — NinoPad (ESP32 / ESP32-S3 + ST7796 480x320 + XPT2046)
+ * LVGL v9 config. 16bpp, CLIB heap (system malloc), moderate feature surface for MVP.
+ * Sysmon + perf monitor enabled. Widgets disabled: meter, table, tabview, tileview, win.
  */
 #ifndef LV_CONF_H
 #define LV_CONF_H
@@ -15,10 +16,10 @@
 #define LV_COLOR_SCREEN_TRANSP  0
 
 /*================
- * MEMORY — use libc malloc (LV_STDLIB_CLIB). ESP32-S3 libc malloc routes
- * allocations to PSRAM when present, transparently. If you need guaranteed
- * PSRAM-only pools and want to override lv_malloc, set LV_USE_STDLIB_MALLOC
- * to LV_STDLIB_CUSTOM and provide lv_malloc/lv_realloc/lv_free externally.
+ * MEMORY — use libc malloc (LV_STDLIB_CLIB). On ESP32-S3 with PSRAM, libc malloc
+ * routes large allocations to PSRAM transparently. On standard ESP32 (no PSRAM),
+ * everything stays in DRAM. If you need to override lv_malloc for custom pools,
+ * set LV_USE_STDLIB_MALLOC to LV_STDLIB_CUSTOM.
  *================*/
 #define LV_USE_STDLIB_MALLOC    LV_STDLIB_CLIB
 /* LV_MEM_SIZE not needed when using CLIB (uses system heap) */

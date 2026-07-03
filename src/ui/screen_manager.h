@@ -1,6 +1,8 @@
 /**
  * screen_manager.h — top-level navigation: boot → home → app → home.
- * Each function builds and loads a fresh LVGL screen, applies a fade-in.
+ * All screens reuse the same screen object (lv_scr_act + lv_obj_clean)
+ * to avoid screen-object creation and transition overhead.
+ * Timers must be stopped BEFORE cleaning (see nino_home_stop).
  */
 #pragma once
 #include "apps/app_registry.h"

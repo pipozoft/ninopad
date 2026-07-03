@@ -1,14 +1,18 @@
 /*
  * ninopad.ino — Arduino IDE entry stub.
  *
- * When opened in Arduino IDE, the sketch must be in the folder
- * matching the .ino name. Add all src/*.cpp files as tabs and
- * ensure LVGL + Arduino_GFX + XPT2046_Touchscreen + ArduinoJson
- * libs are installed via Library Manager.
+ * This file exists solely for Arduino IDE users. PlatformIO ignores it
+ * and uses src/main.cpp instead.
  *
- * For PlatformIO builds this file is ignored; src/main.cpp is used.
+ * To build with Arduino IDE:
+ *   1. Place the sketch folder as "ninopad/"
+ *   2. Add all src/**/*.cpp files as tabs
+ *   3. Install libraries: LVGL, Arduino_GFX, ArduinoJson, Preferences (built-in)
+ *   4. Define NINO_TOUCH_XPT2046 in build flags or board.local
+ *
+ * RECOMMENDED: Use PlatformIO (platformio.ini). This stub is minimal.
  */
 #include <Arduino.h>
 
-void setup()  { lv_init(); /* minimal stub — use PlatformIO */ }
+void setup()  { /* use PlatformIO */ }
 void loop()   { delay(5); }

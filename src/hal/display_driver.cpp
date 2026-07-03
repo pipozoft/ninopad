@@ -1,6 +1,13 @@
 /**
  * display_driver.cpp — ST7796 init, LVGL v9 flush_cb, PWM backlight.
- * Pinout matches the original ninopad.ino starter.
+ *
+ * Hardware:
+ *   - MCU: ESP32 (ESP-WROOM-32) or ESP32-S3, no PSRAM on base target.
+ *   - Display: ST7796 4" 480×320 RGB565 on SPI3 (VSPI).
+ *   - Backlight: PWM via LEDC ch0, 5kHz, 8-bit on GPIO27.
+ *
+ * SPI3 note: Arduino_ESP32SPI(..., spi_num=3) — the GFX library's internal
+ * #define VSPI 1 is wrong; ESP32 Arduino core uses VSPI = 3, not 1.
  */
 #include "display_driver.h"
 #include <Arduino_GFX_Library.h>
@@ -22,8 +29,6 @@ static uint8_t *buf1 = nullptr;
 
 static Arduino_DataBus *bus = nullptr;
 static Arduino_GFX     *gfx  = nullptr;
-
-volatile uint32_t nino_frame_count = 0;
 
 // ST7796 command codes (ILI9341-compatible)
 #define ST77XX_CASET  0x2A
@@ -56,16 +61,14 @@ void nino_disp_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_m
 
     gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)px_map, w, h);
     lv_display_flush_ready(disp);
-
-    if (area->y1 == 0) nino_frame_count++;
 }
 
 extern "C" void nino_display_init(void)
 {
     /* Force spi_num=3 so we use SPI3 (VSPI), not SPI1 (flash controller).
        The GFX library's internal #define VSPI 1 is wrong — Arduino core uses VSPI 3. */
-    bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, TFT_MISO, 3);
-    gfx = new Arduino_ST7796(bus, TFT_RST, 1 /* rotation */, false /* IPS — true sends INVON (0x21) but some panels need INVOFF (0x20) */);
+    bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, TFT_MISO, 3 /* spi_num=3: VSPI, not SPI1 */);
+    gfx = new Arduino_ST7796(bus, TFT_RST, 1 /* rotation */, false /* IPS=false → INVOFF (0x20); toggle to true if colors invert */);
 
     pinMode(LCD_BL, OUTPUT);
     digitalWrite(LCD_BL, HIGH);  // full bright until PWM takes over

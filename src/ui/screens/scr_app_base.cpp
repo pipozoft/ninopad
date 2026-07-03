@@ -1,5 +1,9 @@
 /**
  * scr_app_base.cpp — app frame: colored header bar, round back button, content area.
+ *
+ * The back button uses lv_async_call to defer the screen transition until after
+ * the event processing cycle completes. This avoids deleting the button that
+ * triggered the event (via lv_obj_clean in nino_screen_show_home).
  */
 #include "scr_app_base.h"
 #include "screen_manager.h"
