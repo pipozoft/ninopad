@@ -61,31 +61,36 @@ static void draw_letter(int idx)
 
 // ---- Touch tracking ----
 
+static lv_point_precise_t get_trace_point(lv_obj_t *area)
+{
+    lv_point_t pt;
+    lv_indev_get_point(lv_indev_active(), &pt);
+
+    lv_area_t coords;
+    lv_obj_get_coords(area, &coords);
+
+    lv_point_precise_t rel;
+    rel.x = pt.x - coords.x1;
+    rel.y = pt.y - coords.y1;
+    return rel;
+}
+
 static void on_trace_event(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *area = (lv_obj_t *)lv_event_get_target(e);
 
     if (code == LV_EVENT_PRESSED) {
         trace_count = 0;
         lv_line_set_points_mutable(trace_line, trace_pts, 0);
-        lv_point_t pt;
-        lv_indev_get_point(lv_indev_active(), &pt);
-        lv_obj_t *area = (lv_obj_t *)lv_event_get_target(e);
-        lv_point_precise_t rel;
-        rel.x = pt.x - lv_obj_get_x(area);
-        rel.y = pt.y - lv_obj_get_y(area);
+        lv_point_precise_t rel = get_trace_point(area);
         if (trace_count < MAX_TRACE_PTS) {
             trace_pts[trace_count++] = rel;
         }
     }
 
     if (code == LV_EVENT_PRESSING) {
-        lv_point_t pt;
-        lv_indev_get_point(lv_indev_active(), &pt);
-        lv_obj_t *area = (lv_obj_t *)lv_event_get_target(e);
-        lv_point_precise_t rel;
-        rel.x = pt.x - lv_obj_get_x(area);
-        rel.y = pt.y - lv_obj_get_y(area);
+        lv_point_precise_t rel = get_trace_point(area);
         if (trace_count < MAX_TRACE_PTS) {
             trace_pts[trace_count++] = rel;
             lv_line_set_points_mutable(trace_line, trace_pts, trace_count);
