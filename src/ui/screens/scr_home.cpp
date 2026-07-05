@@ -83,6 +83,7 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
 
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_layout(btn, LV_LAYOUT_NONE);
     lv_obj_add_event_cb(btn, on_app_tap, LV_EVENT_CLICKED, (void *)(intptr_t)id);
 
     lv_obj_t *lab = lv_label_create(btn);

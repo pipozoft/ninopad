@@ -68,7 +68,7 @@
 
 #define LV_FONT_DEFAULT          &lv_font_montserrat_16
 #define LV_FONT_FMT_TXT_LARGE    0
-#define LV_USE_FONT_COMPRESSED    0
+#define LV_USE_FONT_COMPRESSED    1
 #define LV_USE_FONT_PLACEHOLDER   1
 #define LV_FONT_SUBPX_BPP          LV_FONT_SUBPX_NONE
 
@@ -105,6 +105,10 @@
 #define LV_USE_TABVIEW    1
 #define LV_USE_TILEVIEW   0
 #define LV_USE_WIN        0
+#define LV_USE_CHART      0
+#define LV_USE_CALENDAR   0
+#define LV_USE_QRCODE     0
+#define LV_USE_BARCODE    0
 
 /*================
  * LAYOUTS

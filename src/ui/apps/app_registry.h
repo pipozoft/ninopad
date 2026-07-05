@@ -4,7 +4,6 @@
  */
 #pragma once
 #include <lvgl.h>
-#include "ui/icons/nino_icons.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +27,6 @@ typedef void (*nino_app_create_fn)(lv_obj_t *content);
 typedef struct {
     const char         *name;     // "MY NAME" etc.
     lv_color_t          color;
-    nino_icon_draw_fn   draw_icon;
     nino_app_create_fn  create;
 } nino_app_t;
 

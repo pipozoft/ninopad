@@ -335,7 +335,7 @@ static void show_car_mode(void)
     lv_obj_align(la_vi_btn, LV_ALIGN_BOTTOM_MID, 0, -10);
 
     lv_obj_t *la_lab = lv_label_create(la_vi_btn);
-    lv_label_set_text(la_lab, "\xC2\xA1La vi!");
+    lv_label_set_text(la_lab, "La vi!");
     lv_obj_set_style_text_font(la_lab, &lv_font_montserrat_24, 0);
     lv_obj_set_style_text_color(la_lab, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(la_lab);
