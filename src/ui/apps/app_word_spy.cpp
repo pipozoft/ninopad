@@ -143,6 +143,10 @@ static char car_words[MAX_WORDS][24];
 static int car_word_count = 0;
 static int car_word_index = 0;
 
+static int missed_queue[MAX_WORDS];
+static int missed_head = 0;
+static int missed_tail = 0;
+
 static const char *fallback_words[] = {
     "a", "and", "away", "big", "blue", "can", "come", "down", "find",
     "for", "funny", "go", "help", "here", "I", "in", "is", "it", "jump",
@@ -156,6 +160,8 @@ static void load_word_list(void)
 {
     car_word_count = 0;
     car_word_index = 0;
+    missed_head = 0;
+    missed_tail = 0;
 
     JsonDocument doc;
     if (nino_sd_is_mounted() && nino_storage_read("/word_lists/pre_primer.json", doc)) {
@@ -181,9 +187,27 @@ static void load_word_list(void)
     }
 }
 
+static void enqueue_missed(int idx)
+{
+    for (int i = missed_head; i != missed_tail; i = (i + 1) % MAX_WORDS) {
+        if (missed_queue[i] == idx) return;
+    }
+    int next = (missed_tail + 1) % MAX_WORDS;
+    if (next != missed_head) {
+        missed_queue[missed_tail] = idx;
+        missed_tail = next;
+    }
+}
+
 static const char *next_word(void)
 {
     if (car_word_count == 0) return "";
+    if (missed_head != missed_tail) {
+        int idx = missed_queue[missed_head];
+        missed_head = (missed_head + 1) % MAX_WORDS;
+        car_word_index = idx;
+        return car_words[idx];
+    }
     car_word_index = (car_word_index + 1) % car_word_count;
     return car_words[car_word_index];
 }
@@ -290,6 +314,7 @@ static void on_location_tap(lv_event_t *e)
     lv_label_set_text(word_display, word);
     lv_obj_add_flag(location_area, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(la_vi_btn, LV_OBJ_FLAG_HIDDEN);
+    if (auto_timer) lv_timer_reset(auto_timer);
 }
 
 static void on_la_vi_tap(lv_event_t *e)
@@ -304,6 +329,7 @@ static void show_car_mode(void);
 static void on_auto_timer(lv_timer_t *t)
 {
     (void)t;
+    enqueue_missed(car_word_index);
     show_car_mode();
 }
 

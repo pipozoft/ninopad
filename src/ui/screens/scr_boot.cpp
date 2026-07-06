@@ -50,7 +50,7 @@ void scr_boot_create(lv_obj_t *scr)
     lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_style_text_color(status_label, lv_color_hex(0x888888), 0);
     lv_obj_set_style_text_font(status_label, &lv_font_montserrat_14, 0);
-    lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 30);
+    lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 55);
 
     lv_obj_invalidate(scr);
 }
@@ -60,7 +60,7 @@ void scr_boot_set_status(const char *text)
     if (status_label)
     {
         lv_label_set_text(status_label, text);
-        lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 30);
+        lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 55);
     }
 }
 
