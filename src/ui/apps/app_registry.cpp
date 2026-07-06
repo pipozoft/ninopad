@@ -10,6 +10,7 @@
 #include "app_luz_letters.h"
 #include "app_snip_snip.h"
 #include "app_settings.h"
+#include "app_counting_jar.h"
 #include "app_placeholder.h"
 
 static const nino_app_t apps[APP_COUNT] = {
@@ -18,7 +19,7 @@ static const nino_app_t apps[APP_COUNT] = {
     { "LUZ LETTERS",  NINO_COLOR_LUZ,       app_luz_letters_create },
     { "WORD SPY",     NINO_COLOR_WORDSPY,   app_word_spy_create   },
     // Row 2
-    { "COUNTING JAR", NINO_COLOR_COUNTING,  app_placeholder_create },
+    { "COUNTING JAR", NINO_COLOR_COUNTING,  app_counting_jar_create },
     { "10-FRAME SUN", NINO_COLOR_TENFRAME,  app_ten_frame_create  },
     { "SHAPE PAINT",  NINO_COLOR_SHAPE,     app_placeholder_create },
     // Row 3
