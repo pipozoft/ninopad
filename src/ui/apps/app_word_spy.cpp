@@ -229,6 +229,7 @@ static void on_pic_choice(lv_event_t *e)
 
 static void show_picture_match(void)
 {
+    if (!main_content) return;
     lv_obj_clean(main_content);
 
     lv_obj_set_flex_flow(main_content, LV_FLEX_FLOW_COLUMN);
@@ -306,8 +307,19 @@ static void on_auto_timer(lv_timer_t *t)
     show_car_mode();
 }
 
+static void on_main_content_delete(lv_event_t *e)
+{
+    (void)e;
+    if (auto_timer) {
+        lv_timer_del(auto_timer);
+        auto_timer = NULL;
+    }
+    main_content = NULL;
+}
+
 static void show_car_mode(void)
 {
+    if (!main_content) return;
     if (auto_timer) {
         lv_timer_del(auto_timer);
         auto_timer = NULL;
@@ -432,6 +444,7 @@ void app_word_spy_create(lv_obj_t *content)
 
     // Main content area (below mode bar)
     main_content = lv_obj_create(content);
+    lv_obj_add_event_cb(main_content, on_main_content_delete, LV_EVENT_DELETE, NULL);
     lv_obj_remove_style_all(main_content);
     lv_obj_set_size(main_content, 480, 232);
     lv_obj_align(main_content, LV_ALIGN_TOP_MID, 0, 44);

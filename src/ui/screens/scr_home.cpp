@@ -20,11 +20,25 @@
 #include <Arduino.h>
 #include <time.h>
 
+#include "draw/lv_image_decoder_private.h"
+
 #if ENABLE_DEBUG_OVERLAY
 #include "debugging/sysmon/lv_sysmon.h"
 #endif
 
 #define STATUS_H    26
+
+static const char *icon_files[APP_COUNT] = {
+    "S:/images/nino_icon_smiley.bin",     // APP_MY_NAME
+    "S:/images/nino_icon_flame.bin",      // APP_LUZ_LETTERS
+    "S:/images/nino_icon_eye.bin",        // APP_WORD_SPY
+    "S:/images/nino_icon_money.bin",      // APP_COUNTING_JAR
+    "S:/images/nino_icon_sun.bin",        // APP_TEN_FRAME
+    "S:/images/nino_icon_brush.bin",      // APP_SHAPE_PAINT
+    "S:/images/nino_icon_scissors.bin",   // APP_SNIP_SNIP
+    "S:/images/nino_icon_book.bin",       // APP_STORY_TIME
+    "S:/images/nino_icon_gear.bin",       // APP_SETTINGS
+};
 
 static lv_obj_t *time_label = NULL;
 static lv_obj_t *wifi_label = NULL;
@@ -83,16 +97,33 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
 
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_layout(btn, LV_LAYOUT_NONE);
+    lv_obj_set_layout(btn, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(btn, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(btn, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_all(btn, 2, 0);
+    lv_obj_set_style_pad_row(btn, 2, 0);
     lv_obj_add_event_cb(btn, on_app_tap, LV_EVENT_CLICKED, (void *)(intptr_t)id);
+
+    lv_obj_t *icon = lv_image_create(btn);
+    lv_image_set_src(icon, icon_files[id]);
 
     lv_obj_t *lab = lv_label_create(btn);
     lv_label_set_text(lab, app->name);
     lv_obj_set_style_text_color(lab, NINO_COLOR_BG, 0);
     lv_obj_set_style_text_font(lab, &lv_font_montserrat_14, 0);
-    lv_obj_center(lab);
 
     return btn;
+}
+
+void nino_home_preload_icons(void)
+{
+    lv_image_decoder_dsc_t dsc;
+    for (int i = 0; i < APP_COUNT; i++) {
+        lv_result_t res = lv_image_decoder_open(&dsc, icon_files[i], NULL);
+        if (res == LV_RESULT_OK) {
+            lv_image_decoder_close(&dsc);
+        }
+    }
 }
 
 void nino_home_stop(void)

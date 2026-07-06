@@ -18,7 +18,7 @@ bool nino_sd_mount(void)
     for (int attempt = 0; attempt < 3; attempt++)
     {
         delay(200 + attempt * 300);
-        if (SD.begin(SD_CS, sdSPI, 4000000))
+        if (SD.begin(SD_CS, sdSPI, 10000000))
         {
             mounted = true;
             Serial.printf("[SD] Mounted OK (attempt %d)\n", attempt + 1);

@@ -29,7 +29,7 @@
 #endif
 
 #ifndef NINO_LVGL_BUF_ROWS
-#define NINO_LVGL_BUF_ROWS 80
+#define NINO_LVGL_BUF_ROWS 40
 #endif
 
 // Single partial buffer. More rows means fewer address-window resets per frame.

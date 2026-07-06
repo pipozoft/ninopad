@@ -48,84 +48,6 @@ static void profile_tab_create(lv_obj_t *parent)
     lv_obj_add_event_cb(kb, on_name_ready, LV_EVENT_CANCEL, NULL);
 }
 
-static lv_obj_t *word_list_container = NULL;
-
-static void word_toggle_cb(lv_event_t *e)
-{
-    lv_obj_t *sw = (lv_obj_t *)lv_event_get_target(e);
-    void *udata = lv_event_get_user_data(e);
-    if (!udata) return;
-    const char *word = (const char *)udata;
-    bool on = lv_obj_has_state(sw, LV_STATE_CHECKED);
-    Serial.printf("[settings] word '%s' = %s\n", word, on ? "on" : "off");
-}
-
-static void words_tab_create(lv_obj_t *parent)
-{
-    lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(parent, 8, 0);
-
-    if (!nino_sd_is_mounted()) {
-        lv_obj_t *lab = lv_label_create(parent);
-        lv_label_set_text(lab, "No SD card detected.\nInsert SD with word_lists/");
-        lv_obj_set_style_text_color(lab, lv_color_hex(0x888888), 0);
-        return;
-    }
-
-    if (!nino_storage_exists("/word_lists/pre_primer.json")) {
-        lv_obj_t *lab = lv_label_create(parent);
-        lv_label_set_text(lab, "word_lists/pre_primer.json not found.");
-        lv_obj_set_style_text_color(lab, lv_color_hex(0x888888), 0);
-        return;
-    }
-
-    lv_obj_t *header = lv_label_create(parent);
-    lv_label_set_text(header, "Pre-Primer Words");
-    lv_obj_set_style_text_color(header, lv_color_hex(0x444444), 0);
-    lv_obj_set_style_text_font(header, &lv_font_montserrat_14, 0);
-
-    JsonDocument doc;
-    if (!nino_storage_read("/word_lists/pre_primer.json", doc)) {
-        lv_obj_t *lab = lv_label_create(parent);
-        lv_label_set_text(lab, "Error reading word list.");
-        return;
-    }
-
-    JsonArray arr = doc.as<JsonArray>();
-    word_list_container = lv_obj_create(parent);
-    lv_obj_remove_style_all(word_list_container);
-    lv_obj_set_width(word_list_container, 460);
-    lv_obj_set_flex_flow(word_list_container, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(word_list_container, 0, 0);
-
-    for (JsonVariant item : arr) {
-        const char *word = item["word"];
-        bool enabled = item["enabled"] | true;
-        if (!word) continue;
-
-        lv_obj_t *row = lv_obj_create(word_list_container);
-        lv_obj_remove_style_all(row);
-        lv_obj_set_width(row, 460);
-        lv_obj_set_height(row, 32);
-        lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-        lv_obj_set_style_pad_all(row, 4, 0);
-
-        lv_obj_t *lab = lv_label_create(row);
-        lv_label_set_text(lab, word);
-        lv_obj_set_style_text_font(lab, &lv_font_montserrat_16, 0);
-        lv_obj_set_flex_grow(lab, 1);
-
-        lv_obj_t *sw = lv_switch_create(row);
-        if (enabled) lv_obj_add_state(sw, LV_STATE_CHECKED);
-
-        char *word_copy = (char *)lv_malloc(strlen(word) + 1);
-        if (word_copy) {
-            strcpy(word_copy, word);
-            lv_obj_add_event_cb(sw, word_toggle_cb, LV_EVENT_VALUE_CHANGED, word_copy);
-        }
-    }
-}
-
 static void progress_tab_create(lv_obj_t *parent)
 {
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN);
@@ -279,12 +201,10 @@ void app_settings_create(lv_obj_t *content)
     lv_tabview_set_tab_bar_position(tv, LV_DIR_TOP);
 
     lv_obj_t *t_profile  = lv_tabview_add_tab(tv, "Profile");
-    lv_obj_t *t_words    = lv_tabview_add_tab(tv, "Words");
     lv_obj_t *t_progress = lv_tabview_add_tab(tv, "Progress");
     lv_obj_t *t_system   = lv_tabview_add_tab(tv, "System");
 
     profile_tab_create(t_profile);
-    words_tab_create(t_words);
     progress_tab_create(t_progress);
     system_tab_create(t_system);
 }

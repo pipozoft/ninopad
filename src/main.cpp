@@ -18,8 +18,10 @@
 #include "ui/nino_styles.h"
 #include "ui/screen_manager.h"
 #include "ui/screens/scr_boot.h"
+#include "ui/screens/scr_home.h"
 #include "utils/sd_utils.h"
 #include "utils/wifi_utils.h"
+#include "storage/sd_fs_drv.h"
 
 #ifndef NINO_TZ_OFFSET
 #define NINO_TZ_OFFSET -5
@@ -34,20 +36,20 @@ static void pump_lvgl(void)
 
 static void run_loading_sequence(void)
 {
-    scr_boot_set_status("Starting...");
-    pump_lvgl();
-    delay(100);
-
-    bool ok = nino_sd_mount();
-    if (ok)
+    if (nino_sd_is_mounted())
     {
         scr_boot_set_status("SD card ready");
         pump_lvgl();
         delay(300);
 
+        scr_boot_set_status("Loading icons...");
+        pump_lvgl();
+        nino_home_preload_icons();
+        pump_lvgl();
+
         scr_boot_set_status("Connecting to WiFi...");
         pump_lvgl();
-        ok = nino_wifi_connect_from_sd();
+        bool ok = nino_wifi_connect_from_sd();
 
         if (ok)
         {
@@ -63,13 +65,6 @@ static void run_loading_sequence(void)
             pump_lvgl();
             delay(200);
         }
-    }
-
-    if (!ok)
-    {
-        scr_boot_set_status("Continuing offline");
-        pump_lvgl();
-        delay(800);
     }
 
     scr_boot_advance_home();
@@ -103,6 +98,8 @@ void setup(void)
     lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
     lv_indev_set_read_cb(indev, NINO_TOUCH_READ_CB);
 
+    sd_fs_drv_register();
+    nino_sd_mount();
     nino_styles_init();
     nino_screen_show_boot();
     pump_lvgl();

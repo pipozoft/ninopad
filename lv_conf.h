@@ -35,7 +35,7 @@
 #define LV_USE_LOG              1
 #define LV_LOG_LEVEL            LV_LOG_LEVEL_WARN
 #define LV_LOG_PRINTF           1
-#define LV_USE_ASSERT_STYLE     1
+#define LV_USE_ASSERT_STYLE     0
 #define LV_USE_ASSERT_OBJ       0
 
 #define LV_USE_PERF_MONITOR      1
@@ -83,7 +83,7 @@
 #define LV_USE_CANVAS     0
 #define LV_USE_CHECKBOX   0
 #define LV_USE_DROPDOWN   1
-#define LV_USE_IMG        0
+#define LV_USE_IMG        1
 #define LV_USE_IMGBUTTON  0
 #define LV_USE_KEYBOARD   1
 #define LV_USE_LABEL      1
@@ -127,6 +127,14 @@
 /*================
  * DRAW
  *================*/
+#define LV_BIN_DECODER_RAM_LOAD 1
+
+/* CACHE: image cache keeps decoded image in RAM so decoders don't re-read SD. */
+/* 72KB holds 9 icons (50×50 RGB565A8 @ 7.5KB each = 67.5KB) but NOT the logo
+   (299×55 @ 49KB), so logo is evicted during preload and its 49KB returned to heap. */
+#define LV_CACHE_DEF_SIZE       72000
+#define LV_IMAGE_HEADER_CACHE_DEF_CNT 32
+
 #define LV_DRAW_SW_SUPPORT_L8 1
 #define LV_DRAW_SW_SUPPORT_I1 1
 #define LV_DRAW_SW_SUPPORT_AL88 1
