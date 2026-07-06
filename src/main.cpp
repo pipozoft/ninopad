@@ -18,7 +18,6 @@
 #include "ui/nino_styles.h"
 #include "ui/screen_manager.h"
 #include "ui/screens/scr_boot.h"
-#include "ui/screens/scr_home.h"
 #include "utils/sd_utils.h"
 #include "utils/wifi_utils.h"
 #include "storage/sd_fs_drv.h"
@@ -41,11 +40,6 @@ static void run_loading_sequence(void)
         scr_boot_set_status("SD card ready");
         pump_lvgl();
         delay(300);
-
-        scr_boot_set_status("Loading icons...");
-        pump_lvgl();
-        nino_home_preload_icons();
-        pump_lvgl();
 
         scr_boot_set_status("Connecting to WiFi...");
         pump_lvgl();

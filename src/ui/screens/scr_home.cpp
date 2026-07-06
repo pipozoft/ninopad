@@ -20,7 +20,8 @@
 #include <Arduino.h>
 #include <time.h>
 
-#include "draw/lv_image_decoder_private.h"
+#include "fonts/icons_font.h"
+#include "fonts/icon_codepoints.h"
 
 #if ENABLE_DEBUG_OVERLAY
 #include "debugging/sysmon/lv_sysmon.h"
@@ -28,16 +29,16 @@
 
 #define STATUS_H    26
 
-static const char *icon_files[APP_COUNT] = {
-    "S:/images/nino_icon_smiley.bin",     // APP_MY_NAME
-    "S:/images/nino_icon_flame.bin",      // APP_LUZ_LETTERS
-    "S:/images/nino_icon_eye.bin",        // APP_WORD_SPY
-    "S:/images/nino_icon_money.bin",      // APP_COUNTING_JAR
-    "S:/images/nino_icon_sun.bin",        // APP_TEN_FRAME
-    "S:/images/nino_icon_brush.bin",      // APP_SHAPE_PAINT
-    "S:/images/nino_icon_scissors.bin",   // APP_SNIP_SNIP
-    "S:/images/nino_icon_book.bin",       // APP_STORY_TIME
-    "S:/images/nino_icon_gear.bin",       // APP_SETTINGS
+static const char *icon_chars[APP_COUNT] = {
+    "\xEE\xA8\x85",   // ICON_FACE_SMILE  → APP_MY_NAME
+    "\xEE\xA8\x86",   // ICON_FIRE        → APP_LUZ_LETTERS
+    "\xEE\xA8\x84",   // ICON_EYE         → APP_WORD_SPY
+    "\xEE\xA8\x83",   // ICON_DOLLAR      → APP_COUNTING_JAR
+    "\xEE\xA8\x89",   // ICON_SUN         → APP_TEN_FRAME
+    "\xEE\xA8\x87",   // ICON_PAINT_BRUSH → APP_SHAPE_PAINT
+    "\xEE\xA8\x88",   // ICON_SCISSORS    → APP_SNIP_SNIP
+    "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
+    "\xEE\xA8\x82",   // ICON_COG         → APP_SETTINGS
 };
 
 static lv_obj_t *time_label = NULL;
@@ -104,8 +105,10 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
     lv_obj_set_style_pad_row(btn, 2, 0);
     lv_obj_add_event_cb(btn, on_app_tap, LV_EVENT_CLICKED, (void *)(intptr_t)id);
 
-    lv_obj_t *icon = lv_image_create(btn);
-    lv_image_set_src(icon, icon_files[id]);
+    lv_obj_t *icon = lv_label_create(btn);
+    lv_label_set_text(icon, icon_chars[id]);
+    lv_obj_set_style_text_font(icon, &icons_font, 0);
+    lv_obj_set_style_text_color(icon, NINO_COLOR_BG, 0);
 
     lv_obj_t *lab = lv_label_create(btn);
     lv_label_set_text(lab, app->name);
@@ -113,17 +116,6 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
     lv_obj_set_style_text_font(lab, &lv_font_montserrat_14, 0);
 
     return btn;
-}
-
-void nino_home_preload_icons(void)
-{
-    lv_image_decoder_dsc_t dsc;
-    for (int i = 0; i < APP_COUNT; i++) {
-        lv_result_t res = lv_image_decoder_open(&dsc, icon_files[i], NULL);
-        if (res == LV_RESULT_OK) {
-            lv_image_decoder_close(&dsc);
-        }
-    }
 }
 
 void nino_home_stop(void)

@@ -132,8 +132,8 @@
 /* CACHE: image cache keeps decoded image in RAM so decoders don't re-read SD. */
 /* 72KB holds 9 icons (50×50 RGB565A8 @ 7.5KB each = 67.5KB) but NOT the logo
    (299×55 @ 49KB), so logo is evicted during preload and its 49KB returned to heap. */
-#define LV_CACHE_DEF_SIZE       72000
-#define LV_IMAGE_HEADER_CACHE_DEF_CNT 32
+#define LV_CACHE_DEF_SIZE       0
+#define LV_IMAGE_HEADER_CACHE_DEF_CNT 0
 
 #define LV_DRAW_SW_SUPPORT_L8 1
 #define LV_DRAW_SW_SUPPORT_I1 1
