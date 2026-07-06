@@ -2,24 +2,22 @@
 #include "nino_colors.h"
 #include <Arduino.h>
 
-#define FF_MAX 10
+#define ITEM_MAX 10
 #define TQ 10
 
 // ---- State ----
 static int qn;
-static int ff_cnt;
+static int item_cnt;
 static int bvals[4];
 static int cidx;
 static volatile bool locked;
-static lv_obj_t *flies[FF_MAX];
+static lv_obj_t *items[ITEM_MAX];
 static lv_obj_t *btns[4];
 static lv_obj_t *blabs[4];
 static lv_obj_t *jar;
 static lv_obj_t *prog_lab;
 static lv_obj_t *fb_lab;
 static lv_obj_t *overlay;
-static lv_timer_t *glow_tmr;
-static bool glow_phase;
 
 // ---- Helpers ----
 
@@ -28,20 +26,6 @@ static int max_for_q(int q)
     if (q < 3) return 3;
     if (q < 6) return 5;
     return 10;
-}
-
-static void set_glow(void)
-{
-    lv_opa_t opa = glow_phase ? LV_OPA_COVER : 200;
-    for (int i = 0; i < ff_cnt; i++)
-        lv_obj_set_style_bg_opa(flies[i], opa, 0);
-}
-
-static void on_glow(lv_timer_t *t)
-{
-    (void)t;
-    glow_phase = !glow_phase;
-    set_glow();
 }
 
 static void shuf(int arr[], int n)
@@ -60,33 +44,30 @@ static void start_q(void)
     }
 
     int maxv = max_for_q(qn);
-    ff_cnt = random(1, maxv + 1);
+    item_cnt = random(1, maxv + 1);
 
-    // Fireflies
-    for (int i = 0; i < FF_MAX; i++) {
-        if (i < ff_cnt)
-            lv_obj_clear_flag(flies[i], LV_OBJ_FLAG_HIDDEN);
+    for (int i = 0; i < ITEM_MAX; i++) {
+        if (i < item_cnt)
+            lv_obj_clear_flag(items[i], LV_OBJ_FLAG_HIDDEN);
         else
-            lv_obj_add_flag(flies[i], LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(items[i], LV_OBJ_FLAG_HIDDEN);
     }
-    glow_phase = false;
-    set_glow();
 
     // 4 unique answers: correct + 3 distractors from expanded pool
     int pool[12], np = 0;
     int hi = maxv < 4 ? 6 : maxv + 2;
     for (int i = 1; i <= hi; i++) {
-        if (i != ff_cnt) pool[np++] = i;
+        if (i != item_cnt) pool[np++] = i;
     }
     shuf(pool, np);
 
-    bvals[0] = ff_cnt;
+    bvals[0] = item_cnt;
     for (int i = 0; i < 3; i++) bvals[i + 1] = pool[i % np];
     shuf(bvals, 4);
 
     cidx = 0;
     for (int i = 0; i < 4; i++) {
-        if (bvals[i] == ff_cnt) { cidx = i; break; }
+        if (bvals[i] == item_cnt) { cidx = i; break; }
     }
 
     for (int i = 0; i < 4; i++) {
@@ -107,11 +88,6 @@ static void start_q(void)
 
 static void show_congrats(void)
 {
-    if (glow_tmr) {
-        lv_timer_del(glow_tmr);
-        glow_tmr = NULL;
-    }
-
     overlay = lv_obj_create(lv_obj_get_parent(jar));
     lv_obj_remove_style_all(overlay);
     lv_obj_set_size(overlay, 480, 276);
@@ -121,7 +97,7 @@ static void show_congrats(void)
     lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *ml = lv_label_create(overlay);
-    lv_label_set_text(ml, "Great Job!\nYou counted all the fireflies!");
+    lv_label_set_text(ml, "Great Job!\nYou counted all the coins!");
     lv_obj_set_style_text_font(ml, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
     lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
@@ -138,8 +114,6 @@ static void show_congrats(void)
         lv_obj_del(overlay);
         overlay = NULL;
         qn = 0;
-        glow_tmr = lv_timer_create(on_glow, 3000, NULL);
-        lv_timer_set_repeat_count(glow_tmr, -1);
         start_q();
     }, LV_EVENT_CLICKED, NULL);
 
@@ -168,8 +142,6 @@ static void on_btn_tap(lv_event_t *e)
     if (idx == cidx) {
         locked = true;
         lv_obj_set_style_bg_color(btns[idx], lv_color_hex(0x2ECC71), 0);
-        glow_phase = true;
-        set_glow();
         lv_label_set_text(fb_lab, LV_SYMBOL_OK);
         lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x2ECC71), 0);
         lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_28, 0);
@@ -206,10 +178,6 @@ void app_counting_jar_create(lv_obj_t *content)
     lv_obj_set_style_bg_color(content, lv_color_hex(0xF5F5F5), 0);
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_add_event_cb(content, [](lv_event_t *) {
-        if (glow_tmr) { lv_timer_del(glow_tmr); glow_tmr = NULL; }
-    }, LV_EVENT_DELETE, NULL);
-
     // ---- Top: instruction + progress ----
     lv_obj_t *top = lv_obj_create(content);
     lv_obj_remove_style_all(top);
@@ -219,7 +187,7 @@ void app_counting_jar_create(lv_obj_t *content)
     lv_obj_clear_flag(top, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *il = lv_label_create(top);
-    lv_label_set_text(il, "Count the fireflies.");
+    lv_label_set_text(il, "Count the coins.");
     lv_obj_set_style_text_color(il, lv_color_hex(0x444444), 0);
     lv_obj_set_style_text_font(il, &lv_font_montserrat_14, 0);
 
@@ -248,30 +216,30 @@ void app_counting_jar_create(lv_obj_t *content)
     lv_obj_set_style_clip_corner(jar, true, 0);
     lv_obj_clear_flag(jar, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Fireflies: 5×2 grid, 32px circles
+    // Coins: 5×2 grid, 32px circles
     const int sz = 32;
     const int step = 48;
     int ox = (340 - 4 * step - sz) / 2;
     int oy = (140 - 1 * step - sz) / 2;
 
-    for (int i = 0; i < FF_MAX; i++) {
+    for (int i = 0; i < ITEM_MAX; i++) {
         int col = i % 5;
         int row = i / 5;
         int px = ox + col * step;
         int py = oy + row * step;
 
-        flies[i] = lv_obj_create(jar);
-        lv_obj_remove_style_all(flies[i]);
-        lv_obj_set_size(flies[i], sz, sz);
-        lv_obj_set_pos(flies[i], px, py);
-        lv_obj_set_style_radius(flies[i], LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_border_width(flies[i], 3, 0);
-        lv_obj_set_style_border_color(flies[i], lv_color_hex(0xFFEE88), 0);
-        lv_obj_set_style_bg_color(flies[i], lv_color_hex(0xFFD700), 0);
-        lv_obj_set_style_bg_opa(flies[i], 200, 0);
-        lv_obj_add_flag(flies[i], LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(flies[i], LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_clear_flag(flies[i], LV_OBJ_FLAG_SCROLLABLE);
+        items[i] = lv_obj_create(jar);
+        lv_obj_remove_style_all(items[i]);
+        lv_obj_set_size(items[i], sz, sz);
+        lv_obj_set_pos(items[i], px, py);
+        lv_obj_set_style_radius(items[i], LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_border_width(items[i], 3, 0);
+        lv_obj_set_style_border_color(items[i], lv_color_hex(0xDAA520), 0);
+        lv_obj_set_style_bg_color(items[i], lv_color_hex(0xFFD700), 0);
+        lv_obj_set_style_bg_opa(items[i], LV_OPA_COVER, 0);
+        lv_obj_add_flag(items[i], LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(items[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_clear_flag(items[i], LV_OBJ_FLAG_SCROLLABLE);
     }
 
     // ---- Answer buttons ----
@@ -304,7 +272,5 @@ void app_counting_jar_create(lv_obj_t *content)
     lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 224);
 
     // ---- Start ----
-    glow_tmr = lv_timer_create(on_glow, 3000, NULL);
-    lv_timer_set_repeat_count(glow_tmr, -1);
     start_q();
 }
