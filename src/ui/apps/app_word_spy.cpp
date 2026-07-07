@@ -1,481 +1,507 @@
 #include "app_word_spy.h"
-#include "storage/storage.h"
-#include "utils/sd_utils.h"
 #include "nino_colors.h"
 #include <Arduino.h>
+#include <string.h>
 
-#define WORD_AREA_H  140
-#define BTN_AREA_H   60
+#define ROUNDS_PER_GAME 10
+#define TOTAL_ROUNDS    15
 
-// ---- Picture drawing helpers (LVGL primitives, no canvas needed) ----
+// ---- Drawing helpers ----
 
-static lv_obj_t *add_fill_circle(lv_obj_t *parent, int x, int y, int r, lv_color_t c)
+static lv_obj_t *circ(lv_obj_t *p, int x, int y, int r, lv_color_t c)
 {
-    lv_obj_t *o = lv_obj_create(parent);
+    lv_obj_t *o = lv_obj_create(p);
     lv_obj_remove_style_all(o);
+    lv_obj_set_size(o, r*2, r*2);
+    lv_obj_set_pos(o, x - r, y - r);
+    lv_obj_set_style_radius(o, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_bg_color(o, c, 0);
     lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(o, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_border_width(o, 0, 0);
-    lv_obj_set_size(o, r * 2, r * 2);
-    lv_obj_set_pos(o, x - r, y - r);
     lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
     return o;
 }
 
-static lv_obj_t *add_fill_rect(lv_obj_t *parent, int x, int y, int w, int h, lv_color_t c)
+static lv_obj_t *rect(lv_obj_t *p, int x, int y, int w, int h, lv_color_t c)
 {
-    lv_obj_t *o = lv_obj_create(parent);
+    lv_obj_t *o = lv_obj_create(p);
     lv_obj_remove_style_all(o);
-    lv_obj_set_style_bg_color(o, c, 0);
-    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(o, 0, 0);
-    lv_obj_set_style_border_width(o, 0, 0);
     lv_obj_set_size(o, w, h);
     lv_obj_set_pos(o, x, y);
+    lv_obj_set_style_bg_color(o, c, 0);
+    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(o, 2, 0);
     lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
     return o;
 }
 
-static void draw_picture_log(lv_obj_t *parent)
+// ---- Picture drawings (all draw into ~150x110 area) ----
+
+static void dr_dog(lv_obj_t *p)
 {
-    add_fill_rect(parent, 20, 40, 100, 30, lv_color_hex(0x8B4513));
-    add_fill_rect(parent, 30, 30, 10, 50, lv_color_hex(0x6B3410));
-    add_fill_rect(parent, 80, 25, 10, 55, lv_color_hex(0x6B3410));
-    add_fill_rect(parent, 55, 30, 8, 50, lv_color_hex(0x6B3410));
+    circ(p, 75, 60, 32, lv_color_hex(0xD4A574));
+    circ(p, 80, 60, 22, lv_color_hex(0xE8C9A0));
+    circ(p, 63, 50, 5, lv_color_hex(0x222222));
+    circ(p, 87, 50, 5, lv_color_hex(0x222222));
+    circ(p, 75, 70, 8, lv_color_hex(0x222222));
+    rect(p, 70, 79, 10, 6, lv_color_hex(0xE74C3C));
+    rect(p, 42, 42, 14, 24, lv_color_hex(0x8B6914));
+    rect(p, 94, 42, 14, 24, lv_color_hex(0x8B6914));
 }
 
-static void draw_picture_mug(lv_obj_t *parent)
+static void dr_pig(lv_obj_t *p)
 {
-    add_fill_rect(parent, 40, 30, 60, 60, lv_color_hex(0xDDDDDD));
-    add_fill_rect(parent, 100, 45, 20, 15, lv_color_hex(0xDDDDDD));
-    add_fill_rect(parent, 45, 35, 50, 50, lv_color_hex(0xCC9944));
+    circ(p, 75, 58, 30, lv_color_hex(0xFFB6C1));
+    circ(p, 75, 58, 24, lv_color_hex(0xFFD1DC));
+    circ(p, 75, 68, 12, lv_color_hex(0xFF8CA0));
+    circ(p, 75, 68, 6, lv_color_hex(0x444444));
+    circ(p, 60, 48, 4, lv_color_hex(0x222222));
+    circ(p, 90, 48, 4, lv_color_hex(0x222222));
+    rect(p, 52, 30, 8, 14, lv_color_hex(0xFFB6C1));
+    rect(p, 90, 30, 8, 14, lv_color_hex(0xFFB6C1));
 }
 
-static void draw_picture_dog(lv_obj_t *parent)
+static void dr_cat(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 45, 25, lv_color_hex(0xD4A574));
-    add_fill_circle(parent, 70, 75, 20, lv_color_hex(0xD4A574));
-    add_fill_circle(parent, 60, 37, 6, lv_color_hex(0x222222));
-    add_fill_circle(parent, 80, 37, 6, lv_color_hex(0x222222));
-    add_fill_circle(parent, 70, 50, 5, lv_color_hex(0x222222));
+    circ(p, 75, 58, 28, lv_color_hex(0xFF8C00));
+    rect(p, 48, 28, 12, 20, lv_color_hex(0xFF8C00));
+    rect(p, 90, 28, 12, 20, lv_color_hex(0xFF8C00));
+    circ(p, 63, 50, 4, lv_color_hex(0x222222));
+    circ(p, 87, 50, 4, lv_color_hex(0x222222));
+    circ(p, 75, 60, 4, lv_color_hex(0xFF69B4));
+    rect(p, 50, 58, 6, 2, lv_color_hex(0x222222));
+    rect(p, 94, 58, 6, 2, lv_color_hex(0x222222));
 }
 
-static void draw_picture_pig(lv_obj_t *parent)
+static void dr_fox(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 65, 30, lv_color_hex(0xFFB6C1));
-    add_fill_circle(parent, 70, 55, 8, lv_color_hex(0xFF8CA0));
-    add_fill_circle(parent, 55, 50, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 85, 50, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 70, 80, 3, lv_color_hex(0xFF8CA0));
+    circ(p, 75, 58, 26, lv_color_hex(0xFF6600));
+    rect(p, 50, 30, 12, 18, lv_color_hex(0xFF6600));
+    rect(p, 88, 30, 12, 18, lv_color_hex(0xFF6600));
+    circ(p, 65, 50, 4, lv_color_hex(0x222222));
+    circ(p, 85, 50, 4, lv_color_hex(0x222222));
+    circ(p, 75, 60, 5, lv_color_hex(0x222222));
+    rect(p, 62, 44, 26, 5, lv_color_hex(0xFFFFFF));
 }
 
-static void draw_picture_map(lv_obj_t *parent)
+static void dr_hen(lv_obj_t *p)
 {
-    add_fill_rect(parent, 30, 25, 80, 70, lv_color_hex(0x90EE90));
-    add_fill_rect(parent, 30, 25, 25, 30, lv_color_hex(0x228B22));
-    add_fill_rect(parent, 60, 65, 30, 20, lv_color_hex(0x8B4513));
-    add_fill_rect(parent, 75, 25, 20, 20, lv_color_hex(0xADD8E6));
+    circ(p, 75, 62, 24, lv_color_hex(0xFFFF00));
+    circ(p, 75, 48, 14, lv_color_hex(0xFFFF00));
+    circ(p, 65, 46, 3, lv_color_hex(0x222222));
+    circ(p, 85, 46, 3, lv_color_hex(0x222222));
+    rect(p, 100, 56, 14, 7, lv_color_hex(0xFFA500));
+    circ(p, 75, 34, 6, lv_color_hex(0xFF0000));
+    circ(p, 90, 52, 10, lv_color_hex(0xFFDD00));
 }
 
-static void draw_picture_cat(lv_obj_t *parent)
+static void dr_bug(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 50, 22, lv_color_hex(0xFFA500));
-    lv_obj_t *e1 = add_fill_circle(parent, 55, 30, 12, lv_color_hex(0xFFA500));
-    lv_obj_t *e2 = add_fill_circle(parent, 85, 30, 12, lv_color_hex(0xFFA500));
-    (void)e1; (void)e2;
-    add_fill_circle(parent, 60, 47, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 80, 47, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 70, 55, 4, lv_color_hex(0xFF69B4));
+    circ(p, 75, 55, 22, lv_color_hex(0x32CD32));
+    circ(p, 75, 55, 14, lv_color_hex(0x228B22));
+    circ(p, 58, 42, 10, lv_color_hex(0x32CD32));
+    circ(p, 92, 42, 10, lv_color_hex(0x32CD32));
+    circ(p, 58, 42, 5, lv_color_hex(0xFFFFFF));
+    circ(p, 92, 42, 5, lv_color_hex(0xFFFFFF));
+    circ(p, 58, 42, 3, lv_color_hex(0x222222));
+    circ(p, 92, 42, 3, lv_color_hex(0x222222));
+    rect(p, 65, 14, 4, 14, lv_color_hex(0x222222));
+    rect(p, 81, 14, 4, 14, lv_color_hex(0x222222));
 }
 
-static void draw_picture_fox(lv_obj_t *parent)
+static void dr_mug(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 55, 22, lv_color_hex(0xFF6600));
-    add_fill_circle(parent, 60, 45, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 80, 45, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 70, 58, 4, lv_color_hex(0x222));
-    add_fill_rect(parent, 65, 42, 10, 4, lv_color_hex(0xFFFFFF));
+    rect(p, 42, 30, 60, 62, lv_color_hex(0xDDDDDD));
+    rect(p, 48, 36, 48, 50, lv_color_hex(0xCC8844));
+    rect(p, 100, 42, 22, 16, lv_color_hex(0xDDDDDD));
+    rect(p, 36, 26, 72, 8, lv_color_hex(0xAAAAAA));
+    circ(p, 62, 82, 6, lv_color_hex(0xCC8844));
+    circ(p, 82, 82, 6, lv_color_hex(0xCC8844));
 }
 
-static void draw_picture_hen(lv_obj_t *parent)
+static void dr_log(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 60, 22, lv_color_hex(0xFFFF00));
-    add_fill_circle(parent, 70, 45, 12, lv_color_hex(0xFFFF00));
-    add_fill_circle(parent, 60, 42, 3, lv_color_hex(0x222));
-    add_fill_circle(parent, 80, 42, 3, lv_color_hex(0x222));
-    lv_obj_t *comb = add_fill_circle(parent, 70, 33, 5, lv_color_hex(0xFF0000));
-    (void)comb;
-    lv_obj_t *beak = add_fill_rect(parent, 95, 55, 12, 6, lv_color_hex(0xFFA500));
-    (void)beak;
+    rect(p, 18, 42, 114, 34, lv_color_hex(0x8B4513));
+    rect(p, 28, 32, 14, 52, lv_color_hex(0x6B3410));
+    rect(p, 76, 32, 14, 52, lv_color_hex(0x6B3410));
+    rect(p, 50, 36, 10, 48, lv_color_hex(0x6B3410));
+    circ(p, 18, 59, 20, lv_color_hex(0x8B4513));
+    circ(p, 132, 59, 20, lv_color_hex(0x8B4513));
+    circ(p, 18, 59, 14, lv_color_hex(0xA0764A));
+    circ(p, 132, 59, 14, lv_color_hex(0xA0764A));
 }
 
-static void draw_picture_bug(lv_obj_t *parent)
+static void dr_map(lv_obj_t *p)
 {
-    add_fill_circle(parent, 70, 55, 18, lv_color_hex(0x32CD32));
-    add_fill_circle(parent, 60, 50, 8, lv_color_hex(0x32CD32));
-    add_fill_circle(parent, 80, 50, 8, lv_color_hex(0x32CD32));
-    add_fill_circle(parent, 70, 55, 8, lv_color_hex(0x228B22));
-    add_fill_circle(parent, 85, 65, 5, lv_color_hex(0x32CD32));
-    add_fill_circle(parent, 55, 65, 5, lv_color_hex(0x32CD32));
+    rect(p, 30, 20, 90, 80, lv_color_hex(0x90EE90));
+    rect(p, 30, 20, 28, 34, lv_color_hex(0x228B22));
+    rect(p, 68, 68, 34, 22, lv_color_hex(0x8B4513));
+    rect(p, 86, 20, 22, 22, lv_color_hex(0x87CEEB));
+    rect(p, 36, 56, 22, 22, lv_color_hex(0xFFD700));
+    rect(p, 30, 20, 4, 80, lv_color_hex(0x444444));
+    rect(p, 30, 96, 90, 4, lv_color_hex(0x444444));
+    circ(p, 76, 60, 4, lv_color_hex(0xE74C3C));
 }
 
-typedef void (*pic_draw_fn)(lv_obj_t *);
-typedef struct { const char *word; pic_draw_fn draw; } pic_word_t;
+static void dr_hat(lv_obj_t *p)
+{
+    rect(p, 26, 68, 98, 8, lv_color_hex(0x8B4513));
+    rect(p, 40, 22, 70, 48, lv_color_hex(0xE74C3C));
+    rect(p, 40, 22, 70, 6, lv_color_hex(0xFF69B4));
+    rect(p, 46, 30, 58, 3, lv_color_hex(0xFFFFFF));
+    circ(p, 75, 72, 4, lv_color_hex(0xFFFFFF));
+}
 
-static const pic_word_t pic_words[] = {
-    {"log", draw_picture_log},
-    {"mug", draw_picture_mug},
-    {"dog", draw_picture_dog},
-    {"pig", draw_picture_pig},
-    {"map", draw_picture_map},
-    {"cat", draw_picture_cat},
-    {"fox", draw_picture_fox},
-    {"hen", draw_picture_hen},
-    {"bug", draw_picture_bug},
+static void dr_bed(lv_obj_t *p)
+{
+    rect(p, 14, 62, 122, 20, lv_color_hex(0xFFFFFF));
+    rect(p, 14, 34, 122, 32, lv_color_hex(0x3498DB));
+    rect(p, 18, 38, 36, 22, lv_color_hex(0xFFFFFF));
+    rect(p, 16, 82, 8, 18, lv_color_hex(0x8B4513));
+    rect(p, 126, 82, 8, 18, lv_color_hex(0x8B4513));
+    circ(p, 48, 48, 6, lv_color_hex(0xFF69B4));
+    circ(p, 60, 48, 6, lv_color_hex(0xFF69B4));
+    rect(p, 50, 68, 6, 4, lv_color_hex(0x8B4513));
+}
+
+static void dr_fish(lv_obj_t *p)
+{
+    rect(p, 24, 42, 72, 26, lv_color_hex(0x4A90D9));
+    circ(p, 96, 48, 16, lv_color_hex(0x4A90D9));
+    rect(p, 98, 32, 22, 30, lv_color_hex(0x4A90D9));
+    rect(p, 108, 38, 12, 18, lv_color_hex(0x3A7BC8));
+    circ(p, 40, 48, 6, lv_color_hex(0xFFFFFF));
+    circ(p, 40, 48, 4, lv_color_hex(0x222222));
+    rect(p, 46, 38, 30, 6, lv_color_hex(0x87CEEB));
+}
+
+static void dr_sun(lv_obj_t *p)
+{
+    rect(p, 62, 6, 6, 14, lv_color_hex(0xFFD700));
+    rect(p, 62, 90, 6, 14, lv_color_hex(0xFFD700));
+    rect(p, 16, 56, 14, 6, lv_color_hex(0xFFD700));
+    rect(p, 100, 56, 14, 6, lv_color_hex(0xFFD700));
+    rect(p, 28, 22, 6, 10, lv_color_hex(0xFFD700));
+    rect(p, 96, 22, 6, 10, lv_color_hex(0xFFD700));
+    rect(p, 28, 78, 6, 10, lv_color_hex(0xFFD700));
+    rect(p, 96, 78, 6, 10, lv_color_hex(0xFFD700));
+    circ(p, 65, 55, 24, lv_color_hex(0xFFD700));
+    circ(p, 65, 55, 18, lv_color_hex(0xFFF176));
+}
+
+static void dr_van(lv_obj_t *p)
+{
+    rect(p, 12, 30, 106, 40, lv_color_hex(0x3498DB));
+    rect(p, 50, 14, 56, 22, lv_color_hex(0x2980B9));
+    rect(p, 54, 18, 20, 14, lv_color_hex(0x87CEEB));
+    rect(p, 80, 18, 20, 14, lv_color_hex(0x87CEEB));
+    circ(p, 32, 72, 10, lv_color_hex(0x333333));
+    circ(p, 90, 72, 10, lv_color_hex(0x333333));
+    circ(p, 32, 72, 5, lv_color_hex(0x888888));
+    circ(p, 90, 72, 5, lv_color_hex(0x888888));
+    rect(p, 12, 44, 20, 10, lv_color_hex(0x87CEEB));
+}
+
+static void dr_jam(lv_obj_t *p)
+{
+    rect(p, 36, 36, 64, 48, lv_color_hex(0xFFFFFF));
+    rect(p, 30, 28, 76, 12, lv_color_hex(0xE74C3C));
+    rect(p, 36, 52, 64, 24, lv_color_hex(0xFF69B4));
+    rect(p, 40, 56, 10, 4, lv_color_hex(0xFFFFFF));
+    rect(p, 56, 56, 10, 4, lv_color_hex(0xFFFFFF));
+    rect(p, 72, 56, 10, 4, lv_color_hex(0xFFFFFF));
+    circ(p, 52, 68, 6, lv_color_hex(0xE74C3C));
+    circ(p, 78, 68, 6, lv_color_hex(0xE74C3C));
+}
+
+// ---- Round data ----
+
+struct Round {
+    const char *correct;
+    const char *wrong;
+    void (*draw)(lv_obj_t *);
 };
-#define PIC_COUNT (sizeof(pic_words) / sizeof(pic_words[0]))
 
-// ---- Word list ----
-
-#define MAX_WORDS 60
-static char car_words[MAX_WORDS][24];
-static int car_word_count = 0;
-static int car_word_index = 0;
-
-static int missed_queue[MAX_WORDS];
-static int missed_head = 0;
-static int missed_tail = 0;
-
-static const char *fallback_words[] = {
-    "a", "and", "away", "big", "blue", "can", "come", "down", "find",
-    "for", "funny", "go", "help", "here", "I", "in", "is", "it", "jump",
-    "little", "look", "make", "me", "my", "not", "one", "play", "red",
-    "run", "said", "see", "the", "three", "to", "two", "up", "we",
-    "where", "yellow", "you"
+static const Round rounds[TOTAL_ROUNDS] = {
+    {"dog", "jog", dr_dog}, {"pig", "dig", dr_pig}, {"cat", "mat", dr_cat},
+    {"fox", "vex", dr_fox}, {"hen", "ten", dr_hen}, {"bug", "beg", dr_bug},
+    {"mug", "rug", dr_mug}, {"log", "fog", dr_log}, {"map", "rap", dr_map},
+    {"hat", "bat", dr_hat}, {"bed", "fed", dr_bed}, {"fish","dish",dr_fish},
+    {"sun", "run", dr_sun}, {"van", "man", dr_van}, {"jam", "ram", dr_jam},
 };
-#define FALLBACK_COUNT (sizeof(fallback_words) / sizeof(fallback_words[0]))
 
-static void load_word_list(void)
+// ---- State ----
+
+static lv_obj_t *parent_content;
+static int game_order[ROUNDS_PER_GAME];
+static int qn, score;
+static bool locked;
+static int correct_btn;
+
+static lv_obj_t *pic_cont;
+static lv_obj_t *btn1, *btn2;
+static lv_obj_t *btn1_lab, *btn2_lab;
+static lv_obj_t *fb_lab, *score_lab;
+static lv_obj_t *overlay;
+static lv_timer_t *adv_tmr;
+
+// ---- Helpers ----
+
+static void shuf(int a[], int n)
 {
-    car_word_count = 0;
-    car_word_index = 0;
-    missed_head = 0;
-    missed_tail = 0;
-
-    JsonDocument doc;
-    if (nino_sd_is_mounted() && nino_storage_read("/word_lists/pre_primer.json", doc)) {
-        JsonArray arr = doc.as<JsonArray>();
-        for (JsonVariant item : arr) {
-            if (car_word_count >= MAX_WORDS) break;
-            bool enabled = item["enabled"] | true;
-            if (!enabled) continue;
-            const char *w = item["word"];
-            if (!w) continue;
-            strncpy(car_words[car_word_count], w, sizeof(car_words[0]) - 1);
-            car_words[car_word_count][sizeof(car_words[0]) - 1] = 0;
-            car_word_count++;
-        }
-    }
-
-    if (car_word_count == 0) {
-        for (unsigned i = 0; i < FALLBACK_COUNT && car_word_count < MAX_WORDS; i++) {
-            strncpy(car_words[car_word_count], fallback_words[i], sizeof(car_words[0]) - 1);
-            car_words[car_word_count][sizeof(car_words[0]) - 1] = 0;
-            car_word_count++;
-        }
+    for (int i = n - 1; i > 0; i--) {
+        int j = random(i + 1);
+        int t = a[i]; a[i] = a[j]; a[j] = t;
     }
 }
 
-static void enqueue_missed(int idx)
+// ---- Animations ----
+
+static void shake_btn(lv_obj_t *btn)
 {
-    for (int i = missed_head; i != missed_tail; i = (i + 1) % MAX_WORDS) {
-        if (missed_queue[i] == idx) return;
-    }
-    int next = (missed_tail + 1) % MAX_WORDS;
-    if (next != missed_head) {
-        missed_queue[missed_tail] = idx;
-        missed_tail = next;
-    }
+    lv_coord_t ox = lv_obj_get_x(btn);
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, btn);
+    lv_anim_set_exec_cb(&a, [](void *v, int32_t x) { lv_obj_set_x((lv_obj_t *)v, x); });
+    lv_anim_set_values(&a, ox - 6, ox + 6);
+    lv_anim_set_time(&a, 30);
+    lv_anim_set_reverse_duration(&a, 30);
+    lv_anim_set_repeat_count(&a, 3);
+    lv_anim_set_user_data(&a, (void *)(intptr_t)ox);
+    lv_anim_set_ready_cb(&a, [](lv_anim_t *a) {
+        lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
+    });
+    lv_anim_start(&a);
 }
 
-static const char *next_word(void)
+static void pop_checkmark(void)
 {
-    if (car_word_count == 0) return "";
-    if (missed_head != missed_tail) {
-        int idx = missed_queue[missed_head];
-        missed_head = (missed_head + 1) % MAX_WORDS;
-        car_word_index = idx;
-        return car_words[idx];
-    }
-    car_word_index = (car_word_index + 1) % car_word_count;
-    return car_words[car_word_index];
+    lv_obj_t *ck = lv_obj_create(pic_cont);
+    lv_obj_remove_style_all(ck);
+    lv_obj_set_size(ck, 64, 64);
+    lv_obj_center(ck);
+    lv_obj_set_style_radius(ck, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(ck, lv_color_hex(0x2ECC71), 0);
+    lv_obj_set_style_bg_opa(ck, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(ck, LV_OBJ_FLAG_CLICKABLE);
+
+    lv_obj_t *l = lv_label_create(ck);
+    lv_label_set_text(l, LV_SYMBOL_OK);
+    lv_obj_set_style_text_color(l, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(l, &lv_font_montserrat_28, 0);
+    lv_obj_center(l);
+
+    lv_obj_set_style_transform_scale(ck, 0, 0);
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, ck);
+    lv_anim_set_exec_cb(&a, [](void *v, int32_t s) {
+        lv_obj_set_style_transform_scale((lv_obj_t *)v, s, 0);
+    });
+    lv_anim_set_values(&a, 0, 256);
+    lv_anim_set_time(&a, 300);
+    lv_anim_start(&a);
 }
 
-// ---- UI state ----
+// ---- Game ----
 
-static lv_obj_t *mode_label = NULL;
-static lv_obj_t *word_display = NULL;
-static lv_obj_t *la_vi_btn = NULL;
-static lv_obj_t *location_area = NULL;
-static lv_obj_t *timer_label = NULL;
-static lv_obj_t *main_content = NULL;
-static lv_obj_t *pic_display = NULL;
-static lv_obj_t *choice_area = NULL;
-static lv_timer_t *auto_timer = NULL;
-static bool in_car_mode = true;
-static int pic_index = 0;
+static void show_round(void);
 
-// ---- Picture match helpers ----
-
-static void show_picture_match(void);
-
-static void shuffle_pic_order(void)
+static void on_choice(lv_event_t *e)
 {
-    pic_index = random(PIC_COUNT);
-}
+    if (locked) return;
+    int idx = (int)(intptr_t)lv_event_get_user_data(e);
 
-static void on_pic_choice(lv_event_t *e)
-{
-    const char *chosen = (const char *)lv_event_get_user_data(e);
-    const char *correct = pic_words[pic_index].word;
-    lv_obj_t *btn = (lv_obj_t *)lv_event_get_target(e);
-    if (strcmp(chosen, correct) == 0) {
-        lv_obj_set_style_bg_color(btn, lv_color_hex(0x44BB44), 0);
-        lv_async_call([](void*) {
-            shuffle_pic_order();
-            show_picture_match();
-        }, NULL);
+    if (idx == correct_btn) {
+        locked = true;
+        lv_obj_set_style_bg_color(idx == 0 ? btn1 : btn2, lv_color_hex(0x27AE60), 0);
+        pop_checkmark();
+        score++;
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%d / %d", score, ROUNDS_PER_GAME);
+        lv_label_set_text(score_lab, buf);
+        lv_label_set_text(fb_lab, "Found it!");
+        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x27AE60), 0);
+
+        adv_tmr = lv_timer_create([](lv_timer_t *tm) {
+            lv_timer_del(tm);
+            adv_tmr = NULL;
+            qn++;
+            if (qn >= ROUNDS_PER_GAME) {
+                overlay = lv_obj_create(parent_content);
+                lv_obj_remove_style_all(overlay);
+                lv_obj_set_size(overlay, 480, 276);
+                lv_obj_set_pos(overlay, 0, 0);
+                lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
+                lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
+                lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+                char stars[24];
+                int n = (score * 5 + ROUNDS_PER_GAME / 2) / ROUNDS_PER_GAME;
+                if (n < 1) n = 1;
+                int sp = 0;
+                for (int i = 0; i < n; i++)
+                    sp += snprintf(stars + sp, sizeof(stars) - sp, "\xE2\x98\x85 ");
+                stars[sp] = 0;
+
+                lv_obj_t *sl = lv_label_create(overlay);
+                lv_label_set_text(sl, stars);
+                lv_obj_set_style_text_font(sl, &lv_font_montserrat_28, 0);
+                lv_obj_set_style_text_color(sl, lv_color_hex(0xF1C40F), 0);
+                lv_obj_align(sl, LV_ALIGN_TOP_MID, 0, 24);
+
+                lv_obj_t *ml = lv_label_create(overlay);
+                lv_label_set_text(ml, "Case Closed!");
+                lv_obj_set_style_text_font(ml, &lv_font_montserrat_28, 0);
+                lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
+                lv_obj_align(ml, LV_ALIGN_TOP_MID, 0, 70);
+
+                lv_obj_t *ssl = lv_label_create(overlay);
+                char smsg[48];
+                snprintf(smsg, sizeof(smsg), "You found %d words!", score);
+                lv_label_set_text(ssl, smsg);
+                lv_obj_set_style_text_font(ssl, &lv_font_montserrat_16, 0);
+                lv_obj_set_style_text_color(ssl, lv_color_hex(0x666666), 0);
+                lv_obj_align(ssl, LV_ALIGN_TOP_MID, 0, 110);
+
+                lv_obj_t *pb = lv_btn_create(overlay);
+                lv_obj_set_style_bg_color(pb, lv_color_hex(0x3498DB), 0);
+                lv_obj_set_size(pb, 200, 52);
+                lv_obj_set_style_radius(pb, 26, 0);
+                lv_obj_set_style_shadow_width(pb, 0, 0);
+                lv_obj_align(pb, LV_ALIGN_TOP_MID, 0, 150);
+                lv_obj_add_event_cb(pb, [](lv_event_t *) {
+                    lv_obj_del(overlay);
+                    overlay = NULL;
+                    qn = 0; score = 0;
+                    shuf(game_order, ROUNDS_PER_GAME);
+                    show_round();
+                }, LV_EVENT_CLICKED, NULL);
+
+                lv_obj_t *pl = lv_label_create(pb);
+                lv_label_set_text(pl, "Play Again");
+                lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
+                lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
+                lv_obj_center(pl);
+            } else {
+                show_round();
+            }
+        }, 900, NULL);
+        lv_timer_set_repeat_count(adv_tmr, 1);
     } else {
-        lv_obj_set_style_bg_color(btn, lv_color_hex(0xCC4444), 0);
+        lv_obj_t *btn = idx == 0 ? btn1 : btn2;
+        shake_btn(btn);
+        lv_obj_set_style_bg_color(btn, lv_color_hex(0xE74C3C), 0);
+        lv_timer_t *rt = lv_timer_create([](lv_timer_t *tm) {
+            lv_timer_del(tm);
+            int btn_idx = (int)(intptr_t)lv_timer_get_user_data(tm);
+            lv_obj_set_style_bg_color(btn_idx == 0 ? btn1 : btn2, lv_color_hex(0x3498DB), 0);
+        }, 400, (void *)(intptr_t)idx);
+        lv_timer_set_repeat_count(rt, 1);
     }
 }
 
-static void show_picture_match(void)
+static void show_round(void)
 {
-    if (!main_content) return;
-    lv_obj_clean(main_content);
+    locked = false;
 
-    lv_obj_set_flex_flow(main_content, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_all(main_content, 4, 0);
+    const Round *r = &rounds[game_order[qn]];
 
-    pic_display = lv_obj_create(main_content);
-    lv_obj_remove_style_all(pic_display);
-    lv_obj_set_size(pic_display, 460, 120);
-    lv_obj_set_style_border_width(pic_display, 1, 0);
-    lv_obj_set_style_border_color(pic_display, lv_color_hex(0xCCCCCC), 0);
-    lv_obj_clear_flag(pic_display, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clean(pic_cont);
+    lv_obj_set_style_bg_color(pic_cont, lv_color_hex(0xFFFFFF), 0);
+    r->draw(pic_cont);
 
-    pic_words[pic_index].draw(pic_display);
+    int order[2] = {0, 1};
+    shuf(order, 2);
+    correct_btn = 0;
+    if (order[0] == 0) { correct_btn = 0; } else { correct_btn = 1; }
 
-    choice_area = lv_obj_create(main_content);
-    lv_obj_remove_style_all(choice_area);
-    lv_obj_set_width(choice_area, 460);
-    lv_obj_set_flex_flow(choice_area, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(choice_area, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_all(choice_area, 10, 0);
+    const char *t0 = order[0] == 0 ? r->correct : r->wrong;
+    const char *t1 = order[1] == 0 ? r->correct : r->wrong;
 
-    const char *correct = pic_words[pic_index].word;
-    int wrong_idx;
-    do {
-        wrong_idx = random(PIC_COUNT);
-    } while (wrong_idx == pic_index);
-    const char *wrong = pic_words[wrong_idx].word;
+    lv_label_set_text(btn1_lab, t0);
+    lv_label_set_text(btn2_lab, t1);
+    lv_obj_set_style_bg_color(btn1, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(btn2, lv_color_hex(0x3498DB), 0);
 
-    const char *opts[2] = {correct, wrong};
-    if (random(2) == 1) { opts[0] = wrong; opts[1] = correct; }
+    lv_label_set_text(fb_lab, "");
 
-    for (int i = 0; i < 2; i++) {
-        lv_obj_t *btn = lv_btn_create(choice_area);
-        lv_obj_set_style_bg_color(btn, lv_color_hex(0xCCCCCC), 0);
-        lv_obj_set_style_radius(btn, LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_size(btn, 120, 60);
-        lv_obj_set_style_shadow_width(btn, 0, 0);
-
-        lv_obj_t *lab = lv_label_create(btn);
-        lv_label_set_text(lab, opts[i]);
-        lv_obj_set_style_text_font(lab, &lv_font_montserrat_24, 0);
-        lv_obj_center(lab);
-
-        char *copy = (char *)lv_malloc(strlen(opts[i]) + 1);
-        if (copy) {
-            strcpy(copy, opts[i]);
-            lv_obj_add_event_cb(btn, on_pic_choice, LV_EVENT_CLICKED, copy);
-        }
-    }
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%d / %d", score, ROUNDS_PER_GAME);
+    lv_label_set_text(score_lab, buf);
 }
 
-// ---- Car mode helpers ----
-
-static void on_location_tap(lv_event_t *e)
-{
-    (void)e;
-    const char *word = next_word();
-    lv_label_set_text(word_display, word);
-    lv_obj_add_flag(location_area, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(la_vi_btn, LV_OBJ_FLAG_HIDDEN);
-    if (auto_timer) lv_timer_reset(auto_timer);
-}
-
-static void on_la_vi_tap(lv_event_t *e)
-{
-    (void)e;
-    lv_obj_add_flag(la_vi_btn, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(location_area, LV_OBJ_FLAG_HIDDEN);
-}
-
-static void show_car_mode(void);
-
-static void on_auto_timer(lv_timer_t *t)
-{
-    (void)t;
-    enqueue_missed(car_word_index);
-    show_car_mode();
-}
-
-static void on_main_content_delete(lv_event_t *e)
-{
-    (void)e;
-    if (auto_timer) {
-        lv_timer_del(auto_timer);
-        auto_timer = NULL;
-    }
-    main_content = NULL;
-}
-
-static void show_car_mode(void)
-{
-    if (!main_content) return;
-    if (auto_timer) {
-        lv_timer_del(auto_timer);
-        auto_timer = NULL;
-    }
-
-    lv_obj_clean(main_content);
-    lv_obj_clear_flag(main_content, LV_OBJ_FLAG_SCROLLABLE);
-
-    const char *word = next_word();
-
-    word_display = lv_label_create(main_content);
-    lv_label_set_text(word_display, word);
-    lv_obj_set_style_text_font(word_display, &lv_font_montserrat_28, 0);
-    lv_obj_set_style_text_align(word_display, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_size(word_display, 460, WORD_AREA_H);
-    lv_obj_set_style_bg_color(word_display, lv_color_hex(0x222222), 0);
-    lv_obj_set_style_bg_opa(word_display, LV_OPA_COVER, 0);
-    lv_obj_set_style_pad_top(word_display, 50, 0);
-    lv_obj_center(word_display);
-
-    la_vi_btn = lv_btn_create(main_content);
-    lv_obj_set_style_bg_color(la_vi_btn, lv_color_hex(0x44BB44), 0);
-    lv_obj_set_size(la_vi_btn, 220, BTN_AREA_H);
-    lv_obj_set_style_radius(la_vi_btn, LV_RADIUS_CIRCLE, 0);
-    lv_obj_align(la_vi_btn, LV_ALIGN_BOTTOM_MID, 0, -10);
-
-    lv_obj_t *la_lab = lv_label_create(la_vi_btn);
-    lv_label_set_text(la_lab, "La vi!");
-    lv_obj_set_style_text_font(la_lab, &lv_font_montserrat_24, 0);
-    lv_obj_set_style_text_color(la_lab, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_center(la_lab);
-    lv_obj_add_event_cb(la_vi_btn, on_la_vi_tap, LV_EVENT_CLICKED, NULL);
-
-    location_area = lv_obj_create(main_content);
-    lv_obj_remove_style_all(location_area);
-    lv_obj_set_size(location_area, 460, BTN_AREA_H + 20);
-    lv_obj_align(location_area, LV_ALIGN_BOTTOM_MID, 0, -10);
-    lv_obj_set_flex_flow(location_area, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(location_area, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_all(location_area, 4, 0);
-    lv_obj_add_flag(location_area, LV_OBJ_FLAG_HIDDEN);
-
-    static const char *locations[] = {"Store", "Car", "Sign", "House"};
-    static const lv_color_t loc_colors[] = {
-        lv_color_hex(0xE74C3C), lv_color_hex(0x3498DB),
-        lv_color_hex(0xF39C12), lv_color_hex(0x27AE60)
-    };
-    for (int i = 0; i < 4; i++) {
-        lv_obj_t *loc = lv_btn_create(location_area);
-        lv_obj_set_style_bg_color(loc, loc_colors[i], 0);
-        lv_obj_set_size(loc, 90, 50);
-        lv_obj_set_style_radius(loc, 12, 0);
-        lv_obj_set_style_shadow_width(loc, 0, 0);
-        lv_obj_add_event_cb(loc, on_location_tap, LV_EVENT_CLICKED, NULL);
-
-        lv_obj_t *ll = lv_label_create(loc);
-        lv_label_set_text(ll, locations[i]);
-        lv_obj_set_style_text_color(ll, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(ll, &lv_font_montserrat_14, 0);
-        lv_obj_center(ll);
-    }
-
-    auto_timer = lv_timer_create(on_auto_timer, 15000, NULL);
-    lv_timer_set_repeat_count(auto_timer, 1);
-}
-
-// ---- Mode switching ----
-
-static void on_mode_car(lv_event_t *e)
-{
-    (void)e;
-    if (in_car_mode) return;
-    in_car_mode = true;
-    show_car_mode();
-}
-
-static void on_mode_match(lv_event_t *e)
-{
-    (void)e;
-    if (!in_car_mode) return;
-    in_car_mode = false;
-    shuffle_pic_order();
-    show_picture_match();
-}
+// ---- Entry ----
 
 void app_word_spy_create(lv_obj_t *content)
 {
+    parent_content = content;
+    qn = 0; score = 0; locked = false;
+    overlay = NULL; adv_tmr = NULL;
+
     lv_obj_set_style_bg_color(content, lv_color_hex(0xF5F5F5), 0);
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
 
-    load_word_list();
+    lv_obj_add_event_cb(content, [](lv_event_t *) {
+        if (adv_tmr) { lv_timer_del(adv_tmr); adv_tmr = NULL; }
+    }, LV_EVENT_DELETE, NULL);
 
-    // Mode buttons
-    lv_obj_t *mode_bar = lv_obj_create(content);
-    lv_obj_remove_style_all(mode_bar);
-    lv_obj_set_size(mode_bar, 460, 36);
-    lv_obj_align(mode_bar, LV_ALIGN_TOP_MID, 0, 4);
-    lv_obj_set_flex_flow(mode_bar, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(mode_bar, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    score_lab = lv_label_create(content);
+    lv_label_set_text(score_lab, "0 / 10");
+    lv_obj_set_style_text_font(score_lab, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(score_lab, lv_color_hex(0x888888), 0);
+    lv_obj_align(score_lab, LV_ALIGN_TOP_RIGHT, -8, 8);
 
-    lv_obj_t *car_btn = lv_btn_create(mode_bar);
-    lv_obj_set_style_bg_color(car_btn, lv_color_hex(0x3498DB), 0);
-    lv_obj_set_size(car_btn, 140, 32);
-    lv_obj_set_style_radius(car_btn, 16, 0);
-    lv_obj_set_style_shadow_width(car_btn, 0, 0);
-    lv_obj_add_event_cb(car_btn, on_mode_car, LV_EVENT_CLICKED, NULL);
-    lv_obj_t *car_lab = lv_label_create(car_btn);
-    lv_label_set_text(car_lab, "Car Mode");
-    lv_obj_set_style_text_color(car_lab, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_center(car_lab);
+    pic_cont = lv_obj_create(content);
+    lv_obj_remove_style_all(pic_cont);
+    lv_obj_set_size(pic_cont, 160, 120);
+    lv_obj_align(pic_cont, LV_ALIGN_TOP_MID, 0, 32);
+    lv_obj_set_style_bg_color(pic_cont, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_opa(pic_cont, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(pic_cont, 12, 0);
+    lv_obj_clear_flag(pic_cont, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t *pic_btn = lv_btn_create(mode_bar);
-    lv_obj_set_style_bg_color(pic_btn, lv_color_hex(0xE67E22), 0);
-    lv_obj_set_size(pic_btn, 140, 32);
-    lv_obj_set_style_radius(pic_btn, 16, 0);
-    lv_obj_set_style_shadow_width(pic_btn, 0, 0);
-    lv_obj_add_event_cb(pic_btn, on_mode_match, LV_EVENT_CLICKED, NULL);
-    lv_obj_t *pic_lab = lv_label_create(pic_btn);
-    lv_label_set_text(pic_lab, "Picture Match");
-    lv_obj_set_style_text_color(pic_lab, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_center(pic_lab);
+    int bw = 150, bh = 66;
+    int bx = (464 - bw * 2 - 20) / 2;
 
-    // Main content area (below mode bar)
-    main_content = lv_obj_create(content);
-    lv_obj_add_event_cb(main_content, on_main_content_delete, LV_EVENT_DELETE, NULL);
-    lv_obj_remove_style_all(main_content);
-    lv_obj_set_size(main_content, 480, 232);
-    lv_obj_align(main_content, LV_ALIGN_TOP_MID, 0, 44);
+    btn1 = lv_btn_create(content);
+    lv_obj_remove_style_all(btn1);
+    lv_obj_set_size(btn1, bw, bh);
+    lv_obj_set_pos(btn1, bx, 178);
+    lv_obj_set_style_bg_color(btn1, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_opa(btn1, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(btn1, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_shadow_width(btn1, 0, 0);
+    lv_obj_add_event_cb(btn1, on_choice, LV_EVENT_CLICKED, (void *)0);
 
-    // Default: car mode
-    in_car_mode = true;
-    show_car_mode();
+    btn1_lab = lv_label_create(btn1);
+    lv_obj_set_style_text_color(btn1_lab, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(btn1_lab, &lv_font_montserrat_28, 0);
+    lv_obj_center(btn1_lab);
+
+    btn2 = lv_btn_create(content);
+    lv_obj_remove_style_all(btn2);
+    lv_obj_set_size(btn2, bw, bh);
+    lv_obj_set_pos(btn2, bx + bw + 20, 178);
+    lv_obj_set_style_bg_color(btn2, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_opa(btn2, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(btn2, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_shadow_width(btn2, 0, 0);
+    lv_obj_add_event_cb(btn2, on_choice, LV_EVENT_CLICKED, (void *)1);
+
+    btn2_lab = lv_label_create(btn2);
+    lv_obj_set_style_text_color(btn2_lab, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(btn2_lab, &lv_font_montserrat_28, 0);
+    lv_obj_center(btn2_lab);
+
+    fb_lab = lv_label_create(content);
+    lv_label_set_text(fb_lab, "");
+    lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x444444), 0);
+    lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_20, 0);
+    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 250);
+
+    for (int i = 0; i < ROUNDS_PER_GAME; i++)
+        game_order[i] = i;
+    shuf(game_order, ROUNDS_PER_GAME);
+    show_round();
 }
