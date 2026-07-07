@@ -11,6 +11,7 @@
 #include "app_snip_snip.h"
 #include "app_settings.h"
 #include "app_counting_jar.h"
+#include "app_shape_paint.h"
 #include "app_placeholder.h"
 
 static const nino_app_t apps[APP_COUNT] = {
@@ -21,7 +22,7 @@ static const nino_app_t apps[APP_COUNT] = {
     // Row 2
     { "COUNTING JAR", NINO_COLOR_COUNTING,  app_counting_jar_create },
     { "10-FRAME SUN", NINO_COLOR_TENFRAME,  app_ten_frame_create  },
-    { "SHAPE PAINT",  NINO_COLOR_SHAPE,     app_placeholder_create },
+    { "SHAPE PAINT",  NINO_COLOR_SHAPE,     app_shape_paint_create },
     // Row 3
     { "SNIP SNIP",    NINO_COLOR_SNIP,      app_snip_snip_create   },
     { "STORY TIME",   NINO_COLOR_STORY,     app_story_time_create },

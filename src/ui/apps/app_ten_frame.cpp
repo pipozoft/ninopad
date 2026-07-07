@@ -264,18 +264,18 @@ void app_ten_frame_create(lv_obj_t *content)
     }, LV_EVENT_DELETE, NULL);
 
     // ---- Title ----
-    lv_obj_t *title = lv_label_create(content);
-    lv_label_set_text(title, "10-Frame Sun");
-    lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(title, lv_color_hex(0xFF8C00), 0);
-    lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 5);
+    // lv_obj_t *title = lv_label_create(content);
+    // lv_label_set_text(title, "10-Frame Sun");
+    // lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
+    // lv_obj_set_style_text_color(title, lv_color_hex(0xFF8C00), 0);
+    // lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 5);
 
     // ---- Instruction ----
     lv_obj_t *instr = lv_label_create(content);
     lv_label_set_text(instr, "Count the suns and choose the correct number.");
     lv_obj_set_style_text_font(instr, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(instr, lv_color_hex(0x666666), 0);
-    lv_obj_align(instr, LV_ALIGN_TOP_MID, 0, 28);
+    lv_obj_align(instr, LV_ALIGN_TOP_LEFT, 8, 8);
 
     // ---- Progress ----
     prog_lab = lv_label_create(content);

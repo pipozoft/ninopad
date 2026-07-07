@@ -187,7 +187,7 @@ void app_counting_jar_create(lv_obj_t *content)
     lv_obj_clear_flag(top, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *il = lv_label_create(top);
-    lv_label_set_text(il, "Count the coins.");
+    lv_label_set_text(il, " Count the coins inside the jar.");
     lv_obj_set_style_text_color(il, lv_color_hex(0x444444), 0);
     lv_obj_set_style_text_font(il, &lv_font_montserrat_14, 0);
 
