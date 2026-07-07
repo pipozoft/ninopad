@@ -42,5 +42,3 @@
 #define NINO_COLOR_CONTENT_TINT lv_color_hex(0xF5F5F5)
 #define NINO_COLOR_DASH       lv_color_hex(0x9A9A9A)
 
-// Debug
-#define ENABLE_DEBUG_OVERLAY  1

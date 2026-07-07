@@ -7,9 +7,7 @@
  * static pointers BEFORE lv_obj_clean() — essential to prevent dangling
  * pointer crashes.
  *
- * Debug overlay: when ENABLE_DEBUG_OVERLAY=1, LVGL sysmon is shown with its
- * auto-refresh timer paused. lv_sysmon_performance_dump() is called manually
- * from update_status_cb.
+ * Debug overlay: tap the time in the status bar to toggle LVGL sysmon.
  */
 #include "scr_home.h"
 #include "screen_manager.h"
@@ -22,10 +20,7 @@
 
 #include "fonts/icons_font.h"
 #include "fonts/icon_codepoints.h"
-
-#if ENABLE_DEBUG_OVERLAY
 #include "debugging/sysmon/lv_sysmon.h"
-#endif
 
 #define STATUS_H    26
 
@@ -45,6 +40,21 @@ static lv_obj_t *time_label = NULL;
 static lv_obj_t *wifi_label = NULL;
 static lv_obj_t *status_bar_ref = NULL;
 static lv_timer_t *status_timer = NULL;
+static bool sysmon_showing = false;
+
+static void on_time_tap(lv_event_t *e)
+{
+    (void)e;
+    lv_display_t *d = lv_display_get_default();
+    if (sysmon_showing) {
+        lv_sysmon_hide_performance(d);
+        sysmon_showing = false;
+    } else {
+        lv_sysmon_show_performance(d);
+        lv_sysmon_performance_pause(d);
+        sysmon_showing = true;
+    }
+}
 
 static void on_app_tap(lv_event_t *e)
 {
@@ -78,12 +88,10 @@ static void update_status_cb(lv_timer_t *t)
         lv_label_set_text(wifi_label, nino_wifi_is_connected() ? "Connected" : "Offline");
     }
 
-#if ENABLE_DEBUG_OVERLAY
-    {
+    if (sysmon_showing) {
         lv_display_t *d = lv_display_get_default();
         lv_sysmon_performance_dump(d);
     }
-#endif
 
     if (status_bar_ref) lv_obj_invalidate(lv_scr_act());
 }
@@ -172,6 +180,8 @@ void scr_home_create(lv_obj_t *scr)
     lv_obj_set_style_text_color(time_label, NINO_COLOR_BAR_FG, 0);
     lv_obj_set_style_text_font(time_label, &lv_font_montserrat_14, 0);
     lv_obj_align(time_label, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_flag(time_label, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(time_label, on_time_tap, LV_EVENT_CLICKED, NULL);
 
     wifi_label = lv_label_create(status_bar);
     lv_label_set_text(wifi_label, nino_wifi_is_connected() ? "Connected" : "Offline");
@@ -206,12 +216,6 @@ void scr_home_create(lv_obj_t *scr)
 
     status_timer = lv_timer_create(update_status_cb, 5000, NULL);
     update_status_cb(status_timer);
-
-#if ENABLE_DEBUG_OVERLAY
-    lv_display_t *d = lv_display_get_default();
-    lv_sysmon_show_performance(d);
-    lv_sysmon_performance_pause(d);
-#endif
 
     lv_obj_invalidate(scr);
 }
