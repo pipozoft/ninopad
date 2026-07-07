@@ -2,30 +2,31 @@
 #include "nino_colors.h"
 #include <Arduino.h>
 
-#define ITEM_MAX 10
 #define TQ 10
 
-// ---- State ----
-static int qn;
-static int item_cnt;
-static int bvals[4];
-static int cidx;
-static volatile bool locked;
-static lv_obj_t *items[ITEM_MAX];
-static lv_obj_t *btns[4];
-static lv_obj_t *blabs[4];
-static lv_obj_t *jar;
-static lv_obj_t *prog_lab;
-static lv_obj_t *fb_lab;
-static lv_obj_t *overlay;
+struct MathRound {
+    int a, b;
+    int answer;
+    int wrong;
+};
 
-// ---- Helpers ----
+static int g_mode;
+static MathRound g_rounds[TQ];
+static int g_qn;
+static int g_correct_btn;
+static int g_correct_count;
+static bool g_locked;
+static lv_obj_t *g_eq_lab;
+static lv_obj_t *g_btns[2];
+static lv_obj_t *g_blabs[2];
+static lv_obj_t *g_prog_lab;
+static lv_obj_t *g_fb_lab;
+static lv_obj_t *g_overlay;
+static lv_timer_t *g_timer;
 
-static int max_for_q(int q)
+static void cancel_timer(void)
 {
-    if (q < 3) return 3;
-    if (q < 6) return 5;
-    return 10;
+    if (g_timer) { lv_timer_del(g_timer); g_timer = nullptr; }
 }
 
 static void shuf(int arr[], int n)
@@ -36,99 +37,109 @@ static void shuf(int arr[], int n)
     }
 }
 
-static void start_q(void)
+static void generate_rounds(void)
 {
-    if (overlay) {
-        lv_obj_del(overlay);
-        overlay = NULL;
+    for (int i = 0; i < TQ; i++) {
+        if (g_mode == 0) {
+            int target = random(0, 2) ? 8 : 9;
+            int a = random(1, target);
+            g_rounds[i] = {a, target - a, target, 0};
+            int w = (random(0, 2) ? target + 1 : target - 1);
+            if (w == target || w < 1) w = target + 1;
+            if (w > 12) w = target - 1;
+            g_rounds[i].wrong = w;
+        } else {
+            int target = random(0, 2) ? 3 : 4;
+            int m = random(target + 1, target + 6);
+            g_rounds[i] = {m, m - target, target, 0};
+            int w = (random(0, 2) ? target + 1 : target - 1);
+            if (w == target || w < 1) w = target + 1;
+            if (w > 10) w = target - 1;
+            g_rounds[i].wrong = w;
+        }
     }
-
-    int maxv = max_for_q(qn);
-    item_cnt = random(1, maxv + 1);
-
-    for (int i = 0; i < ITEM_MAX; i++) {
-        if (i < item_cnt)
-            lv_obj_clear_flag(items[i], LV_OBJ_FLAG_HIDDEN);
-        else
-            lv_obj_add_flag(items[i], LV_OBJ_FLAG_HIDDEN);
-    }
-
-    // 4 unique answers: correct + 3 distractors from expanded pool
-    int pool[12], np = 0;
-    int hi = maxv < 4 ? 6 : maxv + 2;
-    for (int i = 1; i <= hi; i++) {
-        if (i != item_cnt) pool[np++] = i;
-    }
-    shuf(pool, np);
-
-    bvals[0] = item_cnt;
-    for (int i = 0; i < 3; i++) bvals[i + 1] = pool[i % np];
-    shuf(bvals, 4);
-
-    cidx = 0;
-    for (int i = 0; i < 4; i++) {
-        if (bvals[i] == item_cnt) { cidx = i; break; }
-    }
-
-    for (int i = 0; i < 4; i++) {
-        char buf[8];
-        snprintf(buf, sizeof(buf), "%d", bvals[i]);
-        lv_label_set_text(blabs[i], buf);
-        lv_obj_set_style_bg_color(btns[i], lv_color_hex(0x3498DB), 0);
-    }
-
-    char buf[16];
-    snprintf(buf, sizeof(buf), "%d / %d", qn + 1, TQ);
-    lv_label_set_text(prog_lab, buf);
-
-    lv_label_set_text(fb_lab, "");
-
-    locked = false;
 }
 
-static void show_congrats(void)
+static void start_q(void)
 {
-    overlay = lv_obj_create(lv_obj_get_parent(jar));
-    lv_obj_remove_style_all(overlay);
-    lv_obj_set_size(overlay, 480, 276);
-    lv_obj_align(overlay, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
-    lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
+    cancel_timer();
+    const MathRound &r = g_rounds[g_qn];
 
-    lv_obj_t *ml = lv_label_create(overlay);
-    lv_label_set_text(ml, "Great Job!\nYou counted all the coins!");
-    lv_obj_set_style_text_font(ml, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(ml, LV_ALIGN_CENTER, 0, -30);
+    char buf[32];
+    if (g_mode == 0)
+        snprintf(buf, sizeof(buf), "%d + %d = ?", r.a, r.b);
+    else
+        snprintf(buf, sizeof(buf), "%d - %d = ?", r.a, r.b);
+    lv_label_set_text(g_eq_lab, buf);
 
-    lv_obj_t *pb = lv_btn_create(overlay);
-    lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_size(pb, 160, 52);
-    lv_obj_set_style_radius(pb, 26, 0);
-    lv_obj_set_style_shadow_width(pb, 0, 0);
-    lv_obj_align(pb, LV_ALIGN_CENTER, 0, 50);
-    lv_obj_add_event_cb(pb, [](lv_event_t *e) {
-        (void)e;
-        lv_obj_del(overlay);
-        overlay = NULL;
-        qn = 0;
-        start_q();
-    }, LV_EVENT_CLICKED, NULL);
+    g_correct_btn = random(0, 2);
+    char nb[8];
+    snprintf(nb, sizeof(nb), "%d", r.answer);
+    lv_label_set_text(g_blabs[g_correct_btn], nb);
+    snprintf(nb, sizeof(nb), "%d", r.wrong);
+    lv_label_set_text(g_blabs[1 - g_correct_btn], nb);
 
-    lv_obj_t *pl = lv_label_create(pb);
-    lv_label_set_text(pl, "Play Again");
-    lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-    lv_obj_center(pl);
+    snprintf(buf, sizeof(buf), "%d / %d", g_qn + 1, TQ);
+    lv_label_set_text(g_prog_lab, buf);
+    lv_label_set_text(g_fb_lab, "");
+
+    lv_obj_set_style_bg_color(g_btns[0], lv_color_hex(0x8B5A2B), 0);
+    lv_obj_set_style_bg_color(g_btns[1], lv_color_hex(0xF5E6C8), 0);
+    lv_obj_set_style_text_color(g_blabs[0], lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_color(g_blabs[1], lv_color_hex(0x333333), 0);
+
+    g_locked = false;
 }
 
 static void next_q(void)
 {
-    qn++;
-    if (qn >= TQ) {
-        show_congrats();
+    g_qn++;
+    if (g_qn >= TQ) {
+        g_overlay = lv_obj_create(lv_obj_get_parent(g_eq_lab));
+        lv_obj_remove_style_all(g_overlay);
+        lv_obj_set_size(g_overlay, 480, 276);
+        lv_obj_align(g_overlay, LV_ALIGN_TOP_MID, 0, 0);
+        lv_obj_set_style_bg_color(g_overlay, lv_color_hex(0xF0FFF0), 0);
+        lv_obj_set_style_bg_opa(g_overlay, LV_OPA_COVER, 0);
+        lv_obj_clear_flag(g_overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+        lv_obj_t *ml = lv_label_create(g_overlay);
+        lv_label_set_text(ml, g_correct_count == TQ ? "Perfect!\nAll correct!" :
+                          g_correct_count >= 7 ? "Great Job!" : "Good work!");
+        lv_obj_set_style_text_font(ml, &lv_font_montserrat_24, 0);
+        lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_align(ml, LV_ALIGN_CENTER, 0, -40);
+
+        char stars[16];
+        int n = g_correct_count <= 3 ? 1 : g_correct_count <= 7 ? 2 : 3;
+        snprintf(stars, sizeof(stars), "%.*s", n, "***");
+        lv_obj_t *sl = lv_label_create(g_overlay);
+        lv_label_set_text(sl, stars);
+        lv_obj_set_style_text_font(sl, &lv_font_montserrat_28, 0);
+        lv_obj_set_style_text_color(sl, lv_color_hex(0xF1C40F), 0);
+        lv_obj_align(sl, LV_ALIGN_CENTER, 0, 0);
+
+        lv_obj_t *pb = lv_btn_create(g_overlay);
+        lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_size(pb, 160, 52);
+        lv_obj_set_style_radius(pb, 26, 0);
+        lv_obj_set_style_shadow_width(pb, 0, 0);
+        lv_obj_align(pb, LV_ALIGN_CENTER, 0, 50);
+        lv_obj_add_event_cb(pb, [](lv_event_t *) {
+            lv_obj_del(g_overlay);
+            g_overlay = nullptr;
+            g_qn = 0;
+            g_correct_count = 0;
+            generate_rounds();
+            start_q();
+        }, LV_EVENT_CLICKED, nullptr);
+
+        lv_obj_t *pl = lv_label_create(pb);
+        lv_label_set_text(pl, "Play Again");
+        lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
+        lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
+        lv_obj_center(pl);
         return;
     }
     start_q();
@@ -136,141 +147,145 @@ static void next_q(void)
 
 static void on_btn_tap(lv_event_t *e)
 {
-    if (locked) return;
+    if (g_locked) return;
     int idx = (int)(intptr_t)lv_event_get_user_data(e);
 
-    if (idx == cidx) {
-        locked = true;
-        lv_obj_set_style_bg_color(btns[idx], lv_color_hex(0x2ECC71), 0);
-        lv_label_set_text(fb_lab, LV_SYMBOL_OK);
-        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x2ECC71), 0);
-        lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_28, 0);
-
-        lv_timer_t *t = lv_timer_create([](lv_timer_t *tm) {
-            lv_timer_del(tm);
+    if (idx == g_correct_btn) {
+        g_locked = true;
+        g_correct_count++;
+        lv_obj_set_style_bg_color(g_btns[idx], lv_color_hex(0x27AE60), 0);
+        lv_label_set_text(g_fb_lab, "Correct!");
+        lv_obj_set_style_text_color(g_fb_lab, lv_color_hex(0x27AE60), 0);
+        g_timer = lv_timer_create([](lv_timer_t *t) {
+            lv_timer_del(t);
+            g_timer = nullptr;
             next_q();
-        }, 1000, NULL);
-        lv_timer_set_repeat_count(t, 1);
+        }, 900, nullptr);
+        lv_timer_set_repeat_count(g_timer, 1);
     } else {
-        lv_obj_set_style_bg_color(btns[idx], lv_color_hex(0xE74C3C), 0);
-        lv_label_set_text(fb_lab, "Try Again");
-        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0xE74C3C), 0);
-        lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_16, 0);
-
-        lv_timer_t *t = lv_timer_create([](lv_timer_t *tm) {
-            lv_timer_del(tm);
-            int idx2 = (int)(intptr_t)lv_timer_get_user_data(tm);
-            lv_obj_set_style_bg_color(btns[idx2], lv_color_hex(0x3498DB), 0);
-            lv_label_set_text(fb_lab, "");
-        }, 600, (void *)(intptr_t)idx);
-        lv_timer_set_repeat_count(t, 1);
+        lv_obj_set_style_bg_color(g_btns[idx], lv_color_hex(0xE74C3C), 0);
+        lv_label_set_text(g_fb_lab, "Try again");
+        lv_obj_set_style_text_color(g_fb_lab, lv_color_hex(0xE74C3C), 0);
+        g_timer = lv_timer_create([](lv_timer_t *t) {
+            lv_timer_del(t);
+            g_timer = nullptr;
+            int ridx = (int)(intptr_t)lv_timer_get_user_data(t);
+            lv_obj_set_style_bg_color(g_btns[ridx],
+                ridx == 0 ? lv_color_hex(0x8B5A2B) : lv_color_hex(0xF5E6C8), 0);
+            lv_label_set_text(g_fb_lab, "");
+            g_locked = false;
+        }, 500, (void *)(intptr_t)idx);
+        lv_timer_set_repeat_count(g_timer, 1);
     }
 }
 
-// ---- App entry ----
-
 void app_counting_jar_create(lv_obj_t *content)
 {
-    qn = 0;
-    locked = false;
-    overlay = NULL;
+    g_qn = 0;
+    g_correct_count = 0;
+    g_locked = false;
+    g_timer = nullptr;
+    g_overlay = nullptr;
 
-    lv_obj_set_style_bg_color(content, lv_color_hex(0xF5F5F5), 0);
+    lv_obj_set_style_bg_color(content, lv_color_hex(0xFFF8F0), 0);
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
 
-    // ---- Top: instruction + progress ----
-    lv_obj_t *top = lv_obj_create(content);
-    lv_obj_remove_style_all(top);
-    lv_obj_set_size(top, 480, 18);
-    lv_obj_align(top, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_set_flex_flow(top, LV_FLEX_FLOW_ROW);
-    lv_obj_clear_flag(top, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_event_cb(content, [](lv_event_t *) { cancel_timer(); },
+                        LV_EVENT_DELETE, nullptr);
 
-    lv_obj_t *il = lv_label_create(top);
-    lv_label_set_text(il, " Count the coins inside the jar.");
-    lv_obj_set_style_text_color(il, lv_color_hex(0x444444), 0);
-    lv_obj_set_style_text_font(il, &lv_font_montserrat_14, 0);
+    // ---- Progress ----
+    g_prog_lab = lv_label_create(content);
+    lv_label_set_text(g_prog_lab, "");
+    lv_obj_set_style_text_color(g_prog_lab, lv_color_hex(0x888888), 0);
+    lv_obj_set_style_text_font(g_prog_lab, &lv_font_montserrat_14, 0);
+    lv_obj_align(g_prog_lab, LV_ALIGN_TOP_RIGHT, -8, 4);
 
-    lv_obj_t *sp = lv_obj_create(top);
-    lv_obj_remove_style_all(sp);
-    lv_obj_set_flex_grow(sp, 1);
-    lv_obj_clear_flag(sp, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_clear_flag(sp, LV_OBJ_FLAG_CLICKABLE);
+    // ---- Equation ----
+    g_eq_lab = lv_label_create(content);
+    lv_obj_set_size(g_eq_lab, 220, 72);
+    lv_obj_align(g_eq_lab, LV_ALIGN_TOP_MID, 0, 8);
+    lv_obj_set_style_bg_color(g_eq_lab, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_opa(g_eq_lab, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(g_eq_lab, 2, 0);
+    lv_obj_set_style_border_color(g_eq_lab, lv_color_hex(0xDDDDDD), 0);
+    lv_obj_set_style_radius(g_eq_lab, 14, 0);
+    lv_obj_set_style_text_align(g_eq_lab, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_font(g_eq_lab, &lv_font_montserrat_28, 0);
+    lv_obj_set_style_text_color(g_eq_lab, lv_color_hex(0x333333), 0);
+    lv_obj_set_style_pad_top(g_eq_lab, 20, 0);
 
-    prog_lab = lv_label_create(top);
-    lv_label_set_text(prog_lab, "1 / 10");
-    lv_obj_set_style_text_color(prog_lab, lv_color_hex(0x888888), 0);
-    lv_obj_set_style_text_font(prog_lab, &lv_font_montserrat_14, 0);
-    lv_obj_set_style_pad_right(prog_lab, 8, 0);
+    // ---- Cone buttons ----
+    int bw = 150, bh = 90, gap = 24;
+    int ox = (464 - 2 * bw - gap) / 2;
 
-    // ---- Jar ----
-    jar = lv_obj_create(content);
-    lv_obj_remove_style_all(jar);
-    lv_obj_set_size(jar, 340, 140);
-    lv_obj_align(jar, LV_ALIGN_TOP_MID, 0, 22);
-    lv_obj_set_style_border_color(jar, lv_color_hex(0x888888), 0);
-    lv_obj_set_style_border_width(jar, 3, 0);
-    lv_obj_set_style_radius(jar, 14, 0);
-    lv_obj_set_style_bg_color(jar, lv_color_hex(0xEEEEEE), 0);
-    lv_obj_set_style_bg_opa(jar, LV_OPA_COVER, 0);
-    lv_obj_set_style_clip_corner(jar, true, 0);
-    lv_obj_clear_flag(jar, LV_OBJ_FLAG_SCROLLABLE);
+    for (int i = 0; i < 2; i++) {
+        g_btns[i] = lv_btn_create(content);
+        lv_obj_set_size(g_btns[i], bw, bh);
+        lv_obj_set_pos(g_btns[i], ox + i * (bw + gap), 90);
+        lv_obj_set_style_radius(g_btns[i], 60, 0);
+        lv_obj_set_style_shadow_width(g_btns[i], 0, 0);
+        lv_obj_add_event_cb(g_btns[i], on_btn_tap, LV_EVENT_CLICKED,
+                            (void *)(intptr_t)i);
 
-    // Coins: 5×2 grid, 32px circles
-    const int sz = 32;
-    const int step = 48;
-    int ox = (340 - 4 * step - sz) / 2;
-    int oy = (140 - 1 * step - sz) / 2;
-
-    for (int i = 0; i < ITEM_MAX; i++) {
-        int col = i % 5;
-        int row = i / 5;
-        int px = ox + col * step;
-        int py = oy + row * step;
-
-        items[i] = lv_obj_create(jar);
-        lv_obj_remove_style_all(items[i]);
-        lv_obj_set_size(items[i], sz, sz);
-        lv_obj_set_pos(items[i], px, py);
-        lv_obj_set_style_radius(items[i], LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_border_width(items[i], 3, 0);
-        lv_obj_set_style_border_color(items[i], lv_color_hex(0xDAA520), 0);
-        lv_obj_set_style_bg_color(items[i], lv_color_hex(0xFFD700), 0);
-        lv_obj_set_style_bg_opa(items[i], LV_OPA_COVER, 0);
-        lv_obj_add_flag(items[i], LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(items[i], LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_clear_flag(items[i], LV_OBJ_FLAG_SCROLLABLE);
+        g_blabs[i] = lv_label_create(g_btns[i]);
+        lv_label_set_text(g_blabs[i], "");
+        lv_obj_set_style_text_font(g_blabs[i], &lv_font_montserrat_28, 0);
+        lv_obj_center(g_blabs[i]);
     }
 
-    // ---- Answer buttons ----
-    int bw = 88, bh = 48, bg = 10;
-    int bx = (480 - 4 * bw - 3 * bg) / 2;
-
-    for (int i = 0; i < 4; i++) {
-        btns[i] = lv_btn_create(content);
-        lv_obj_set_style_bg_color(btns[i], lv_color_hex(0x3498DB), 0);
-        lv_obj_set_size(btns[i], bw, bh);
-        lv_obj_set_pos(btns[i], bx + i * (bw + bg), 168);
-        lv_obj_set_style_radius(btns[i], 10, 0);
-        lv_obj_set_style_shadow_width(btns[i], 0, 0);
-        lv_obj_set_style_border_width(btns[i], 2, 0);
-        lv_obj_set_style_border_color(btns[i], lv_color_hex(0x2980B9), 0);
-        lv_obj_add_event_cb(btns[i], on_btn_tap, LV_EVENT_CLICKED, (void *)(intptr_t)i);
-
-        blabs[i] = lv_label_create(btns[i]);
-        lv_label_set_text(blabs[i], "");
-        lv_obj_set_style_text_color(blabs[i], lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(blabs[i], &lv_font_montserrat_24, 0);
-        lv_obj_center(blabs[i]);
-    }
+    lv_obj_set_style_bg_color(g_btns[0], lv_color_hex(0x8B5A2B), 0);
+    lv_obj_set_style_bg_color(g_btns[1], lv_color_hex(0xF5E6C8), 0);
+    lv_obj_set_style_text_color(g_blabs[0], lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_color(g_blabs[1], lv_color_hex(0x333333), 0);
 
     // ---- Feedback ----
-    fb_lab = lv_label_create(content);
-    lv_label_set_text(fb_lab, "");
-    lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x444444), 0);
-    lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_16, 0);
-    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 224);
+    g_fb_lab = lv_label_create(content);
+    lv_label_set_text(g_fb_lab, "");
+    lv_obj_set_style_text_font(g_fb_lab, &lv_font_montserrat_20, 0);
+    lv_obj_align(g_fb_lab, LV_ALIGN_TOP_MID, 0, 192);
 
-    // ---- Start ----
-    start_q();
+    // ---- Mode picker ----
+    g_overlay = lv_obj_create(content);
+    lv_obj_remove_style_all(g_overlay);
+    lv_obj_set_size(g_overlay, 480, 276);
+    lv_obj_align(g_overlay, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_style_bg_color(g_overlay, lv_color_hex(0xFFF8F0), 0);
+    lv_obj_set_style_bg_opa(g_overlay, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(g_overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *tl = lv_label_create(g_overlay);
+    lv_label_set_text(tl, "Pick your ice cream!");
+    lv_obj_set_style_text_font(tl, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_color(tl, lv_color_hex(0x333333), 0);
+    lv_obj_set_style_text_align(tl, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(tl, LV_ALIGN_TOP_MID, 0, 50);
+
+    static const lv_color_t mode_colors[] = { lv_color_hex(0x6B3E0D), lv_color_hex(0xF5E6C8) };
+    static const char *mode_names[] = { "Chocolate", "Vanilla" };
+
+    int mw = 180, mgap = 24;
+    int mox = (480 - 2 * mw - mgap) / 2;
+    for (int i = 0; i < 2; i++) {
+        lv_obj_t *b = lv_btn_create(g_overlay);
+        lv_obj_set_size(b, mw, 72);
+        lv_obj_set_pos(b, mox + i * (mw + mgap), 110);
+        lv_obj_set_style_radius(b, 20, 0);
+        lv_obj_set_style_shadow_width(b, 0, 0);
+        lv_obj_set_style_bg_color(b, mode_colors[i], 0);
+
+        lv_obj_t *l = lv_label_create(b);
+        lv_label_set_text(l, mode_names[i]);
+        lv_obj_set_style_text_font(l, &lv_font_montserrat_20, 0);
+        lv_obj_set_style_text_color(l,
+            i == 0 ? lv_color_hex(0xFFFFFF) : lv_color_hex(0x333333), 0);
+        lv_obj_center(l);
+
+        lv_obj_add_event_cb(b, [](lv_event_t *e) {
+            g_mode = (int)(intptr_t)lv_event_get_user_data(e);
+            lv_obj_del(g_overlay);
+            g_overlay = nullptr;
+            generate_rounds();
+            start_q();
+        }, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+    }
 }

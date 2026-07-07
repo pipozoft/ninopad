@@ -34,9 +34,9 @@ static const char *icon_chars[APP_COUNT] = {
     "\xEE\xA8\x86",   // ICON_FIRE        → APP_LUZ_LETTERS
     "\xEE\xA8\x84",   // ICON_EYE         → APP_WORD_SPY
     "\xEE\xA8\x83",   // ICON_DOLLAR      → APP_COUNTING_JAR
-    "\xEE\xA8\x89",   // ICON_SUN         → APP_TEN_FRAME
-    "\xEE\xA8\x87",   // ICON_PAINT_BRUSH → APP_SHAPE_PAINT
-    "\xEE\xA8\x88",   // ICON_SCISSORS    → APP_SNIP_SNIP
+    "\xEE\xA8\x8A",   // ICON_SUN         → APP_TEN_FRAME
+    "\xEE\xA8\x88",   // ICON_PAINT_BRUSH → APP_SHAPE_PAINT
+    "\xEE\xA8\x89",   // ICON_SCISSORS    → APP_SNIP_SNIP
     "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
     "\xEE\xA8\x82",   // ICON_COG         → APP_SETTINGS
 };

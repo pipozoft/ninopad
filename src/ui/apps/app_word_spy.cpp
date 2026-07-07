@@ -291,15 +291,16 @@ static void pop_checkmark(void)
     lv_obj_set_style_text_font(l, &lv_font_montserrat_28, 0);
     lv_obj_center(l);
 
-    lv_obj_set_style_transform_scale(ck, 0, 0);
+    // Fade in — opacity does not require a layer buffer
+    lv_obj_set_style_opa(ck, 0, 0);
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, ck);
-    lv_anim_set_exec_cb(&a, [](void *v, int32_t s) {
-        lv_obj_set_style_transform_scale((lv_obj_t *)v, s, 0);
+    lv_anim_set_exec_cb(&a, [](void *v, int32_t opa) {
+        lv_obj_set_style_opa((lv_obj_t *)v, (lv_opa_t)opa, 0);
     });
-    lv_anim_set_values(&a, 0, 256);
-    lv_anim_set_time(&a, 300);
+    lv_anim_set_values(&a, 0, LV_OPA_COVER);
+    lv_anim_set_time(&a, 200);
     lv_anim_start(&a);
 }
 

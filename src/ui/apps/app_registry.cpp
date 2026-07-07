@@ -20,7 +20,7 @@ static const nino_app_t apps[APP_COUNT] = {
     { "LUZ LETTERS",  NINO_COLOR_LUZ,       app_luz_letters_create },
     { "WORD SPY",     NINO_COLOR_WORDSPY,   app_word_spy_create   },
     // Row 2
-    { "COUNTING JAR", NINO_COLOR_COUNTING,  app_counting_jar_create },
+    { "ICE CREAM",   NINO_COLOR_ICE_CREAM,  app_counting_jar_create },
     { "10-FRAME SUN", NINO_COLOR_TENFRAME,  app_ten_frame_create  },
     { "SHAPE PAINT",  NINO_COLOR_SHAPE,     app_shape_paint_create },
     // Row 3
