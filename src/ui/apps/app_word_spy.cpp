@@ -1,236 +1,98 @@
+// Word Spy uses emoji artwork from OpenMoji (CC BY-SA 4.0)
+// https://openmoji.org/  -  the open-source emoji and icon project
 #include "app_word_spy.h"
 #include "nino_colors.h"
 #include <Arduino.h>
 #include <string.h>
 
 #define ROUNDS_PER_GAME 10
-#define TOTAL_ROUNDS    15
 
-// ---- Drawing helpers ----
-
-static lv_obj_t *circ(lv_obj_t *p, int x, int y, int r, lv_color_t c)
-{
-    lv_obj_t *o = lv_obj_create(p);
-    lv_obj_remove_style_all(o);
-    lv_obj_set_size(o, r*2, r*2);
-    lv_obj_set_pos(o, x - r, y - r);
-    lv_obj_set_style_radius(o, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_bg_color(o, c, 0);
-    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
-    return o;
-}
-
-static lv_obj_t *rect(lv_obj_t *p, int x, int y, int w, int h, lv_color_t c)
-{
-    lv_obj_t *o = lv_obj_create(p);
-    lv_obj_remove_style_all(o);
-    lv_obj_set_size(o, w, h);
-    lv_obj_set_pos(o, x, y);
-    lv_obj_set_style_bg_color(o, c, 0);
-    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(o, 2, 0);
-    lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
-    return o;
-}
-
-// ---- Picture drawings (all draw into ~150x110 area) ----
-
-static void dr_dog(lv_obj_t *p)
-{
-    circ(p, 75, 60, 32, lv_color_hex(0xD4A574));
-    circ(p, 80, 60, 22, lv_color_hex(0xE8C9A0));
-    circ(p, 63, 50, 5, lv_color_hex(0x222222));
-    circ(p, 87, 50, 5, lv_color_hex(0x222222));
-    circ(p, 75, 70, 8, lv_color_hex(0x222222));
-    rect(p, 70, 79, 10, 6, lv_color_hex(0xE74C3C));
-    rect(p, 42, 42, 14, 24, lv_color_hex(0x8B6914));
-    rect(p, 94, 42, 14, 24, lv_color_hex(0x8B6914));
-}
-
-static void dr_pig(lv_obj_t *p)
-{
-    circ(p, 75, 58, 30, lv_color_hex(0xFFB6C1));
-    circ(p, 75, 58, 24, lv_color_hex(0xFFD1DC));
-    circ(p, 75, 68, 12, lv_color_hex(0xFF8CA0));
-    circ(p, 75, 68, 6, lv_color_hex(0x444444));
-    circ(p, 60, 48, 4, lv_color_hex(0x222222));
-    circ(p, 90, 48, 4, lv_color_hex(0x222222));
-    rect(p, 52, 30, 8, 14, lv_color_hex(0xFFB6C1));
-    rect(p, 90, 30, 8, 14, lv_color_hex(0xFFB6C1));
-}
-
-static void dr_cat(lv_obj_t *p)
-{
-    circ(p, 75, 58, 28, lv_color_hex(0xFF8C00));
-    rect(p, 48, 28, 12, 20, lv_color_hex(0xFF8C00));
-    rect(p, 90, 28, 12, 20, lv_color_hex(0xFF8C00));
-    circ(p, 63, 50, 4, lv_color_hex(0x222222));
-    circ(p, 87, 50, 4, lv_color_hex(0x222222));
-    circ(p, 75, 60, 4, lv_color_hex(0xFF69B4));
-    rect(p, 50, 58, 6, 2, lv_color_hex(0x222222));
-    rect(p, 94, 58, 6, 2, lv_color_hex(0x222222));
-}
-
-static void dr_fox(lv_obj_t *p)
-{
-    circ(p, 75, 58, 26, lv_color_hex(0xFF6600));
-    rect(p, 50, 30, 12, 18, lv_color_hex(0xFF6600));
-    rect(p, 88, 30, 12, 18, lv_color_hex(0xFF6600));
-    circ(p, 65, 50, 4, lv_color_hex(0x222222));
-    circ(p, 85, 50, 4, lv_color_hex(0x222222));
-    circ(p, 75, 60, 5, lv_color_hex(0x222222));
-    rect(p, 62, 44, 26, 5, lv_color_hex(0xFFFFFF));
-}
-
-static void dr_hen(lv_obj_t *p)
-{
-    circ(p, 75, 62, 24, lv_color_hex(0xFFFF00));
-    circ(p, 75, 48, 14, lv_color_hex(0xFFFF00));
-    circ(p, 65, 46, 3, lv_color_hex(0x222222));
-    circ(p, 85, 46, 3, lv_color_hex(0x222222));
-    rect(p, 100, 56, 14, 7, lv_color_hex(0xFFA500));
-    circ(p, 75, 34, 6, lv_color_hex(0xFF0000));
-    circ(p, 90, 52, 10, lv_color_hex(0xFFDD00));
-}
-
-static void dr_bug(lv_obj_t *p)
-{
-    circ(p, 75, 55, 22, lv_color_hex(0x32CD32));
-    circ(p, 75, 55, 14, lv_color_hex(0x228B22));
-    circ(p, 58, 42, 10, lv_color_hex(0x32CD32));
-    circ(p, 92, 42, 10, lv_color_hex(0x32CD32));
-    circ(p, 58, 42, 5, lv_color_hex(0xFFFFFF));
-    circ(p, 92, 42, 5, lv_color_hex(0xFFFFFF));
-    circ(p, 58, 42, 3, lv_color_hex(0x222222));
-    circ(p, 92, 42, 3, lv_color_hex(0x222222));
-    rect(p, 65, 14, 4, 14, lv_color_hex(0x222222));
-    rect(p, 81, 14, 4, 14, lv_color_hex(0x222222));
-}
-
-static void dr_mug(lv_obj_t *p)
-{
-    rect(p, 42, 30, 60, 62, lv_color_hex(0xDDDDDD));
-    rect(p, 48, 36, 48, 50, lv_color_hex(0xCC8844));
-    rect(p, 100, 42, 22, 16, lv_color_hex(0xDDDDDD));
-    rect(p, 36, 26, 72, 8, lv_color_hex(0xAAAAAA));
-    circ(p, 62, 82, 6, lv_color_hex(0xCC8844));
-    circ(p, 82, 82, 6, lv_color_hex(0xCC8844));
-}
-
-static void dr_log(lv_obj_t *p)
-{
-    rect(p, 18, 42, 114, 34, lv_color_hex(0x8B4513));
-    rect(p, 28, 32, 14, 52, lv_color_hex(0x6B3410));
-    rect(p, 76, 32, 14, 52, lv_color_hex(0x6B3410));
-    rect(p, 50, 36, 10, 48, lv_color_hex(0x6B3410));
-    circ(p, 18, 59, 20, lv_color_hex(0x8B4513));
-    circ(p, 132, 59, 20, lv_color_hex(0x8B4513));
-    circ(p, 18, 59, 14, lv_color_hex(0xA0764A));
-    circ(p, 132, 59, 14, lv_color_hex(0xA0764A));
-}
-
-static void dr_map(lv_obj_t *p)
-{
-    rect(p, 30, 20, 90, 80, lv_color_hex(0x90EE90));
-    rect(p, 30, 20, 28, 34, lv_color_hex(0x228B22));
-    rect(p, 68, 68, 34, 22, lv_color_hex(0x8B4513));
-    rect(p, 86, 20, 22, 22, lv_color_hex(0x87CEEB));
-    rect(p, 36, 56, 22, 22, lv_color_hex(0xFFD700));
-    rect(p, 30, 20, 4, 80, lv_color_hex(0x444444));
-    rect(p, 30, 96, 90, 4, lv_color_hex(0x444444));
-    circ(p, 76, 60, 4, lv_color_hex(0xE74C3C));
-}
-
-static void dr_hat(lv_obj_t *p)
-{
-    rect(p, 26, 68, 98, 8, lv_color_hex(0x8B4513));
-    rect(p, 40, 22, 70, 48, lv_color_hex(0xE74C3C));
-    rect(p, 40, 22, 70, 6, lv_color_hex(0xFF69B4));
-    rect(p, 46, 30, 58, 3, lv_color_hex(0xFFFFFF));
-    circ(p, 75, 72, 4, lv_color_hex(0xFFFFFF));
-}
-
-static void dr_bed(lv_obj_t *p)
-{
-    rect(p, 14, 62, 122, 20, lv_color_hex(0xFFFFFF));
-    rect(p, 14, 34, 122, 32, lv_color_hex(0x3498DB));
-    rect(p, 18, 38, 36, 22, lv_color_hex(0xFFFFFF));
-    rect(p, 16, 82, 8, 18, lv_color_hex(0x8B4513));
-    rect(p, 126, 82, 8, 18, lv_color_hex(0x8B4513));
-    circ(p, 48, 48, 6, lv_color_hex(0xFF69B4));
-    circ(p, 60, 48, 6, lv_color_hex(0xFF69B4));
-    rect(p, 50, 68, 6, 4, lv_color_hex(0x8B4513));
-}
-
-static void dr_fish(lv_obj_t *p)
-{
-    rect(p, 24, 42, 72, 26, lv_color_hex(0x4A90D9));
-    circ(p, 96, 48, 16, lv_color_hex(0x4A90D9));
-    rect(p, 98, 32, 22, 30, lv_color_hex(0x4A90D9));
-    rect(p, 108, 38, 12, 18, lv_color_hex(0x3A7BC8));
-    circ(p, 40, 48, 6, lv_color_hex(0xFFFFFF));
-    circ(p, 40, 48, 4, lv_color_hex(0x222222));
-    rect(p, 46, 38, 30, 6, lv_color_hex(0x87CEEB));
-}
-
-static void dr_sun(lv_obj_t *p)
-{
-    rect(p, 62, 6, 6, 14, lv_color_hex(0xFFD700));
-    rect(p, 62, 90, 6, 14, lv_color_hex(0xFFD700));
-    rect(p, 16, 56, 14, 6, lv_color_hex(0xFFD700));
-    rect(p, 100, 56, 14, 6, lv_color_hex(0xFFD700));
-    rect(p, 28, 22, 6, 10, lv_color_hex(0xFFD700));
-    rect(p, 96, 22, 6, 10, lv_color_hex(0xFFD700));
-    rect(p, 28, 78, 6, 10, lv_color_hex(0xFFD700));
-    rect(p, 96, 78, 6, 10, lv_color_hex(0xFFD700));
-    circ(p, 65, 55, 24, lv_color_hex(0xFFD700));
-    circ(p, 65, 55, 18, lv_color_hex(0xFFF176));
-}
-
-static void dr_van(lv_obj_t *p)
-{
-    rect(p, 12, 30, 106, 40, lv_color_hex(0x3498DB));
-    rect(p, 50, 14, 56, 22, lv_color_hex(0x2980B9));
-    rect(p, 54, 18, 20, 14, lv_color_hex(0x87CEEB));
-    rect(p, 80, 18, 20, 14, lv_color_hex(0x87CEEB));
-    circ(p, 32, 72, 10, lv_color_hex(0x333333));
-    circ(p, 90, 72, 10, lv_color_hex(0x333333));
-    circ(p, 32, 72, 5, lv_color_hex(0x888888));
-    circ(p, 90, 72, 5, lv_color_hex(0x888888));
-    rect(p, 12, 44, 20, 10, lv_color_hex(0x87CEEB));
-}
-
-static void dr_jam(lv_obj_t *p)
-{
-    rect(p, 36, 36, 64, 48, lv_color_hex(0xFFFFFF));
-    rect(p, 30, 28, 76, 12, lv_color_hex(0xE74C3C));
-    rect(p, 36, 52, 64, 24, lv_color_hex(0xFF69B4));
-    rect(p, 40, 56, 10, 4, lv_color_hex(0xFFFFFF));
-    rect(p, 56, 56, 10, 4, lv_color_hex(0xFFFFFF));
-    rect(p, 72, 56, 10, 4, lv_color_hex(0xFFFFFF));
-    circ(p, 52, 68, 6, lv_color_hex(0xE74C3C));
-    circ(p, 78, 68, 6, lv_color_hex(0xE74C3C));
-}
+#define LVL3_COUNT 40
+#define LVL4_COUNT 40
+#define LVL5_COUNT 30
 
 // ---- Round data ----
 
 struct Round {
     const char *correct;
     const char *wrong;
-    void (*draw)(lv_obj_t *);
+    const char *img_path;
 };
 
-static const Round rounds[TOTAL_ROUNDS] = {
-    {"dog", "jog", dr_dog}, {"pig", "dig", dr_pig}, {"cat", "mat", dr_cat},
-    {"fox", "vex", dr_fox}, {"hen", "ten", dr_hen}, {"bug", "beg", dr_bug},
-    {"mug", "rug", dr_mug}, {"log", "fog", dr_log}, {"map", "rap", dr_map},
-    {"hat", "bat", dr_hat}, {"bed", "fed", dr_bed}, {"fish","dish",dr_fish},
-    {"sun", "run", dr_sun}, {"van", "man", dr_van}, {"jam", "ram", dr_jam},
+static const Round words_3lvl[LVL3_COUNT] = {
+    // original 20
+    {"dog", "jog", "S:/words/dog.bin"}, {"pig", "dig", "S:/words/pig.bin"},
+    {"cat", "mat", "S:/words/cat.bin"}, {"fox", "vex", "S:/words/fox.bin"},
+    {"hen", "ten", "S:/words/hen.bin"}, {"bug", "beg", "S:/words/bug.bin"},
+    {"mug", "rug", "S:/words/mug.bin"}, {"log", "fog", "S:/words/log.bin"},
+    {"map", "rap", "S:/words/map.bin"}, {"hat", "pat", "S:/words/hat.bin"},
+    {"bed", "fed", "S:/words/bed.bin"}, {"sun", "fun", "S:/words/sun.bin"},
+    {"van", "man", "S:/words/van.bin"}, {"cup", "pup", "S:/words/cup.bin"},
+    {"pot", "hot", "S:/words/pot.bin"}, {"bus", "mud", "S:/words/bus.bin"},
+    {"net", "pet", "S:/words/net.bin"}, {"cap", "gap", "S:/words/cap.bin"},
+    {"cow", "how", "S:/words/cow.bin"}, {"bee", "see", "S:/words/bee.bin"},
+    // +20
+    {"ant", "and", "S:/words/ant.bin"}, {"axe", "ask", "S:/words/axe.bin"},
+    {"boy", "joy", "S:/words/boy.bin"}, {"car", "far", "S:/words/car.bin"},
+    {"egg", "leg", "S:/words/egg.bin"}, {"fly", "fry", "S:/words/fly.bin"},
+    {"jam", "ham", "S:/words/jam.bin"}, {"jar", "bar", "S:/words/jar.bin"},
+    {"lip", "tip", "S:/words/lip.bin"}, {"mop", "hop", "S:/words/mop.bin"},
+    {"nut", "but", "S:/words/nut.bin"}, {"pan", "can", "S:/words/pan.bin"},
+    {"pie", "tie", "S:/words/pie.bin"}, {"pin", "win", "S:/words/pin.bin"},
+    {"rat", "sat", "S:/words/rat.bin"}, {"row", "bow", "S:/words/row.bin"},
+    {"run", "fun", "S:/words/run.bin"}, {"sea", "see", "S:/words/sea.bin"},
+    {"tap", "nap", "S:/words/tap.bin"}, {"top", "mop", "S:/words/top.bin"},
+};
+
+static const Round words_4lvl[LVL4_COUNT] = {
+    // original 20
+    {"fish","dish","S:/words/fish.bin"}, {"cake","bake","S:/words/cake.bin"},
+    {"book","look","S:/words/book.bin"}, {"bird","word","S:/words/bird.bin"},
+    {"lamp","camp","S:/words/lamp.bin"}, {"milk","silk","S:/words/milk.bin"},
+    {"nest","rest","S:/words/nest.bin"}, {"ring","sing","S:/words/ring.bin"},
+    {"sail","tail","S:/words/sail.bin"}, {"bell","sell","S:/words/bell.bin"},
+    {"door","floor","S:/words/door.bin"},{"hand","sand","S:/words/hand.bin"},
+    {"kite","bite","S:/words/kite.bin"}, {"sock","lock","S:/words/sock.bin"},
+    {"star","scar","S:/words/star.bin"}, {"moon","noon","S:/words/moon.bin"},
+    {"rain","pain","S:/words/rain.bin"}, {"tree","free","S:/words/tree.bin"},
+    {"wolf","woof","S:/words/wolf.bin"}, {"frog","fog", "S:/words/frog.bin"},
+    // +20
+    {"ball","call","S:/words/ball.bin"}, {"barn","warn","S:/words/barn.bin"},
+    {"bath","math","S:/words/bath.bin"}, {"bear","fear","S:/words/bear.bin"},
+    {"bike","like","S:/words/bike.bin"}, {"crab","grab","S:/words/crab.bin"},
+    {"duck","luck","S:/words/duck.bin"}, {"fire","wire","S:/words/fire.bin"},
+    {"food","mood","S:/words/food.bin"}, {"gift","lift","S:/words/gift.bin"},
+    {"goat","coat","S:/words/goat.bin"}, {"gold","mold","S:/words/gold.bin"},
+    {"king","wing","S:/words/king.bin"}, {"lion","line","S:/words/lion.bin"},
+    {"lock","dock","S:/words/lock.bin"}, {"nose","rose","S:/words/nose.bin"},
+    {"owl", "foul","S:/words/owl.bin"},  {"pear","tear","S:/words/pear.bin"},
+    {"ship","chip","S:/words/ship.bin"}, {"snow","blow","S:/words/snow.bin"},
+};
+
+static const Round words_5lvl[LVL5_COUNT] = {
+    // original 16
+    {"house","mouse","S:/words/house.bin"}, {"bread","thread","S:/words/bread.bin"},
+    {"candy","handy","S:/words/candy.bin"}, {"clock","block","S:/words/clock.bin"},
+    {"crown","brown","S:/words/crown.bin"}, {"grape","shape","S:/words/grape.bin"},
+    {"heart","smart","S:/words/heart.bin"}, {"lemon","demon","S:/words/lemon.bin"},
+    {"pizza","wizza","S:/words/pizza.bin"}, {"sheep","jeep", "S:/words/sheep.bin"},
+    {"tiger","lion", "S:/words/tiger.bin"}, {"train","plane","S:/words/train.bin"},
+    {"ghost","toast","S:/words/ghost.bin"}, {"mouse","house","S:/words/mouse.bin"},
+    {"ocean","motion","S:/words/ocean.bin"},{"onion","union","S:/words/onion.bin"},
+    // +14
+    {"apple","maple","S:/words/apple.bin"}, {"beach","reach","S:/words/beach.bin"},
+    {"brain","crane","S:/words/brain.bin"}, {"chair","chain","S:/words/chair.bin"},
+    {"cloud","loud", "S:/words/cloud.bin"}, {"happy","sappy","S:/words/happy.bin"},
+    {"horse","worse","S:/words/horse.bin"}, {"phone","tone", "S:/words/phone.bin"},
+    {"shell","bell", "S:/words/shell.bin"}, {"shirt","skirt","S:/words/shirt.bin"},
+    {"skate","gate", "S:/words/skate.bin"}, {"snake","snack","S:/words/snake.bin"},
+    {"whale","while","S:/words/whale.bin"}, {"wheat","cheat","S:/words/wheat.bin"},
 };
 
 // ---- State ----
 
+static const Round *cur_bank;
+static int cur_count;
 static lv_obj_t *parent_content;
 static int game_order[ROUNDS_PER_GAME];
 static int qn, score;
@@ -244,6 +106,8 @@ static lv_obj_t *fb_lab, *score_lab;
 static lv_obj_t *overlay;
 static lv_timer_t *adv_tmr;
 
+#define MAX_WORDS 40
+
 // ---- Helpers ----
 
 static void shuf(int a[], int n)
@@ -252,6 +116,16 @@ static void shuf(int a[], int n)
         int j = random(i + 1);
         int t = a[i]; a[i] = a[j]; a[j] = t;
     }
+}
+
+static void pick_rounds(void)
+{
+    int pool[MAX_WORDS];
+    for (int i = 0; i < cur_count; i++)
+        pool[i] = i;
+    shuf(pool, cur_count);
+    for (int i = 0; i < ROUNDS_PER_GAME; i++)
+        game_order[i] = pool[i];
 }
 
 // ---- Animations ----
@@ -291,7 +165,6 @@ static void pop_checkmark(void)
     lv_obj_set_style_text_font(l, &lv_font_montserrat_28, 0);
     lv_obj_center(l);
 
-    // Fade in — opacity does not require a layer buffer
     lv_obj_set_style_opa(ck, 0, 0);
     lv_anim_t a;
     lv_anim_init(&a);
@@ -337,13 +210,10 @@ static void on_choice(lv_event_t *e)
                 lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
                 lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
 
-                char stars[24];
+                char stars[16];
                 int n = (score * 5 + ROUNDS_PER_GAME / 2) / ROUNDS_PER_GAME;
                 if (n < 1) n = 1;
-                int sp = 0;
-                for (int i = 0; i < n; i++)
-                    sp += snprintf(stars + sp, sizeof(stars) - sp, "\xE2\x98\x85 ");
-                stars[sp] = 0;
+                snprintf(stars, sizeof(stars), "%.*s", n, "***");
 
                 lv_obj_t *sl = lv_label_create(overlay);
                 lv_label_set_text(sl, stars);
@@ -375,7 +245,7 @@ static void on_choice(lv_event_t *e)
                     lv_obj_del(overlay);
                     overlay = NULL;
                     qn = 0; score = 0;
-                    shuf(game_order, ROUNDS_PER_GAME);
+                    pick_rounds();
                     show_round();
                 }, LV_EVENT_CLICKED, NULL);
 
@@ -406,16 +276,18 @@ static void show_round(void)
 {
     locked = false;
 
-    const Round *r = &rounds[game_order[qn]];
+    const Round *r = &cur_bank[game_order[qn]];
 
     lv_obj_clean(pic_cont);
     lv_obj_set_style_bg_color(pic_cont, lv_color_hex(0xFFFFFF), 0);
-    r->draw(pic_cont);
+
+    lv_obj_t *img = lv_image_create(pic_cont);
+    lv_image_set_src(img, r->img_path);
+    lv_obj_center(img);
 
     int order[2] = {0, 1};
     shuf(order, 2);
-    correct_btn = 0;
-    if (order[0] == 0) { correct_btn = 0; } else { correct_btn = 1; }
+    correct_btn = order[0] == 0 ? 0 : 1;
 
     const char *t0 = order[0] == 0 ? r->correct : r->wrong;
     const char *t1 = order[1] == 0 ? r->correct : r->wrong;
@@ -430,6 +302,58 @@ static void show_round(void)
     char buf[16];
     snprintf(buf, sizeof(buf), "%d / %d", score, ROUNDS_PER_GAME);
     lv_label_set_text(score_lab, buf);
+}
+
+static void start_level(int level)
+{
+    if (level == 3)      { cur_bank = words_3lvl; cur_count = LVL3_COUNT; }
+    else if (level == 4) { cur_bank = words_4lvl; cur_count = LVL4_COUNT; }
+    else                 { cur_bank = words_5lvl; cur_count = LVL5_COUNT; }
+    qn = 0; score = 0;
+    pick_rounds();
+    lv_obj_del(overlay);
+    overlay = NULL;
+    show_round();
+}
+
+// ---- Level picker ----
+
+static void show_level_picker(void)
+{
+    overlay = lv_obj_create(parent_content);
+    lv_obj_remove_style_all(overlay);
+    lv_obj_set_size(overlay, 480, 276);
+    lv_obj_set_pos(overlay, 0, 0);
+    lv_obj_set_style_bg_color(overlay, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *tl = lv_label_create(overlay);
+    lv_label_set_text(tl, "Pick your level!");
+    lv_obj_set_style_text_font(tl, &lv_font_montserrat_28, 0);
+    lv_obj_set_style_text_color(tl, lv_color_hex(0x444444), 0);
+    lv_obj_align(tl, LV_ALIGN_TOP_MID, 0, 24);
+
+    static const char *labs[] = {"3 Letters", "4 Letters", "5 Letters"};
+    static const uint32_t colors[] = {0x2ECC71, 0x3498DB, 0xE74C3C};
+
+    for (int i = 0; i < 3; i++) {
+        lv_obj_t *btn = lv_btn_create(overlay);
+        lv_obj_set_size(btn, 280, 52);
+        lv_obj_set_style_bg_color(btn, lv_color_hex(colors[i]), 0);
+        lv_obj_set_style_radius(btn, 26, 0);
+        lv_obj_set_style_shadow_width(btn, 0, 0);
+        lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, 80 + i * 64);
+        lv_obj_add_event_cb(btn, [](lv_event_t *e) {
+            start_level((int)(intptr_t)lv_event_get_user_data(e));
+        }, LV_EVENT_CLICKED, (void *)(intptr_t)(i == 0 ? 3 : i == 1 ? 4 : 5));
+
+        lv_obj_t *ll = lv_label_create(btn);
+        lv_label_set_text(ll, labs[i]);
+        lv_obj_set_style_text_color(ll, lv_color_hex(0xFFFFFF), 0);
+        lv_obj_set_style_text_font(ll, &lv_font_montserrat_20, 0);
+        lv_obj_center(ll);
+    }
 }
 
 // ---- Entry ----
@@ -455,8 +379,8 @@ void app_word_spy_create(lv_obj_t *content)
 
     pic_cont = lv_obj_create(content);
     lv_obj_remove_style_all(pic_cont);
-    lv_obj_set_size(pic_cont, 160, 120);
-    lv_obj_align(pic_cont, LV_ALIGN_TOP_MID, 0, 32);
+    lv_obj_set_size(pic_cont, 128, 96);
+    lv_obj_align(pic_cont, LV_ALIGN_TOP_MID, 0, 16);
     lv_obj_set_style_bg_color(pic_cont, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_bg_opa(pic_cont, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(pic_cont, 12, 0);
@@ -468,7 +392,7 @@ void app_word_spy_create(lv_obj_t *content)
     btn1 = lv_btn_create(content);
     lv_obj_remove_style_all(btn1);
     lv_obj_set_size(btn1, bw, bh);
-    lv_obj_set_pos(btn1, bx, 178);
+    lv_obj_set_pos(btn1, bx, 130);
     lv_obj_set_style_bg_color(btn1, lv_color_hex(0x3498DB), 0);
     lv_obj_set_style_bg_opa(btn1, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn1, LV_RADIUS_CIRCLE, 0);
@@ -483,7 +407,7 @@ void app_word_spy_create(lv_obj_t *content)
     btn2 = lv_btn_create(content);
     lv_obj_remove_style_all(btn2);
     lv_obj_set_size(btn2, bw, bh);
-    lv_obj_set_pos(btn2, bx + bw + 20, 178);
+    lv_obj_set_pos(btn2, bx + bw + 20, 130);
     lv_obj_set_style_bg_color(btn2, lv_color_hex(0x3498DB), 0);
     lv_obj_set_style_bg_opa(btn2, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn2, LV_RADIUS_CIRCLE, 0);
@@ -499,10 +423,7 @@ void app_word_spy_create(lv_obj_t *content)
     lv_label_set_text(fb_lab, "");
     lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x444444), 0);
     lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_20, 0);
-    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 250);
+    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 205);
 
-    for (int i = 0; i < ROUNDS_PER_GAME; i++)
-        game_order[i] = i;
-    shuf(game_order, ROUNDS_PER_GAME);
-    show_round();
+    show_level_picker();
 }
