@@ -127,206 +127,39 @@ static void parse_sentence(const char *s, char *buf, int sz,
     *after = p + 3;
 }
 
-// ---- Drawing primitives ----
-
-static lv_obj_t *dr_circ(lv_obj_t *p, int x, int y, int r, uint32_t c)
-{
-    lv_obj_t *o = lv_obj_create(p);
-    lv_obj_remove_style_all(o);
-    lv_obj_set_size(o, r*2, r*2);
-    lv_obj_set_pos(o, x - r, y - r);
-    lv_obj_set_style_radius(o, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_bg_color(o, lv_color_hex(c), 0);
-    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(o, LV_OBJ_FLAG_SCROLLABLE);
-    return o;
-}
-
-static lv_obj_t *dr_rect(lv_obj_t *p, int x, int y, int w, int h, uint32_t c)
-{
-    lv_obj_t *o = lv_obj_create(p);
-    lv_obj_remove_style_all(o);
-    lv_obj_set_size(o, w, h);
-    lv_obj_set_pos(o, x, y);
-    lv_obj_set_style_bg_color(o, lv_color_hex(c), 0);
-    lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(o, 3, 0);
-    lv_obj_clear_flag(o, LV_OBJ_FLAG_SCROLLABLE);
-    return o;
-}
-
 // ---- Illustrations ----
 
 static void draw_illus(int id)
 {
     lv_obj_clean(ill_cont);
-    lv_obj_t *p = ill_cont;
 
-    switch (id) {
-    case ILL_DOG:
-        dr_circ(p, 24,16,12,0x8B4513);
-        dr_rect(p, 36,18,30,18,0x8B4513);
-        dr_rect(p, 38,36,4,12,0x8B4513);
-        dr_rect(p, 46,36,4,12,0x8B4513);
-        dr_rect(p, 54,36,4,12,0x8B4513);
-        dr_rect(p, 62,36,4,12,0x8B4513);
-        dr_rect(p, 66,16,3,14,0x8B4513);
-        dr_circ(p, 22,14,3,0x000000);
-        break;
-    case ILL_CAT:
-        dr_circ(p, 24,16,12,0xFF8C00);
-        dr_rect(p, 16,5,5,8,0xFF8C00);
-        dr_rect(p, 27,5,5,8,0xFF8C00);
-        dr_rect(p, 36,18,28,16,0xFF8C00);
-        dr_rect(p, 64,16,3,16,0xFF8C00);
-        dr_circ(p, 22,14,3,0x000000);
-        break;
-    case ILL_BIRD:
-        dr_rect(p, 32,16,28,14,0xFFD700);
-        dr_rect(p, 32,16,28,14,0xFFD700);
-        lv_obj_set_style_radius(dr_circ(p, 18,12,8,0xFFD700), LV_RADIUS_CIRCLE, 0);
-        dr_rect(p, 14,18,6,8,0xFF8C00);
-        dr_rect(p, 40,14,16,8,0xFFEB3B);
-        dr_rect(p, 60,16,10,10,0xFFD700);
-        dr_circ(p, 16,10,2,0x000000);
-        break;
-    case ILL_FISH:
-        dr_rect(p, 18,16,34,16,0x4A90D9);
-        lv_obj_set_style_radius(dr_circ(p, 46,20,8,0x4A90D9), 0, 1);
-        dr_rect(p, 52,14,14,20,0x4A90D9);
-        dr_circ(p, 22,18,3,0xFFFFFF);
-        dr_circ(p, 22,18,2,0x000000);
-        dr_circ(p, 14,8,3,0x87CEEB);
-        dr_circ(p, 20,4,2,0x87CEEB);
-        dr_circ(p, 10,12,2,0x87CEEB);
-        break;
-    case ILL_RABBIT:
-        dr_circ(p, 24,14,10,0xFFFFFF);
-        dr_rect(p, 18,0,5,16,0xFFFFFF);
-        dr_rect(p, 25,2,5,14,0xFFFFFF);
-        dr_rect(p, 36,16,24,16,0xFFFFFF);
-        dr_rect(p, 38,32,4,12,0xFFFFFF);
-        dr_rect(p, 48,32,4,12,0xFFFFFF);
-        dr_circ(p, 22,12,2,0x000000);
-        dr_circ(p, 26,12,2,0xFFB6C1);
-        break;
-    case ILL_SUN:
-        dr_rect(p, 35,4,4,10,0xFFD700);
-        dr_rect(p, 35,46,4,10,0xFFD700);
-        dr_rect(p, 4,35,10,4,0xFFD700);
-        dr_rect(p, 46,35,10,4,0xFFD700);
-        dr_rect(p, 10,10,4,8,0xFFD700);
-        dr_rect(p, 46,10,4,8,0xFFD700);
-        dr_rect(p, 10,42,4,8,0xFFD700);
-        dr_rect(p, 46,42,4,8,0xFFD700);
-        dr_circ(p, 28,28,16,0xFFD700);
-        break;
-    case ILL_STAR:
-        dr_circ(p, 36,24,18,0xFFD700);
-        dr_circ(p, 36,24,12,0xFFF176);
-        dr_circ(p, 36,24,6,0xFFFFFF);
-        break;
-    case ILL_TREE:
-        dr_rect(p, 36,32,6,22,0x8B4513);
-        dr_circ(p, 39,20,16,0x2ECC71);
-        dr_circ(p, 28,24,12,0x27AE60);
-        dr_circ(p, 50,24,12,0x27AE60);
-        break;
-    case ILL_FLOWER:
-        dr_rect(p, 34,32,4,20,0x2ECC71);
-        dr_circ(p, 26,24,8,0xFF69B4);
-        dr_circ(p, 42,24,8,0xFF69B4);
-        dr_circ(p, 34,16,8,0xFF69B4);
-        dr_circ(p, 18,28,8,0xFFB6C1);
-        dr_circ(p, 50,28,8,0xFFB6C1);
-        dr_circ(p, 34,24,6,0xFFD700);
-        break;
-    case ILL_BOOK:
-        dr_rect(p, 12,8,48,38,0x3498DB);
-        dr_rect(p, 16,12,40,34,0xFFFFFF);
-        dr_rect(p, 16,16,36,3,0xCCCCCC);
-        dr_rect(p, 16,22,36,3,0xCCCCCC);
-        dr_rect(p, 16,28,36,3,0xCCCCCC);
-        dr_rect(p, 16,34,36,3,0xCCCCCC);
-        break;
-    case ILL_BALL:
-        dr_circ(p, 36,26,16,0xE74C3C);
-        dr_rect(p, 34,10,4,32,0xFFFFFF);
-        dr_rect(p, 20,24,32,4,0xFFFFFF);
-        break;
-    case ILL_CAR:
-        dr_rect(p, 12,14,42,18,0xE74C3C);
-        dr_rect(p, 24,6,22,12,0x3498DB);
-        dr_circ(p, 20,32,6,0x333333);
-        dr_circ(p, 46,32,6,0x333333);
-        dr_circ(p, 20,32,3,0xFFFFFF);
-        dr_circ(p, 46,32,3,0xFFFFFF);
-        dr_rect(p, 14,16,8,6,0x87CEEB);
-        dr_rect(p, 42,16,8,6,0x87CEEB);
-        break;
-    case ILL_HOUSE:
-        dr_rect(p, 16,18,40,26,0xF5DEB3);
-        dr_rect(p, 16,6,40,14,0xE74C3C);
-        dr_rect(p, 32,28,10,16,0x8B4513);
-        dr_circ(p, 37,36,2,0xFFD700);
-        dr_rect(p, 20,22,10,8,0x87CEEB);
-        dr_rect(p, 22,24,6,6,0xFFFFFF);
-        break;
-    case ILL_BED:
-        dr_rect(p, 14,22,46,14,0xFFFFFF);
-        dr_rect(p, 14,8,46,16,0x3498DB);
-        dr_rect(p, 16,12,14,10,0xFFFFFF);
-        dr_rect(p, 14,36,4,10,0x8B4513);
-        dr_rect(p, 56,36,4,10,0x8B4513);
-        dr_circ(p, 34,10,3,0xFF69B4);
-        dr_circ(p, 42,10,3,0xFF69B4);
-        break;
-    case ILL_WATER:
-        dr_rect(p, 12,10,50,40,0x4A90D9);
-        dr_rect(p, 16,14,42,6,0x87CEEB);
-        dr_rect(p, 16,24,42,6,0x87CEEB);
-        dr_rect(p, 16,34,42,6,0x87CEEB);
-        dr_circ(p, 14,8,4,0xFFFFFF);
-        dr_circ(p, 8,18,3,0xFFFFFF);
-        dr_circ(p, 56,12,3,0xFFFFFF);
-        break;
-    case ILL_HAT:
-        dr_rect(p, 16,24,44,6,0x8B4513);
-        dr_rect(p, 24,6,24,20,0xE74C3C);
-        dr_rect(p, 24,6,24,4,0xFF69B4);
-        dr_circ(p, 36,28,2,0xFFFFFF);
-        break;
-    case ILL_CAKE:
-        dr_rect(p, 18,22,38,18,0xFF69B4);
-        dr_rect(p, 22,14,30,10,0xFFB6C1);
-        dr_rect(p, 36,7,4,10,0xFFFFFF);
-        dr_circ(p, 38,6,3,0xFFD700);
-        dr_rect(p, 14,40,46,4,0x8B4513);
-        dr_circ(p, 26,18,3,0xE74C3C);
-        dr_circ(p, 48,18,3,0xE74C3C);
-        break;
-    case ILL_ICE:
-        dr_rect(p, 20,28,32,20,0xD2B48C);
-        dr_rect(p, 24,32,24,14,0xC4A882);
-        dr_circ(p, 36,16,12,0xFFB6C1);
-        dr_circ(p, 28,20,8,0xFF69B4);
-        dr_circ(p, 44,18,7,0xFFFFFF);
-        break;
-    case ILL_COOKIE:
-        dr_circ(p, 36,26,18,0xD2B48C);
-        dr_circ(p, 28,20,4,0x8B4513);
-        dr_circ(p, 44,20,4,0x8B4513);
-        dr_circ(p, 36,16,3,0x8B4513);
-        dr_circ(p, 36,30,4,0x8B4513);
-        dr_circ(p, 28,32,3,0x8B4513);
-        dr_circ(p, 44,32,3,0x8B4513);
-        break;
-    case ILL_BANANA:
-        dr_rect(p, 14,18,40,16,0xFFD700);
-        lv_obj_set_style_radius(dr_circ(p, 34,24,12,0xFFD700), 0, 2);
-        dr_circ(p, 12,22,4,0x8B4513);
-        break;
-    default: break;
+    static const char *paths[] = {
+        "S:/words/dog.bin",      // ILL_DOG
+        "S:/words/cat.bin",      // ILL_CAT
+        "S:/words/bird.bin",     // ILL_BIRD
+        "S:/words/fish.bin",     // ILL_FISH
+        "S:/words/rabbit.bin",   // ILL_RABBIT
+        "S:/words/sun.bin",      // ILL_SUN
+        "S:/words/star.bin",     // ILL_STAR
+        "S:/words/tree.bin",     // ILL_TREE
+        "S:/words/flower.bin",   // ILL_FLOWER
+        "S:/words/book.bin",     // ILL_BOOK
+        "S:/words/ball.bin",     // ILL_BALL
+        "S:/words/car.bin",      // ILL_CAR
+        "S:/words/house.bin",    // ILL_HOUSE
+        "S:/words/bed.bin",      // ILL_BED
+        "S:/words/water.bin",    // ILL_WATER
+        "S:/words/hat.bin",      // ILL_HAT
+        "S:/words/cake.bin",     // ILL_CAKE
+        "S:/words/icecream.bin", // ILL_ICE
+        "S:/words/cookie.bin",   // ILL_COOKIE
+        "S:/words/banana.bin",   // ILL_BANANA
+    };
+
+    if (id >= 0 && id < ILL_COUNT) {
+        lv_obj_t *img = lv_image_create(ill_cont);
+        lv_image_set_src(img, paths[id]);
+        lv_obj_align(img, LV_ALIGN_CENTER, 0, -16);
     }
 }
 
@@ -629,7 +462,7 @@ void app_story_time_create(lv_obj_t *content)
 
     ill_cont = lv_obj_create(content);
     lv_obj_remove_style_all(ill_cont);
-    lv_obj_set_size(ill_cont, 140, 90);
+    lv_obj_set_size(ill_cont, 148, 110);
     lv_obj_align(ill_cont, LV_ALIGN_TOP_MID, 0, 100);
     lv_obj_add_flag(ill_cont, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ill_cont, LV_OBJ_FLAG_SCROLLABLE);
@@ -645,7 +478,7 @@ void app_story_time_create(lv_obj_t *content)
     lv_obj_set_style_bg_color(next_btn, lv_color_hex(0x3498DB), 0);
     lv_obj_set_style_radius(next_btn, 22, 0);
     lv_obj_set_style_shadow_width(next_btn, 0, 0);
-    lv_obj_align(next_btn, LV_ALIGN_TOP_MID, 0, 185);
+    lv_obj_align(next_btn, LV_ALIGN_TOP_MID, 0, 200);
     lv_obj_add_flag(next_btn, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_event_cb(next_btn, on_next, LV_EVENT_CLICKED, NULL);
 

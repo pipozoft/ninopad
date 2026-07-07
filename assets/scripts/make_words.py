@@ -129,6 +129,11 @@ WORDS = {
     # +14 more
     "apple":  {"cp": "1F34E", "wrong": "maple",  "level": 5},
     "beach":  {"cp": "1F3D6", "wrong": "reach",  "level": 5},
+    "rabbit": {"cp": "1F430", "wrong": "habit",  "level": 5},
+    "flower": {"cp": "1F490", "wrong": "tower",  "level": 5},
+    "water":  {"cp": "1F4A7", "wrong": "waiter", "level": 5},
+    "icecream":{"cp": "1F366", "wrong": "icepick","level": 5},
+    "cookie": {"cp": "1F36A", "wrong": "rookie", "level": 5},
     "brain":  {"cp": "1F9E0", "wrong": "crane",  "level": 5},
     "chair":  {"cp": "1FA91", "wrong": "chain",  "level": 5},
     "cloud":  {"cp": "2601",  "wrong": "loud",   "level": 5},

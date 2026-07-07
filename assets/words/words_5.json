@@ -108,6 +108,36 @@
     "img": "S:/words/beach.bin"
   },
   {
+    "correct": "rabbit",
+    "wrong": "habit",
+    "level": 5,
+    "img": "S:/words/rabbit.bin"
+  },
+  {
+    "correct": "flower",
+    "wrong": "tower",
+    "level": 5,
+    "img": "S:/words/flower.bin"
+  },
+  {
+    "correct": "water",
+    "wrong": "waiter",
+    "level": 5,
+    "img": "S:/words/water.bin"
+  },
+  {
+    "correct": "icecream",
+    "wrong": "icepick",
+    "level": 5,
+    "img": "S:/words/icecream.bin"
+  },
+  {
+    "correct": "cookie",
+    "wrong": "rookie",
+    "level": 5,
+    "img": "S:/words/cookie.bin"
+  },
+  {
     "correct": "brain",
     "wrong": "crane",
     "level": 5,
