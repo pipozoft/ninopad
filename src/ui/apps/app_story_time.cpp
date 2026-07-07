@@ -9,8 +9,8 @@
 enum Illus {
     ILL_DOG, ILL_CAT, ILL_BIRD, ILL_FISH, ILL_RABBIT, ILL_SUN,
     ILL_STAR, ILL_TREE, ILL_FLOWER, ILL_BOOK, ILL_BALL, ILL_CAR,
-    ILL_HOUSE, ILL_BED, ILL_WATER, ILL_HAT, ILL_CAKE, ILL_ICE,
-    ILL_COOKIE, ILL_BANANA, ILL_COUNT
+    ILL_HOUSE, ILL_BED, ILL_TOOTH, ILL_HAT, ILL_CAKE, ILL_ICE,
+    ILL_COOKIE, ILL_BANANA, ILL_PIZZA, ILL_COUNT
 };
 
 struct Question {
@@ -29,7 +29,7 @@ static const Question L1[] = {
     {"A fish can ___.",    "swim", "fly",   "jump", 0, ILL_FISH},
     {"The sun is ___.",    "hot",  "little","blue", 0, ILL_SUN},
     {"I like to ___.",     "play", "run",   "see",  0, ILL_BALL},
-    {"My ___ is red.",     "ball", "cat",   "book", 0, ILL_BALL},
+    {"My ___ is white.",     "ball", "cat",   "book", 0, ILL_BALL},
     {"I see a ___.",       "car",  "dog",   "tree", 0, ILL_CAR},
     {"Look at the ___.",   "flower","bird", "fish", 0, ILL_FLOWER},
     {"The star is ___.",   "bright","big",  "small",0, ILL_STAR},
@@ -43,16 +43,16 @@ static const Question L1[] = {
 
 // ---- Level 2: Intermediate ----
 static const Question L2[] = {
-    {"She ___ a red ball.",     "has",  "like",  "sees",  0, ILL_BALL},
+    {"She ___ a soccer ball.",     "has",  "like",  "sees",  0, ILL_BALL},
     {"The dog can ___ fast.",   "run",  "eat",   "sleep", 0, ILL_DOG},
     {"He ___ to read.",         "likes","goes",  "sees",  0, ILL_BOOK},
     {"The fish lives in ___.",  "water","a bowl","the sea",0, ILL_FISH},
     {"We ___ to the store.",    "go",   "run",   "see",   0, ILL_CAR},
     {"The rabbit ___ fast.",    "hops", "runs",  "eats",  0, ILL_RABBIT},
-    {"Dad makes ___ for us.",   "pizza","cake",  "cookies",0, ILL_CAKE},
+    {"Dad makes ___ for us.",   "pizza","cake",  "cookies",0, ILL_PIZZA},
     {"She ___ on her bed.",     "sleeps","reads","jumps", 0, ILL_BED},
     {"He ___ with his ball.",   "plays","runs",  "eats",  0, ILL_BALL},
-    {"I ___ my teeth.",         "brush","see",   "like",  0, ILL_WATER},
+    {"I ___ my teeth.",         "brush","see",   "like",  0, ILL_TOOTH},
     {"The sun is very ___.",    "bright","big",  "hot",   0, ILL_SUN},
     {"We ___ cookies.",         "eat",  "make",  "like",  0, ILL_COOKIE},
     {"The cat ___ on the bed.", "sleeps","jumps","sits",  0, ILL_CAT},
@@ -65,11 +65,11 @@ static const Question L2[] = {
 // ---- Level 3: Advanced ----
 static const Question L3[] = {
     {"The bird can fly ___.",     "high", "fast", "away",   0, ILL_BIRD},
-    {"I brush my ___ every day.", "teeth","hair", "cat",    0, ILL_WATER},
+    {"I brush my ___ every day.", "teeth","hair", "cat",    0, ILL_TOOTH},
     {"She goes to ___ every day.","school","bed", "home",   0, ILL_BOOK},
     {"A fish lives in the ___.",  "ocean","pond", "bowl",   0, ILL_FISH},
     {"The rabbit ___ very fast.", "hops", "runs", "jumps",  0, ILL_RABBIT},
-    {"We ___ milk with dinner.",  "drink","eat",  "have",   0, ILL_WATER},
+    {"We ___ milk with dinner.",  "drink","eat",  "have",   0, ILL_TOOTH},
     {"She puts on her ___.",      "shoes","hat",  "coat",   0, ILL_HAT},
     {"The stars ___ at night.",   "shine","come", "move",   0, ILL_STAR},
     {"My hat is on the ___.",     "table","bed",  "floor",  0, ILL_HAT},
@@ -148,18 +148,19 @@ static void draw_illus(int id)
         "S:/words/car.bin",      // ILL_CAR
         "S:/words/house.bin",    // ILL_HOUSE
         "S:/words/bed.bin",      // ILL_BED
-        "S:/words/water.bin",    // ILL_WATER
+        "S:/words/tooth.bin",    // ILL_TOOTH
         "S:/words/hat.bin",      // ILL_HAT
         "S:/words/cake.bin",     // ILL_CAKE
         "S:/words/icecream.bin", // ILL_ICE
         "S:/words/cookie.bin",   // ILL_COOKIE
         "S:/words/banana.bin",   // ILL_BANANA
+        "S:/words/pizza.bin",    // ILL_PIZZA
     };
 
     if (id >= 0 && id < ILL_COUNT) {
         lv_obj_t *img = lv_image_create(ill_cont);
         lv_image_set_src(img, paths[id]);
-        lv_obj_align(img, LV_ALIGN_CENTER, 0, -16);
+        lv_obj_center(img);
     }
 }
 
@@ -302,10 +303,7 @@ static void next_q(void)
         char stars[16];
         int n = (score * 5 + Q_PER_GAME / 2) / Q_PER_GAME;
         if (n < 1) n = 1;
-        int p = 0;
-        for (int i = 0; i < n; i++)
-            p += snprintf(stars + p, sizeof(stars) - p, "\xE2\x98\x85 ");
-        stars[p] = 0;
+        snprintf(stars, sizeof(stars), "%.*s", n, "***");
 
         lv_obj_t *sl = lv_label_create(overlay);
         lv_label_set_text(sl, stars);
@@ -463,7 +461,7 @@ void app_story_time_create(lv_obj_t *content)
     ill_cont = lv_obj_create(content);
     lv_obj_remove_style_all(ill_cont);
     lv_obj_set_size(ill_cont, 148, 110);
-    lv_obj_align(ill_cont, LV_ALIGN_TOP_MID, 0, 100);
+    lv_obj_align(ill_cont, LV_ALIGN_TOP_MID, 0, 84);
     lv_obj_add_flag(ill_cont, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ill_cont, LV_OBJ_FLAG_SCROLLABLE);
 

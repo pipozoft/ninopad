@@ -120,10 +120,10 @@
     "img": "S:/words/flower.bin"
   },
   {
-    "correct": "water",
-    "wrong": "waiter",
+    "correct": "tooth",
+    "wrong": "booth",
     "level": 5,
-    "img": "S:/words/water.bin"
+    "img": "S:/words/tooth.bin"
   },
   {
     "correct": "icecream",
