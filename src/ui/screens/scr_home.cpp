@@ -217,7 +217,5 @@ void scr_home_create(lv_obj_t *scr)
     status_timer = lv_timer_create(update_status_cb, 5000, NULL);
     update_status_cb(status_timer);
 
-    lv_sysmon_hide_performance(lv_display_get_default());
-
     lv_obj_invalidate(scr);
 }

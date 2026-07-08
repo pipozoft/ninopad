@@ -53,7 +53,7 @@ WORDS = {
     "car":  {"cp": "1F697", "wrong": "far", "level": 3},
     "egg":  {"cp": "1F95A", "wrong": "leg", "level": 3},
     "fly":  {"cp": "1FAB0", "wrong": "fry", "level": 3},
-    "jam":  {"cp": "1FAD0", "wrong": "ham", "level": 3},
+    "jam":  {"cp": "1FAD9-200D-1F7E9", "wrong": "ham", "level": 3},
     "jar":  {"cp": "1FAD9", "wrong": "bar", "level": 3},
     "lip":  {"cp": "1F444", "wrong": "tip", "level": 3},
     "mop":  {"cp": "1F9F9", "wrong": "hop", "level": 3},

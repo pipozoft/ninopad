@@ -21,6 +21,7 @@
 #include "utils/sd_utils.h"
 #include "utils/wifi_utils.h"
 #include "storage/sd_fs_drv.h"
+#include "debugging/sysmon/lv_sysmon.h"
 
 #ifndef NINO_TZ_OFFSET
 #define NINO_TZ_OFFSET -5
@@ -87,6 +88,7 @@ void setup(void)
 #endif
 
     nino_display_init();
+    lv_sysmon_hide_performance(lv_display_get_default());
     NINO_TOUCH_INIT();
     lv_indev_t *indev = lv_indev_create();
     lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);

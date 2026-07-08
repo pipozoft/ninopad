@@ -22,13 +22,13 @@ struct Round {
 static const Round words_3lvl[LVL3_COUNT] = {
     // original 20
     {"dog", "jog", "S:/words/dog.bin"}, {"pig", "dig", "S:/words/pig.bin"},
-    {"cat", "mat", "S:/words/cat.bin"}, {"fox", "vex", "S:/words/fox.bin"},
+    {"cat", "mat", "S:/words/cat.bin"}, {"fox", "box", "S:/words/fox.bin"},
     {"hen", "ten", "S:/words/hen.bin"}, {"bug", "beg", "S:/words/bug.bin"},
     {"mug", "rug", "S:/words/mug.bin"}, {"log", "fog", "S:/words/log.bin"},
     {"map", "rap", "S:/words/map.bin"}, {"hat", "pat", "S:/words/hat.bin"},
     {"bed", "fed", "S:/words/bed.bin"}, {"sun", "fun", "S:/words/sun.bin"},
     {"van", "man", "S:/words/van.bin"}, {"cup", "pup", "S:/words/cup.bin"},
-    {"pot", "hot", "S:/words/pot.bin"}, {"bus", "mud", "S:/words/bus.bin"},
+    {"pot", "hot", "S:/words/pot.bin"}, {"bus", "pus", "S:/words/bus.bin"},
     {"net", "pet", "S:/words/net.bin"}, {"cap", "gap", "S:/words/cap.bin"},
     {"cow", "how", "S:/words/cow.bin"}, {"bee", "see", "S:/words/bee.bin"},
     // +20
@@ -75,7 +75,7 @@ static const Round words_5lvl[LVL5_COUNT] = {
     {"candy","handy","S:/words/candy.bin"}, {"clock","block","S:/words/clock.bin"},
     {"crown","brown","S:/words/crown.bin"}, {"grape","shape","S:/words/grape.bin"},
     {"heart","smart","S:/words/heart.bin"}, {"lemon","demon","S:/words/lemon.bin"},
-    {"pizza","wizza","S:/words/pizza.bin"}, {"sheep","jeep", "S:/words/sheep.bin"},
+    {"pizza","pita","S:/words/pizza.bin"}, {"sheep","jeep", "S:/words/sheep.bin"},
     {"tiger","lion", "S:/words/tiger.bin"}, {"train","plane","S:/words/train.bin"},
     {"ghost","toast","S:/words/ghost.bin"}, {"mouse","house","S:/words/mouse.bin"},
     {"ocean","motion","S:/words/ocean.bin"},{"onion","union","S:/words/onion.bin"},
@@ -423,7 +423,7 @@ void app_word_spy_create(lv_obj_t *content)
     lv_label_set_text(fb_lab, "");
     lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x444444), 0);
     lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_20, 0);
-    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 205);
+    lv_obj_align(fb_lab, LV_ALIGN_TOP_MID, 0, 224);
 
     show_level_picker();
 }
