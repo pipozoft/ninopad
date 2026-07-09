@@ -77,32 +77,32 @@
  *================*/
 #define LV_USE_ANIMIMG    0
 #define LV_USE_ARC        0
-#define LV_USE_BAR        1
+#define LV_USE_BAR        0
 #define LV_USE_BTN        1
-#define LV_USE_BTNMATRIX  1
+#define LV_USE_BTNMATRIX  0
 #define LV_USE_CANVAS     0
 #define LV_USE_CHECKBOX   0
-#define LV_USE_DROPDOWN   1
+#define LV_USE_DROPDOWN   0
 #define LV_USE_IMG        1
 #define LV_USE_IMGBUTTON  0
 #define LV_USE_KEYBOARD   1
 #define LV_USE_LABEL      1
 #define LV_USE_LED        0
 #define LV_USE_LINE       1
-#define LV_USE_LIST       1
+#define LV_USE_LIST       0
 #define LV_USE_MENU       0
 #define LV_USE_METER      0
-#define LV_USE_MSGBOX     1
+#define LV_USE_MSGBOX     0
 #define LV_USE_ROLLER     0
 #define LV_USE_SCALE      0
-#define LV_USE_SLIDER     1
+#define LV_USE_SLIDER     0
 #define LV_USE_SPAN       0
 #define LV_USE_SPINBOX    0
 #define LV_USE_SPINNER    0
-#define LV_USE_SWITCH     1
+#define LV_USE_SWITCH     0
 #define LV_USE_TEXTAREA   1
 #define LV_USE_TABLE      0
-#define LV_USE_TABVIEW    1
+#define LV_USE_TABVIEW    0
 #define LV_USE_TILEVIEW   0
 #define LV_USE_WIN        0
 #define LV_USE_CHART      0
@@ -135,13 +135,13 @@
 #define LV_CACHE_DEF_SIZE       0
 #define LV_IMAGE_HEADER_CACHE_DEF_CNT 0
 
-#define LV_DRAW_SW_SUPPORT_L8 1
-#define LV_DRAW_SW_SUPPORT_I1 1
-#define LV_DRAW_SW_SUPPORT_AL88 1
-#define LV_DRAW_SW_SUPPORT_ARGB8888 1
-#define LV_DRAW_SW_SUPPORT_XRGB8888 1
+#define LV_DRAW_SW_SUPPORT_L8 0
+#define LV_DRAW_SW_SUPPORT_I1 0
+#define LV_DRAW_SW_SUPPORT_AL88 0
+#define LV_DRAW_SW_SUPPORT_ARGB8888 0
+#define LV_DRAW_SW_SUPPORT_XRGB8888 0
 #define LV_DRAW_SW_SUPPORT_RGB565 1
-#define LV_DRAW_SW_SUPPORT_RGB888 1
+#define LV_DRAW_SW_SUPPORT_RGB888 0
 
 #define LV_DRAW_SW_CLOBBER_BITS_DITHER 4
 
