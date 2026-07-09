@@ -185,7 +185,7 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_add_event_cb(next_btn, on_next, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *next_lab = lv_label_create(next_btn);
-    lv_label_set_text(next_lab, LV_SYMBOL_NEXT);
+    lv_label_set_text(next_lab, "Next");
     lv_obj_set_style_text_color(next_lab, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(next_lab, &lv_font_montserrat_16, 0);
     lv_obj_center(next_lab);
@@ -200,7 +200,7 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_add_event_cb(clear_btn, on_clear, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *clear_lab = lv_label_create(clear_btn);
-    lv_label_set_text(clear_lab, LV_SYMBOL_TRASH);
+    lv_label_set_text(clear_lab, "Clear");
     lv_obj_set_style_text_color(clear_lab, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(clear_lab, &lv_font_montserrat_16, 0);
     lv_obj_center(clear_lab);

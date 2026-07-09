@@ -203,6 +203,31 @@ void app_my_name_create(lv_obj_t *content)
     lv_obj_set_style_text_color(name_lab, lv_color_hex(0x222222), 0);
     lv_obj_set_style_text_font(name_lab, &lv_font_montserrat_16, 0);
 
+    // Spacer to push mode buttons right
+    lv_obj_t *nr_spacer = lv_obj_create(nr);
+    lv_obj_remove_style_all(nr_spacer);
+    lv_obj_set_flex_grow(nr_spacer, 1);
+    lv_obj_clear_flag(nr_spacer, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(nr_spacer, LV_OBJ_FLAG_CLICKABLE);
+
+    // Mode toggle pills (in name row, right side)
+    const char *mode_labels[2] = {"Draw", "Trace"};
+    for (int i = 0; i < 2; i++) {
+        mode_btn[i] = lv_btn_create(nr);
+        lv_obj_set_style_bg_color(mode_btn[i], lv_color_hex(0x3498DB), 0);
+        lv_obj_set_style_bg_opa(mode_btn[i], i == 0 ? LV_OPA_COVER : LV_OPA_30, 0);
+        lv_obj_set_size(mode_btn[i], 58, 28);
+        lv_obj_set_style_radius(mode_btn[i], 14, 0);
+        lv_obj_set_style_shadow_width(mode_btn[i], 0, 0);
+        lv_obj_set_style_margin_right(mode_btn[i], 4, 0);
+        lv_obj_add_event_cb(mode_btn[i], i == 0 ? on_mode_draw : on_mode_trace, LV_EVENT_CLICKED, NULL);
+        lv_obj_t *ml = lv_label_create(mode_btn[i]);
+        lv_label_set_text(ml, mode_labels[i]);
+        lv_obj_set_style_text_color(ml, lv_color_hex(0xFFFFFF), 0);
+        lv_obj_set_style_text_font(ml, &lv_font_montserrat_12, 0);
+        lv_obj_center(ml);
+    }
+
     // ---- Canvas area ----
     canvas = lv_obj_create(content);
     lv_obj_remove_style_all(canvas);
@@ -265,7 +290,7 @@ void app_my_name_create(lv_obj_t *content)
     lv_obj_set_style_margin_right(clear_btn, 4, 0);
     lv_obj_add_event_cb(clear_btn, on_clear, LV_EVENT_CLICKED, NULL);
     lv_obj_t *cl = lv_label_create(clear_btn);
-    lv_label_set_text(cl, "Clr");
+    lv_label_set_text(cl, "Clear");
     lv_obj_set_style_text_color(cl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(cl, &lv_font_montserrat_12, 0);
     lv_obj_center(cl);
@@ -275,31 +300,12 @@ void app_my_name_create(lv_obj_t *content)
     lv_obj_set_size(undo_btn, 52, 30);
     lv_obj_set_style_radius(undo_btn, 6, 0);
     lv_obj_set_style_shadow_width(undo_btn, 0, 0);
-    lv_obj_set_style_margin_right(undo_btn, 6, 0);
     lv_obj_add_event_cb(undo_btn, on_undo, LV_EVENT_CLICKED, NULL);
     lv_obj_t *ul = lv_label_create(undo_btn);
     lv_label_set_text(ul, "Undo");
     lv_obj_set_style_text_color(ul, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(ul, &lv_font_montserrat_12, 0);
     lv_obj_center(ul);
-
-    // Mode toggle pills
-    const char *mode_labels[2] = {"Draw", "Trace"};
-    for (int i = 0; i < 2; i++) {
-        mode_btn[i] = lv_btn_create(tb);
-        lv_obj_set_style_bg_color(mode_btn[i], lv_color_hex(0x3498DB), 0);
-        lv_obj_set_style_bg_opa(mode_btn[i], i == 0 ? LV_OPA_COVER : LV_OPA_30, 0);
-        lv_obj_set_size(mode_btn[i], 58, 30);
-        lv_obj_set_style_radius(mode_btn[i], 15, 0);
-        lv_obj_set_style_shadow_width(mode_btn[i], 0, 0);
-        lv_obj_set_style_margin_right(mode_btn[i], 4, 0);
-        lv_obj_add_event_cb(mode_btn[i], i == 0 ? on_mode_draw : on_mode_trace, LV_EVENT_CLICKED, NULL);
-        lv_obj_t *ml = lv_label_create(mode_btn[i]);
-        lv_label_set_text(ml, mode_labels[i]);
-        lv_obj_set_style_text_color(ml, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(ml, &lv_font_montserrat_12, 0);
-        lv_obj_center(ml);
-    }
 
     set_mode(true);
 }

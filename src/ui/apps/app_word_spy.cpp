@@ -323,7 +323,8 @@ static void show_level_picker(void)
     overlay = lv_obj_create(parent_content);
     lv_obj_remove_style_all(overlay);
     lv_obj_set_size(overlay, 480, 276);
-    lv_obj_set_pos(overlay, 0, 0);
+    lv_obj_align(overlay, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_pos(overlay, 0, -8);
     lv_obj_set_style_bg_color(overlay, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
     lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
