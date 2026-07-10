@@ -27,8 +27,6 @@ static const lv_color_t palette[] = {
 };
 static const char *color_names[] = {"RED", "BLUE", "YELLOW", "GREEN", "ORANGE"};
 
-static const lv_point_precise_t tri_pts[] = {{24, 4}, {4, 45}, {44, 45}, {24, 4}};
-
 // ---- State ----
 static lv_obj_t *parent_content;
 static int qn;
@@ -45,11 +43,10 @@ static int painted_total[TYPES];
 
 struct Shape {
     lv_obj_t *obj;
-    lv_obj_t *outline;
-    lv_obj_t *fill_line;
     int type;
     int orig_x;
     bool painted;
+    lv_color_t paint_color;
 };
 static Shape shapes[MAX_SHAPES];
 
@@ -88,6 +85,74 @@ static bool overlaps(int x, int y, int w, int h, int cnt)
 static lv_color_t darker(lv_color_t c)
 {
     return lv_color_darken(c, LV_OPA_30);
+}
+
+// ---- Custom shape drawing (scanline fill + midpoint ellipse) ----
+
+// Interpolate x along a line segment from (ax,ay) to (bx,by) at y-coordinate cy
+static int32_t interp_x(int32_t ax, int32_t ay, int32_t bx, int32_t by, int32_t cy)
+{
+    if (by == ay) return ax;
+    return ax + (bx - ax) * (cy - ay) / (by - ay);
+}
+
+// Draw a single horizontal line on the layer using lv_draw_rect
+static void draw_hline(lv_layer_t *layer, int32_t x1, int32_t x2, int32_t y,
+                        lv_color_t color, int32_t ox, int32_t oy)
+{
+    lv_draw_rect_dsc_t dsc;
+    lv_draw_rect_dsc_init(&dsc);
+    dsc.bg_color = color;
+    dsc.bg_opa = LV_OPA_COVER;
+
+    lv_area_t a;
+    a.x1 = x1 + ox;
+    a.y1 = y + oy;
+    a.x2 = x2 + ox;
+    a.y2 = y + oy;
+    lv_draw_rect(layer, &dsc, &a);
+}
+
+// Draw filled triangle using scanline fill algorithm
+static void draw_triangle_filled(lv_layer_t *layer, int32_t w, int32_t h,
+                                  lv_color_t color, int32_t ox, int32_t oy)
+{
+    int32_t x0 = w / 2,  y0 = h / 10;
+    int32_t x1 = 2,      y1 = h - 3;
+    int32_t x2 = w - 3,  y2 = h - 3;
+
+    for (int32_t y = y0; y <= y2; y++) {
+        int32_t xa, xb;
+        if (y <= y1)
+            xa = interp_x(x0, y0, x1, y1, y);
+        else
+            xa = x1;
+        if (y <= y2)
+            xb = interp_x(x0, y0, x2, y2, y);
+        else
+            xb = x2;
+        if (xa > xb) { int32_t t = xa; xa = xb; xb = t; }
+        if (xa < 0) xa = 0;
+        if (xb >= w) xb = w - 1;
+        draw_hline(layer, xa, xb, y, color, ox, oy);
+    }
+}
+
+// Draw filled ellipse using scanline fill
+static void draw_ellipse_filled(lv_layer_t *layer, int32_t cx, int32_t cy,
+                                 int32_t rx, int32_t ry, lv_color_t color,
+                                 int32_t ox, int32_t oy)
+{
+    if (rx <= 0 || ry <= 0) return;
+    int32_t ry2 = ry * ry;
+    int32_t rx2 = rx * rx;
+    for (int32_t y = -ry; y <= ry; y++) {
+        int32_t dy2 = y * y;
+        int32_t x_sq = (rx2 * (ry2 - dy2) + ry2 / 2) / ry2;
+        int32_t x = 0;
+        while (x * x < x_sq && x <= rx) x++;
+        draw_hline(layer, cx - x, cx + x, cy + y, color, ox, oy);
+    }
 }
 
 // ---- Level config ----
@@ -158,24 +223,6 @@ static void paint_anim_shape(lv_obj_t *obj, lv_color_t color)
     lv_anim_start(&a);
 }
 
-static void paint_triangle(Shape *s, lv_color_t color)
-{
-    lv_obj_set_style_line_color(s->outline, darker(color), 0);
-    lv_obj_set_style_line_color(s->fill_line, color, 0);
-    lv_obj_set_style_line_width(s->fill_line, 0, 0);
-    lv_obj_clear_flag(s->fill_line, LV_OBJ_FLAG_HIDDEN);
-
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, s->fill_line);
-    lv_anim_set_exec_cb(&a, [](void *var, int32_t v) {
-        lv_obj_set_style_line_width((lv_obj_t *)var, v, 0);
-    });
-    lv_anim_set_values(&a, 0, 30);
-    lv_anim_set_time(&a, 200);
-    lv_anim_start(&a);
-}
-
 static void wiggle_obj(lv_obj_t *obj, int orig_x)
 {
     lv_anim_t a;
@@ -199,33 +246,26 @@ static void wiggle_obj(lv_obj_t *obj, int orig_x)
 
 static void flash_wrong(Shape *s)
 {
-    if (s->type == T_TRIANGLE)
-        lv_obj_set_style_line_color(s->outline, lv_color_hex(0xE74C3C), 0);
-    else
-        lv_obj_set_style_border_color(s->obj, lv_color_hex(0xE74C3C), 0);
+    lv_obj_set_style_bg_color(s->obj, lv_color_hex(0xE74C3C), 0);
     wiggle_obj(s->obj, s->orig_x);
 }
 
 static void restore_shape(Shape *s)
 {
     if (s->painted) return;
-    if (s->type == T_TRIANGLE)
-        lv_obj_set_style_line_color(s->outline, lv_color_hex(0x999999), 0);
-    else
-        lv_obj_set_style_border_color(s->obj, lv_color_hex(0x999999), 0);
+    lv_obj_set_style_bg_color(s->obj, lv_color_hex(0xDDDDDD), 0);
 }
 
 static void paint_shape(Shape *s, lv_color_t color)
 {
     s->painted = true;
-    if (s->type == T_TRIANGLE)
-        paint_triangle(s, color);
-    else if (s->type == T_OVAL) {
-        lv_obj_set_style_bg_opa(s->obj, LV_OPA_COVER, 0);
-        lv_obj_set_style_bg_color(s->obj, color, 0);
-        lv_obj_set_style_border_color(s->obj, darker(color), 0);
-    } else
+    s->paint_color = color;
+    if (s->type == T_TRIANGLE || s->type == T_OVAL) {
+        // Custom-drawn shapes: invalidate to trigger redraw in filled state
+        lv_obj_invalidate(s->obj);
+    } else {
         paint_anim_shape(s->obj, color);
+    }
 }
 
 // ---- Game flow forward decl ----
@@ -240,13 +280,7 @@ static void create_shape(int i, lv_obj_t *parent)
     Shape *s = &shapes[i];
     s->type = t;
     s->painted = false;
-    s->outline = NULL;
-    s->fill_line = NULL;
-
-    if (t == T_OVAL) {
-        sw = 28;
-        sh = 28;
-    }
+    s->paint_color = lv_color_hex(0x999999);
 
     s->obj = lv_obj_create(parent);
     lv_obj_remove_style_all(s->obj);
@@ -258,33 +292,58 @@ static void create_shape(int i, lv_obj_t *parent)
     lv_obj_set_style_border_width(s->obj, 0, 0);
 
     if (t == T_OVAL) {
-        int ox = shape_x[i] + (shape_w[T_OVAL] - sw) / 2;
-        lv_obj_set_pos(s->obj, ox, shape_y[i]);
-        s->orig_x = ox;
-        lv_obj_set_style_radius(s->obj, LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_border_width(s->obj, 3, 0);
-        lv_obj_set_style_border_color(s->obj, lv_color_hex(0x999999), 0);
-        lv_obj_set_style_transform_scale_x(s->obj, 456, 0);
+        // True ellipse drawn via custom draw event
+        lv_obj_set_pos(s->obj, shape_x[i], shape_y[i]);
+
+        lv_obj_add_event_cb(s->obj, [](lv_event_t *e) {
+            lv_layer_t *layer = lv_event_get_layer(e);
+            int idx = (int)(intptr_t)lv_event_get_user_data(e);
+            Shape *sh = &shapes[idx];
+            lv_obj_t *obj = sh->obj;
+            int32_t w = lv_obj_get_width(obj);
+            int32_t h = lv_obj_get_height(obj);
+
+            lv_area_t coords;
+            lv_obj_get_coords(obj, &coords);
+            int32_t ox = coords.x1;
+            int32_t oy = coords.y1;
+
+            if (sh->painted) {
+                draw_ellipse_filled(layer, w / 2, h / 2, w / 2 - 2, h / 2 - 2, sh->paint_color, ox, oy);
+            } else {
+                draw_ellipse_filled(layer, w / 2, h / 2, w / 2 - 2, h / 2 - 2, lv_color_hex(0xDDDDDD), ox, oy);
+            }
+        }, LV_EVENT_DRAW_MAIN, (void *)(intptr_t)i);
+
     } else if (t == T_TRIANGLE) {
+        // True triangle drawn via custom draw event
         lv_obj_set_pos(s->obj, shape_x[i], shape_y[i]);
-        lv_obj_set_style_border_width(s->obj, 0, 0);
 
-        s->fill_line = lv_line_create(s->obj);
-        lv_obj_set_style_line_width(s->fill_line, 30, 0);
-        lv_obj_set_style_line_color(s->fill_line, lv_color_hex(0xFFD700), 0);
-        lv_obj_set_style_line_rounded(s->fill_line, false, 0);
-        lv_obj_add_flag(s->fill_line, LV_OBJ_FLAG_HIDDEN);
-        lv_line_set_points(s->fill_line, tri_pts, 4);
+        lv_obj_add_event_cb(s->obj, [](lv_event_t *e) {
+            lv_layer_t *layer = lv_event_get_layer(e);
+            int idx = (int)(intptr_t)lv_event_get_user_data(e);
+            Shape *sh = &shapes[idx];
+            lv_obj_t *obj = sh->obj;
+            int32_t w = lv_obj_get_width(obj);
+            int32_t h = lv_obj_get_height(obj);
 
-        s->outline = lv_line_create(s->obj);
-        lv_obj_set_style_line_width(s->outline, 4, 0);
-        lv_obj_set_style_line_color(s->outline, lv_color_hex(0x999999), 0);
-        lv_obj_set_style_line_rounded(s->outline, true, 0);
-        lv_line_set_points(s->outline, tri_pts, 4);
+            lv_area_t coords;
+            lv_obj_get_coords(obj, &coords);
+            int32_t ox = coords.x1;
+            int32_t oy = coords.y1;
+
+            if (sh->painted) {
+                draw_triangle_filled(layer, w, h, sh->paint_color, ox, oy);
+            } else {
+                draw_triangle_filled(layer, w, h, lv_color_hex(0xDDDDDD), ox, oy);
+            }
+        }, LV_EVENT_DRAW_MAIN, (void *)(intptr_t)i);
+
     } else {
+        // Circle, square, rectangle: filled gray initially
         lv_obj_set_pos(s->obj, shape_x[i], shape_y[i]);
-        lv_obj_set_style_border_width(s->obj, 3, 0);
-        lv_obj_set_style_border_color(s->obj, lv_color_hex(0x999999), 0);
+        lv_obj_set_style_bg_opa(s->obj, LV_OPA_COVER, 0);
+        lv_obj_set_style_bg_color(s->obj, lv_color_hex(0xDDDDDD), 0);
         if (t == T_CIRCLE)
             lv_obj_set_style_radius(s->obj, LV_RADIUS_CIRCLE, 0);
         else
@@ -361,8 +420,6 @@ static void clear_shapes(void)
         if (shapes[i].obj) {
             lv_obj_del(shapes[i].obj);
             shapes[i].obj = NULL;
-            shapes[i].outline = NULL;
-            shapes[i].fill_line = NULL;
         }
     }
     shape_count = 0;
