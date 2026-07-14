@@ -1,5 +1,7 @@
 # NinoPad — Touchscreen Learning Device for Kindergarteners
 
+![NinoPad](ninopad.jpg)
+
 LVGL v9 + ESP32 + ST7796 480×320 + XPT2046 resistive touch.
 
 ## Quick Start
@@ -280,3 +282,5 @@ Pin configuration: see `src/hal/touch_ft6236.cpp` (SDA=8, SCL=9).
 ## License
 
 MIT (per original ninopad.ino starter).
+
+![NinoPad Logo](/assets/images/logo.png)
