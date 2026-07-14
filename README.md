@@ -14,6 +14,26 @@ python3 -m venv .venv
 .venv/bin/pio device monitor    # 115200 baud
 ```
 
+## SD Card Setup
+
+The device requires a microSD card (FAT32) with the following structure:
+
+```
+sd_card/
+├── images/
+│   └── logo.bin          # Boot logo (320×240 RGB565A8)
+├── words/
+│   ├── ant.bin … wolf.bin  # 113 OpenMoji word images (128×96 RGB565A8)
+└── wifi_networks.json    # WiFi credentials
+```
+
+1. Format a microSD card as **FAT32** (MBR partition table)
+2. Copy the entire contents of [`sd_card_content/`](sd_card_content/) to the root of the card
+3. Edit `wifi_networks.json` with your WiFi name and password
+4. Insert the card into the CYD slot
+
+To regenerate word images from OpenMoji SVGs: `assets/scripts/make_words.py`
+
 ## Hardware
 
 | Component | Part | Interface |
