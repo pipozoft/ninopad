@@ -283,4 +283,4 @@ Pin configuration: see `src/hal/touch_ft6236.cpp` (SDA=8, SCL=9).
 
 MIT (per original ninopad.ino starter).
 
-![NinoPad Logo](/assets/images/logo.png)
+![NinoPad Logo](/assets/images/logo.svg)

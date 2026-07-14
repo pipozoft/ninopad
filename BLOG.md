@@ -161,6 +161,6 @@ Flash with `.venv/bin/pio run -e esp32 -t upload`.
 
 ---
 
-![NinoPad Logo](/assets/images/logo.png)
+![NinoPad Logo](/assets/images/logo.svg)
 
 *July 2026. Built for my kids, because a worksheet just isn't the same.*
