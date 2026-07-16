@@ -204,16 +204,18 @@ Raw ADC values are inverted on both axes (X decreases right, Y decreases down). 
 
 Mapped via `map(raw, edge_min, edge_max, display_max-1, 0)` then clamped to 0..max-1.
 
+### SPI DMA (Arduino_ESP32SPIDMA)
+
+The flush callback uses `Arduino_ESP32SPIDMA` which drives the SPI bus via the ESP32's DMA engine (instead of CPU register-pushing). SPI clock is 40MHz (up from 20MHz). Single draw buffer to preserve heap for OpenMoji image decode.
+
 ### Memory Layout
 
 | Region | Size | Notes |
 |--------|------|-------|
 | Static RAM | ~47KB | Code, globals, BSS |
-| Display buffer | 153KB | Single 160-row × 480px × 2B |
-| LVGL heap + misc | ~120KB | Remaining of 320KB total |
+| Display buffer | 57.6KB | Single 60-row × 480px × 2B |
+| LVGL heap + misc | ~153KB | Remaining of 320KB total |
 | **Total RAM** | **320KB** | No PSRAM |
-
-The display buffer is a single chunk (not dual). With 160 rows and 320 total visible rows, each frame requires 2 flushes (fallback to 60 rows if malloc fails = 6 flushes).
 
 ### OneFrame for ESP32 (Optional)
 
