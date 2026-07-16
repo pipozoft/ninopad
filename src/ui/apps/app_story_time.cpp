@@ -70,7 +70,7 @@ static const Question L3[] = {
     {"A fish lives in the ___.",  "ocean","pond", "happy",  0, ILL_FISH},
     {"The rabbit ___ very fast.", "hops", "runs", "happy",  0, ILL_RABBIT},
     {"We ___ milk with dinner.",  "drink","eat",  "have",   0, ILL_COOKIE},
-    {"She puts on her ___.",      "shoes","hat",  "happy",  0, ILL_HAT},
+    {"She puts on her ___.",      "hat","shoes",  "happy",  0, ILL_HAT},
     {"The stars ___ at night.",   "shine","come", "soon",   0, ILL_STAR},
     {"My hat is on the ___.",     "table","bed",  "soon",   0, ILL_HAT},
     {"The cat sits on the ___.",  "mat",  "chair","soon",   0, ILL_CAT},
@@ -482,7 +482,7 @@ void app_story_time_create(lv_obj_t *content)
     lv_obj_add_event_cb(next_btn, on_next, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *nl = lv_label_create(next_btn);
-    lv_label_set_text(nl, "Next " LV_SYMBOL_NEXT);
+    lv_label_set_text(nl, "Next");
     lv_obj_set_style_text_color(nl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(nl, &lv_font_montserrat_20, 0);
     lv_obj_center(nl);

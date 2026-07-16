@@ -6,11 +6,11 @@
 #define MAX_TRACE_PTS 300
 #define MAX_STROKES   16
 #define MAX_PATH_PTS  60
-#define PATH_TYPES    4
+#define PATH_TYPES    5
 
-typedef enum { PATH_STRAIGHT, PATH_ZIGZAG, PATH_WAVE, PATH_SPIRAL } path_type_t;
+typedef enum { PATH_STRAIGHT, PATH_ZIGZAG, PATH_WAVE, PATH_SPIRAL, PATH_STAR } path_type_t;
 
-static const char *path_names[] = {"Straight", "Zigzag", "Wave", "Spiral"};
+static const char *path_names[] = {"Straight", "Zigzag", "Wave", "Spiral", "Star"};
 
 static int current_path = 0;
 
@@ -99,7 +99,27 @@ static void gen_spiral(void)
     }
 }
 
-static void (* const gen_funcs[])(void) = {gen_straight, gen_zigzag, gen_wave, gen_spiral};
+static void gen_star(void)
+{
+    path_count = 0;
+    int cx = 180, cy = 100;
+    int outer_r = 90, inner_r = 38;
+    for (int i = 0; i < 5 && path_count < MAX_PATH_PTS - 1; i++) {
+        float a1 = (i * 72.0f - 90.0f) * 3.14159f / 180.0f;
+        float a2 = (i * 72.0f + 36.0f - 90.0f) * 3.14159f / 180.0f;
+        path_pts[path_count].x = cx + (int)(outer_r * cosf(a1));
+        path_pts[path_count].y = cy + (int)(outer_r * sinf(a1));
+        path_count++;
+        path_pts[path_count].x = cx + (int)(inner_r * cosf(a2));
+        path_pts[path_count].y = cy + (int)(inner_r * sinf(a2));
+        path_count++;
+    }
+    // Close the star: back to first point
+    path_pts[path_count] = path_pts[0];
+    path_count++;
+}
+
+static void (* const gen_funcs[])(void) = {gen_straight, gen_zigzag, gen_wave, gen_spiral, gen_star};
 
 static void draw_path(int idx)
 {
@@ -183,7 +203,7 @@ void app_snip_snip_create(lv_obj_t *content)
 
     // Title + path name row
     lv_obj_t *title = lv_label_create(content);
-    lv_label_set_text(title, "Trace along the dotted line!");
+    lv_label_set_text(title, "Trace along the line!");
     lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x555555), 0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 10, 6);

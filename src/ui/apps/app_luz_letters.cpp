@@ -119,6 +119,13 @@ static void on_trace_event(lv_event_t *e)
 
 // ---- Navigation ----
 
+static void on_prev(lv_event_t *e)
+{
+    (void)e;
+    current_idx = (current_idx - 1 + CHAR_COUNT) % CHAR_COUNT;
+    draw_char(current_idx);
+}
+
 static void on_next(lv_event_t *e)
 {
     (void)e;
@@ -137,7 +144,7 @@ void app_luz_letters_create(lv_obj_t *content)
 
     // Title + letter name row
     lv_obj_t *title = lv_label_create(content);
-    lv_label_set_text(title, "Trace the letter with your finger!");
+    lv_label_set_text(title, "Trace the letter!");
     lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x555555), 0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 10, 6);
@@ -175,11 +182,11 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_add_event_cb(trace_area, on_trace_event, LV_EVENT_PRESSED, NULL);
     lv_obj_add_event_cb(trace_area, on_trace_event, LV_EVENT_PRESSING, NULL);
 
-    // Next button — right side
+    // Next button — right side, top
     next_btn = lv_btn_create(content);
     lv_obj_set_style_bg_color(next_btn, lv_color_hex(0x3498DB), 0);
     lv_obj_set_size(next_btn, 80, 44);
-    lv_obj_align(next_btn, LV_ALIGN_CENTER, 185, 6);
+    lv_obj_align(next_btn, LV_ALIGN_CENTER, 185, -10);
     lv_obj_set_style_radius(next_btn, 22, 0);
     lv_obj_set_style_shadow_width(next_btn, 0, 0);
     lv_obj_add_event_cb(next_btn, on_next, LV_EVENT_CLICKED, NULL);
@@ -190,11 +197,26 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_set_style_text_font(next_lab, &lv_font_montserrat_16, 0);
     lv_obj_center(next_lab);
 
-    // Clear button — below next
+    // Prev button — below next
+    lv_obj_t *prev_btn = lv_btn_create(content);
+    lv_obj_set_style_bg_color(prev_btn, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_size(prev_btn, 80, 44);
+    lv_obj_align(prev_btn, LV_ALIGN_CENTER, 185, 44);
+    lv_obj_set_style_radius(prev_btn, 22, 0);
+    lv_obj_set_style_shadow_width(prev_btn, 0, 0);
+    lv_obj_add_event_cb(prev_btn, on_prev, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t *prev_lab = lv_label_create(prev_btn);
+    lv_label_set_text(prev_lab, "Prev");
+    lv_obj_set_style_text_color(prev_lab, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(prev_lab, &lv_font_montserrat_16, 0);
+    lv_obj_center(prev_lab);
+
+    // Clear button — below prev
     lv_obj_t *clear_btn = lv_btn_create(content);
     lv_obj_set_style_bg_color(clear_btn, lv_color_hex(0xE74C3C), 0);
     lv_obj_set_size(clear_btn, 80, 44);
-    lv_obj_align(clear_btn, LV_ALIGN_CENTER, 185, 64);
+    lv_obj_align(clear_btn, LV_ALIGN_CENTER, 185, 98);
     lv_obj_set_style_radius(clear_btn, 22, 0);
     lv_obj_set_style_shadow_width(clear_btn, 0, 0);
     lv_obj_add_event_cb(clear_btn, on_clear, LV_EVENT_CLICKED, NULL);
