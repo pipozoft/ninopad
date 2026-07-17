@@ -1,5 +1,6 @@
 #include "app_counting_jar.h"
 #include "nino_colors.h"
+#include "scr_congrats.h"
 #include <Arduino.h>
 
 #define TQ 10
@@ -95,51 +96,16 @@ static void next_q(void)
 {
     g_qn++;
     if (g_qn >= TQ) {
-        g_overlay = lv_obj_create(lv_obj_get_parent(g_eq_lab));
-        lv_obj_remove_style_all(g_overlay);
-        lv_obj_set_size(g_overlay, 480, 276);
-        lv_obj_align(g_overlay, LV_ALIGN_TOP_MID, 0, 0);
-        lv_obj_set_style_bg_color(g_overlay, lv_color_hex(0xF0FFF0), 0);
-        lv_obj_set_style_bg_opa(g_overlay, LV_OPA_COVER, 0);
-        lv_obj_clear_flag(g_overlay, LV_OBJ_FLAG_SCROLLABLE);
-
-        lv_obj_t *ml = lv_label_create(g_overlay);
-        lv_label_set_text(ml, g_correct_count == TQ ? "Perfect!\nAll correct!" :
-                          g_correct_count >= 7 ? "Great Job!" : "Good work!");
-        lv_obj_set_style_text_font(ml, &lv_font_montserrat_24, 0);
-        lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
-        lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_align(ml, LV_ALIGN_CENTER, 0, -40);
-
-        char stars[16];
-        int n = g_correct_count <= 3 ? 1 : g_correct_count <= 7 ? 2 : 3;
-        snprintf(stars, sizeof(stars), "%.*s", n, "***");
-        lv_obj_t *sl = lv_label_create(g_overlay);
-        lv_label_set_text(sl, stars);
-        lv_obj_set_style_text_font(sl, &lv_font_montserrat_28, 0);
-        lv_obj_set_style_text_color(sl, lv_color_hex(0xF1C40F), 0);
-        lv_obj_align(sl, LV_ALIGN_CENTER, 0, 0);
-
-        lv_obj_t *pb = lv_btn_create(g_overlay);
-        lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
-        lv_obj_set_size(pb, 160, 52);
-        lv_obj_set_style_radius(pb, 26, 0);
-        lv_obj_set_style_shadow_width(pb, 0, 0);
-        lv_obj_align(pb, LV_ALIGN_CENTER, 0, 50);
-        lv_obj_add_event_cb(pb, [](lv_event_t *) {
-            lv_obj_del(g_overlay);
-            g_overlay = nullptr;
-            g_qn = 0;
-            g_correct_count = 0;
-            generate_rounds();
-            start_q();
-        }, LV_EVENT_CLICKED, nullptr);
-
-        lv_obj_t *pl = lv_label_create(pb);
-        lv_label_set_text(pl, "Play Again");
-        lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-        lv_obj_center(pl);
+        const char *msg = g_correct_count == TQ ? "Perfect!\nAll correct!" :
+                          g_correct_count >= 7 ? "Great Job!" : "Good work!";
+        int stars = g_correct_count <= 3 ? 1 : g_correct_count <= 7 ? 2 : 3;
+        g_overlay = nino_congrats_create(lv_obj_get_parent(g_eq_lab),
+            msg, stars, NULL, NINO_COLOR_SUCCESS, 160, [](lv_event_t *) {
+                lv_obj_del(g_overlay); g_overlay = nullptr;
+                g_qn = 0; g_correct_count = 0;
+                generate_rounds();
+                start_q();
+            });
         return;
     }
     start_q();
@@ -153,9 +119,9 @@ static void on_btn_tap(lv_event_t *e)
     if (idx == g_correct_btn) {
         g_locked = true;
         g_correct_count++;
-        lv_obj_set_style_bg_color(g_btns[idx], lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_bg_color(g_btns[idx], NINO_COLOR_SUCCESS, 0);
         lv_label_set_text(g_fb_lab, "Correct!");
-        lv_obj_set_style_text_color(g_fb_lab, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_text_color(g_fb_lab, NINO_COLOR_SUCCESS, 0);
         g_timer = lv_timer_create([](lv_timer_t *t) {
             lv_timer_del(t);
             g_timer = nullptr;
@@ -163,9 +129,9 @@ static void on_btn_tap(lv_event_t *e)
         }, 900, nullptr);
         lv_timer_set_repeat_count(g_timer, 1);
     } else {
-        lv_obj_set_style_bg_color(g_btns[idx], lv_color_hex(0xE74C3C), 0);
+        lv_obj_set_style_bg_color(g_btns[idx], NINO_COLOR_DANGER, 0);
         lv_label_set_text(g_fb_lab, "Try again");
-        lv_obj_set_style_text_color(g_fb_lab, lv_color_hex(0xE74C3C), 0);
+        lv_obj_set_style_text_color(g_fb_lab, NINO_COLOR_DANGER, 0);
         g_timer = lv_timer_create([](lv_timer_t *t) {
             lv_timer_del(t);
             g_timer = nullptr;

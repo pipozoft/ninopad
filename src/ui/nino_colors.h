@@ -42,3 +42,9 @@
 #define NINO_COLOR_CONTENT_TINT lv_color_hex(0xF5F5F5)
 #define NINO_COLOR_DASH       lv_color_hex(0x9A9A9A)
 
+// Common semantic colors
+#define NINO_COLOR_PRIMARY    lv_color_hex(0x3498DB)
+#define NINO_COLOR_SUCCESS    lv_color_hex(0x27AE60)
+#define NINO_COLOR_DANGER     lv_color_hex(0xE74C3C)
+#define NINO_COLOR_STAR_GOLD  lv_color_hex(0xF1C40F)
+

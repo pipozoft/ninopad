@@ -1,6 +1,7 @@
 #include "app_settings.h"
 #include "storage/settings.h"
 #include "nino_colors.h"
+#include "utils/anim_utils.h"
 #include <Arduino.h>
 
 static lv_obj_t *parent_content;
@@ -65,21 +66,7 @@ static void on_verify(lv_event_t *e)
         create_settings_ui();
     } else {
         lv_obj_t *btn = (lv_obj_t *)lv_event_get_target(e);
-        lv_anim_t a;
-        lv_anim_init(&a);
-        lv_anim_set_var(&a, btn);
-        lv_anim_set_exec_cb(&a, [](void *v, int32_t x) {
-            lv_obj_set_x((lv_obj_t *)v, x);
-        });
-        lv_anim_set_values(&a, lv_obj_get_x(btn) - 6, lv_obj_get_x(btn) + 6);
-        lv_anim_set_time(&a, 30);
-        lv_anim_set_reverse_duration(&a, 30);
-        lv_anim_set_repeat_count(&a, 3);
-        lv_anim_set_ready_cb(&a, [](lv_anim_t *a) {
-            lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
-        });
-        lv_anim_set_user_data(&a, (void *)(intptr_t)lv_obj_get_x(btn));
-        lv_anim_start(&a);
+        nino_anim_shake(btn);
     }
 }
 

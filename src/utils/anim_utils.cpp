@@ -76,3 +76,23 @@ void nino_anim_fade_out(lv_obj_t *scr, uint32_t ms, lv_anim_completed_cb_t done_
     }
     lv_anim_start(&a);
 }
+
+void nino_anim_shake(lv_obj_t *obj)
+{
+    lv_coord_t ox = lv_obj_get_x(obj);
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, obj);
+    lv_anim_set_exec_cb(&a, [](void *var, int32_t v) {
+        lv_obj_set_x((lv_obj_t *)var, v);
+    });
+    lv_anim_set_values(&a, ox - 6, ox + 6);
+    lv_anim_set_time(&a, 40);
+    lv_anim_set_reverse_duration(&a, 40);
+    lv_anim_set_repeat_count(&a, 2);
+    lv_anim_set_user_data(&a, (void *)(intptr_t)ox);
+    lv_anim_set_completed_cb(&a, [](lv_anim_t *a) {
+        lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
+    });
+    lv_anim_start(&a);
+}

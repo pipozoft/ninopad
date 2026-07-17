@@ -20,6 +20,9 @@ void nino_anim_bounce(lv_obj_t *obj, uint32_t ms_duration, uint32_t scale_max_q8
 void nino_anim_fade_in(lv_obj_t *scr, uint32_t ms);
 void nino_anim_fade_out(lv_obj_t *scr, uint32_t ms, lv_anim_completed_cb_t done_cb, void *user_data);
 
+// Shake an object horizontally (6px, 40ms half-shake, 2 repeats). Restores x on completion.
+void nino_anim_shake(lv_obj_t *obj);
+
 #ifdef __cplusplus
 }
 #endif

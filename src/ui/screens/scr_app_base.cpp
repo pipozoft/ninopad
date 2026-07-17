@@ -36,6 +36,7 @@ void scr_app_base_create(lv_obj_t *scr, nino_app_id_t id)
     // Back circle (left)
     lv_obj_t *back = lv_obj_create(bar);
     lv_obj_add_style(back, &nino_style_back_btn, 0);
+    lv_obj_add_style(back, &nino_style_back_btn_pressed, LV_STATE_PRESSED);
     lv_obj_set_size(back, 36, 36);
     lv_obj_align(back, LV_ALIGN_LEFT_MID, 4, 0);
     lv_obj_clear_flag(back, LV_OBJ_FLAG_SCROLLABLE);

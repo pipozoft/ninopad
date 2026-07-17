@@ -1,5 +1,7 @@
 #include "app_shape_paint.h"
 #include "nino_colors.h"
+#include "utils/anim_utils.h"
+#include "scr_congrats.h"
 #include <Arduino.h>
 
 #define MAX_SHAPES   15
@@ -223,31 +225,12 @@ static void paint_anim_shape(lv_obj_t *obj, lv_color_t color)
     lv_anim_start(&a);
 }
 
-static void wiggle_obj(lv_obj_t *obj, int orig_x)
-{
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, obj);
-    lv_anim_set_exec_cb(&a, [](void *var, int32_t v) {
-        lv_obj_set_x((lv_obj_t *)var, v);
-    });
-    lv_anim_set_values(&a, orig_x - 6, orig_x + 6);
-    lv_anim_set_time(&a, 40);
-    lv_anim_set_reverse_duration(&a, 40);
-    lv_anim_set_repeat_count(&a, 2);
-    lv_anim_set_user_data(&a, (void *)(intptr_t)orig_x);
-    lv_anim_set_completed_cb(&a, [](lv_anim_t *a) {
-        lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
-    });
-    lv_anim_start(&a);
-}
-
 // ---- Shape actions ----
 
 static void flash_wrong(Shape *s)
 {
-    lv_obj_set_style_bg_color(s->obj, lv_color_hex(0xE74C3C), 0);
-    wiggle_obj(s->obj, s->orig_x);
+    lv_obj_set_style_bg_color(s->obj, NINO_COLOR_DANGER, 0);
+    nino_anim_shake(s->obj);
 }
 
 static void restore_shape(Shape *s)
@@ -397,7 +380,7 @@ static void create_shape(int i, lv_obj_t *parent)
             rst_idx = idx;
             flash_wrong(s2);
             lv_label_set_text(fb_lab, "Try Again");
-            lv_obj_set_style_text_color(fb_lab, lv_color_hex(0xE74C3C), 0);
+            lv_obj_set_style_text_color(fb_lab, NINO_COLOR_DANGER, 0);
             lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_16, 0);
 
             rst_tmr = lv_timer_create([](lv_timer_t *tm) {
@@ -464,65 +447,32 @@ static void start_round(void)
 
 static void show_summary(void)
 {
-    overlay = lv_obj_create(parent_content);
-    lv_obj_remove_style_all(overlay);
-    lv_obj_set_size(overlay, 480, 276);
-    lv_obj_set_pos(overlay, 0, 0);
-    lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
-    lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_t *ml = lv_label_create(overlay);
-    lv_label_set_text(ml, "Great Painting!\nYou painted all the shapes!");
-    lv_obj_set_style_text_font(ml, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(ml, LV_ALIGN_TOP_MID, 0, 16);
-
-    char summary[256];
+    char subtitle[256];
     int pos = 0;
     for (int i = 0; i < type_count; i++) {
         int t = active_types[i];
-        pos += snprintf(summary + pos, sizeof(summary) - pos,
+        pos += snprintf(subtitle + pos, sizeof(subtitle) - pos,
                         "%d %s  ", painted_total[t], type_singular[t]);
-        if (pos >= (int)sizeof(summary)) break;
+        if (pos >= (int)sizeof(subtitle)) break;
     }
-    lv_obj_t *sl = lv_label_create(overlay);
-    lv_label_set_text(sl, summary);
-    lv_obj_set_style_text_font(sl, &lv_font_montserrat_16, 0);
-    lv_obj_set_style_text_color(sl, lv_color_hex(0x444444), 0);
-    lv_obj_set_style_text_align(sl, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(sl, LV_ALIGN_TOP_MID, 0, 80);
 
-    lv_obj_t *pb = lv_btn_create(overlay);
-    lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_size(pb, 160, 52);
-    lv_obj_set_style_radius(pb, 26, 0);
-    lv_obj_set_style_shadow_width(pb, 0, 0);
-    lv_obj_align(pb, LV_ALIGN_TOP_MID, 0, 140);
-
-    lv_obj_add_event_cb(pb, [](lv_event_t *) {
-        lv_obj_del(overlay);
-        overlay = NULL;
-        clear_shapes();
-        for (int i = 0; i < TYPES; i++) painted_total[i] = 0;
-        generate_shapes();
-        for (int i = 0; i < shape_count; i++)
-            create_shape(i, parent_content);
-        for (int i = 0; i < type_count; i++) {
-            round_order[i] = i;
-            round_color[i] = palette[i];
-        }
-        shuf(round_order, type_count);
-        qn = 0;
-        start_round();
-    }, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t *pl = lv_label_create(pb);
-    lv_label_set_text(pl, "Play Again");
-    lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-    lv_obj_center(pl);
+    overlay = nino_congrats_create(parent_content,
+        "Great Painting!\nYou painted all the shapes!", 0, subtitle,
+        NINO_COLOR_SUCCESS, 160, [](lv_event_t *) {
+            lv_obj_del(overlay); overlay = NULL;
+            clear_shapes();
+            for (int i = 0; i < TYPES; i++) painted_total[i] = 0;
+            generate_shapes();
+            for (int i = 0; i < shape_count; i++)
+                create_shape(i, parent_content);
+            for (int i = 0; i < type_count; i++) {
+                round_order[i] = i;
+                round_color[i] = palette[i];
+            }
+            shuf(round_order, type_count);
+            qn = 0;
+            start_round();
+        });
 }
 
 static void next_q(void)

@@ -21,6 +21,7 @@ extern lv_style_t nino_style_header_bar;
 
 // Round back button (white circle, dark glyph).
 extern lv_style_t nino_style_back_btn;
+extern lv_style_t nino_style_back_btn_pressed;
 
 // Status bar text (small white on dark).
 extern lv_style_t nino_style_status_text;
@@ -29,6 +30,11 @@ extern lv_style_t nino_style_app_title_light;
 
 // Light tinted app content area.
 extern lv_style_t nino_style_content;
+
+// Shared button styles (color + 22px pill + no border/shadow).
+extern lv_style_t nino_style_btn_primary;
+extern lv_style_t nino_style_btn_success;
+extern lv_style_t nino_style_btn_danger;
 
 void nino_styles_init(void);
 

@@ -184,7 +184,7 @@ void app_luz_letters_create(lv_obj_t *content)
 
     // Next button — right side, top
     next_btn = lv_btn_create(content);
-    lv_obj_set_style_bg_color(next_btn, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(next_btn, NINO_COLOR_PRIMARY, 0);
     lv_obj_set_size(next_btn, 80, 44);
     lv_obj_align(next_btn, LV_ALIGN_CENTER, 185, -10);
     lv_obj_set_style_radius(next_btn, 22, 0);
@@ -199,7 +199,7 @@ void app_luz_letters_create(lv_obj_t *content)
 
     // Prev button — below next
     lv_obj_t *prev_btn = lv_btn_create(content);
-    lv_obj_set_style_bg_color(prev_btn, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(prev_btn, NINO_COLOR_PRIMARY, 0);
     lv_obj_set_size(prev_btn, 80, 44);
     lv_obj_align(prev_btn, LV_ALIGN_CENTER, 185, 44);
     lv_obj_set_style_radius(prev_btn, 22, 0);
@@ -214,7 +214,7 @@ void app_luz_letters_create(lv_obj_t *content)
 
     // Clear button — below prev
     lv_obj_t *clear_btn = lv_btn_create(content);
-    lv_obj_set_style_bg_color(clear_btn, lv_color_hex(0xE74C3C), 0);
+    lv_obj_set_style_bg_color(clear_btn, NINO_COLOR_DANGER, 0);
     lv_obj_set_size(clear_btn, 80, 44);
     lv_obj_align(clear_btn, LV_ALIGN_CENTER, 185, 98);
     lv_obj_set_style_radius(clear_btn, 22, 0);

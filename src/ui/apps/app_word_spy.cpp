@@ -2,6 +2,8 @@
 // https://openmoji.org/  -  the open-source emoji and icon project
 #include "app_word_spy.h"
 #include "nino_colors.h"
+#include "utils/anim_utils.h"
+#include "scr_congrats.h"
 #include <Arduino.h>
 #include <string.h>
 
@@ -130,24 +132,6 @@ static void pick_rounds(void)
 
 // ---- Animations ----
 
-static void shake_btn(lv_obj_t *btn)
-{
-    lv_coord_t ox = lv_obj_get_x(btn);
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, btn);
-    lv_anim_set_exec_cb(&a, [](void *v, int32_t x) { lv_obj_set_x((lv_obj_t *)v, x); });
-    lv_anim_set_values(&a, ox - 6, ox + 6);
-    lv_anim_set_time(&a, 30);
-    lv_anim_set_reverse_duration(&a, 30);
-    lv_anim_set_repeat_count(&a, 3);
-    lv_anim_set_user_data(&a, (void *)(intptr_t)ox);
-    lv_anim_set_ready_cb(&a, [](lv_anim_t *a) {
-        lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
-    });
-    lv_anim_start(&a);
-}
-
 static void pop_checkmark(void)
 {
     lv_obj_t *ck = lv_obj_create(pic_cont);
@@ -188,72 +172,32 @@ static void on_choice(lv_event_t *e)
 
     if (idx == correct_btn) {
         locked = true;
-        lv_obj_set_style_bg_color(idx == 0 ? btn1 : btn2, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_bg_color(idx == 0 ? btn1 : btn2, NINO_COLOR_SUCCESS, 0);
         pop_checkmark();
         score++;
         char buf[16];
         snprintf(buf, sizeof(buf), "%d / %d", score, ROUNDS_PER_GAME);
         lv_label_set_text(score_lab, buf);
         lv_label_set_text(fb_lab, "Found it!");
-        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_text_color(fb_lab, NINO_COLOR_SUCCESS, 0);
 
         adv_tmr = lv_timer_create([](lv_timer_t *tm) {
             lv_timer_del(tm);
             adv_tmr = NULL;
             qn++;
             if (qn >= ROUNDS_PER_GAME) {
-                overlay = lv_obj_create(parent_content);
-                lv_obj_remove_style_all(overlay);
-                lv_obj_set_size(overlay, 480, 276);
-                lv_obj_set_pos(overlay, 0, 0);
-                lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
-                lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
-                lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
-
-                char stars[16];
                 int n = (score * 5 + ROUNDS_PER_GAME / 2) / ROUNDS_PER_GAME;
                 if (n < 1) n = 1;
-                snprintf(stars, sizeof(stars), "%.*s", n, "***");
-
-                lv_obj_t *sl = lv_label_create(overlay);
-                lv_label_set_text(sl, stars);
-                lv_obj_set_style_text_font(sl, &lv_font_montserrat_28, 0);
-                lv_obj_set_style_text_color(sl, lv_color_hex(0xF1C40F), 0);
-                lv_obj_align(sl, LV_ALIGN_TOP_MID, 0, 24);
-
-                lv_obj_t *ml = lv_label_create(overlay);
-                lv_label_set_text(ml, "Case Closed!");
-                lv_obj_set_style_text_font(ml, &lv_font_montserrat_28, 0);
-                lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
-                lv_obj_align(ml, LV_ALIGN_TOP_MID, 0, 70);
-
-                lv_obj_t *ssl = lv_label_create(overlay);
                 char smsg[48];
                 snprintf(smsg, sizeof(smsg), "You found %d words!", score);
-                lv_label_set_text(ssl, smsg);
-                lv_obj_set_style_text_font(ssl, &lv_font_montserrat_16, 0);
-                lv_obj_set_style_text_color(ssl, lv_color_hex(0x666666), 0);
-                lv_obj_align(ssl, LV_ALIGN_TOP_MID, 0, 110);
-
-                lv_obj_t *pb = lv_btn_create(overlay);
-                lv_obj_set_style_bg_color(pb, lv_color_hex(0x3498DB), 0);
-                lv_obj_set_size(pb, 200, 52);
-                lv_obj_set_style_radius(pb, 26, 0);
-                lv_obj_set_style_shadow_width(pb, 0, 0);
-                lv_obj_align(pb, LV_ALIGN_TOP_MID, 0, 150);
-                lv_obj_add_event_cb(pb, [](lv_event_t *) {
-                    lv_obj_del(overlay);
-                    overlay = NULL;
-                    qn = 0; score = 0;
-                    pick_rounds();
-                    show_round();
-                }, LV_EVENT_CLICKED, NULL);
-
-                lv_obj_t *pl = lv_label_create(pb);
-                lv_label_set_text(pl, "Play Again");
-                lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-                lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-                lv_obj_center(pl);
+                overlay = nino_congrats_create(parent_content,
+                    "Case Closed!", n, smsg,
+                    NINO_COLOR_PRIMARY, 200, [](lv_event_t *) {
+                        lv_obj_del(overlay); overlay = NULL;
+                        qn = 0; score = 0;
+                        pick_rounds();
+                        show_round();
+                    });
             } else {
                 show_round();
             }
@@ -261,12 +205,12 @@ static void on_choice(lv_event_t *e)
         lv_timer_set_repeat_count(adv_tmr, 1);
     } else {
         lv_obj_t *btn = idx == 0 ? btn1 : btn2;
-        shake_btn(btn);
-        lv_obj_set_style_bg_color(btn, lv_color_hex(0xE74C3C), 0);
+        nino_anim_shake(btn);
+        lv_obj_set_style_bg_color(btn, NINO_COLOR_DANGER, 0);
         lv_timer_t *rt = lv_timer_create([](lv_timer_t *tm) {
             lv_timer_del(tm);
             int btn_idx = (int)(intptr_t)lv_timer_get_user_data(tm);
-            lv_obj_set_style_bg_color(btn_idx == 0 ? btn1 : btn2, lv_color_hex(0x3498DB), 0);
+            lv_obj_set_style_bg_color(btn_idx == 0 ? btn1 : btn2, NINO_COLOR_PRIMARY, 0);
         }, 400, (void *)(intptr_t)idx);
         lv_timer_set_repeat_count(rt, 1);
     }
@@ -294,8 +238,8 @@ static void show_round(void)
 
     lv_label_set_text(btn1_lab, t0);
     lv_label_set_text(btn2_lab, t1);
-    lv_obj_set_style_bg_color(btn1, lv_color_hex(0x3498DB), 0);
-    lv_obj_set_style_bg_color(btn2, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(btn1, NINO_COLOR_PRIMARY, 0);
+    lv_obj_set_style_bg_color(btn2, NINO_COLOR_PRIMARY, 0);
 
     lv_label_set_text(fb_lab, "");
 
@@ -394,7 +338,7 @@ void app_word_spy_create(lv_obj_t *content)
     lv_obj_remove_style_all(btn1);
     lv_obj_set_size(btn1, bw, bh);
     lv_obj_set_pos(btn1, bx, 130);
-    lv_obj_set_style_bg_color(btn1, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(btn1, NINO_COLOR_PRIMARY, 0);
     lv_obj_set_style_bg_opa(btn1, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn1, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_shadow_width(btn1, 0, 0);
@@ -409,7 +353,7 @@ void app_word_spy_create(lv_obj_t *content)
     lv_obj_remove_style_all(btn2);
     lv_obj_set_size(btn2, bw, bh);
     lv_obj_set_pos(btn2, bx + bw + 20, 130);
-    lv_obj_set_style_bg_color(btn2, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(btn2, NINO_COLOR_PRIMARY, 0);
     lv_obj_set_style_bg_opa(btn2, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn2, LV_RADIUS_CIRCLE, 0);
     lv_obj_set_style_shadow_width(btn2, 0, 0);

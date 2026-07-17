@@ -9,10 +9,14 @@ lv_style_t nino_style_app_btn;
 lv_style_t nino_style_app_btn_pressed;
 lv_style_t nino_style_header_bar;
 lv_style_t nino_style_back_btn;
+lv_style_t nino_style_back_btn_pressed;
 lv_style_t nino_style_status_text;
 lv_style_t nino_style_app_title_dark;
 lv_style_t nino_style_app_title_light;
 lv_style_t nino_style_content;
+lv_style_t nino_style_btn_primary;
+lv_style_t nino_style_btn_success;
+lv_style_t nino_style_btn_danger;
 
 void nino_styles_init(void)
 {
@@ -55,6 +59,10 @@ void nino_styles_init(void)
     lv_style_set_border_width(&nino_style_back_btn, 0);
     lv_style_set_pad_all(&nino_style_back_btn, 0);
 
+    lv_style_init(&nino_style_back_btn_pressed);
+    lv_style_set_bg_color(&nino_style_back_btn_pressed, lv_color_hex(0xCCCCCC));
+    lv_style_set_bg_opa(&nino_style_back_btn_pressed, LV_OPA_COVER);
+
     // ---- Status bar text ----
     lv_style_init(&nino_style_status_text);
     lv_style_set_text_color(&nino_style_status_text, NINO_COLOR_BAR_FG);
@@ -80,4 +88,26 @@ void nino_styles_init(void)
     lv_style_set_border_width(&nino_style_content, 0);
     lv_style_set_pad_all(&nino_style_content, 8);
     lv_style_set_radius(&nino_style_content, 0);
+
+    // ---- Shared button styles ----
+    lv_style_init(&nino_style_btn_primary);
+    lv_style_set_bg_color(&nino_style_btn_primary, NINO_COLOR_PRIMARY);
+    lv_style_set_radius(&nino_style_btn_primary, 22);
+    lv_style_set_shadow_width(&nino_style_btn_primary, 0);
+    lv_style_set_border_width(&nino_style_btn_primary, 0);
+    lv_style_set_bg_opa(&nino_style_btn_primary, LV_OPA_COVER);
+
+    lv_style_init(&nino_style_btn_success);
+    lv_style_set_bg_color(&nino_style_btn_success, NINO_COLOR_SUCCESS);
+    lv_style_set_radius(&nino_style_btn_success, 22);
+    lv_style_set_shadow_width(&nino_style_btn_success, 0);
+    lv_style_set_border_width(&nino_style_btn_success, 0);
+    lv_style_set_bg_opa(&nino_style_btn_success, LV_OPA_COVER);
+
+    lv_style_init(&nino_style_btn_danger);
+    lv_style_set_bg_color(&nino_style_btn_danger, NINO_COLOR_DANGER);
+    lv_style_set_radius(&nino_style_btn_danger, 22);
+    lv_style_set_shadow_width(&nino_style_btn_danger, 0);
+    lv_style_set_border_width(&nino_style_btn_danger, 0);
+    lv_style_set_bg_opa(&nino_style_btn_danger, LV_OPA_COVER);
 }

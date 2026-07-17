@@ -1,5 +1,6 @@
 #include "app_ten_frame.h"
 #include "nino_colors.h"
+#include "scr_congrats.h"
 #include <Arduino.h>
 
 #define SUN_MAX     20
@@ -143,7 +144,7 @@ static void start_q(void)
         char buf[8];
         snprintf(buf, sizeof(buf), "%d", bvals[i]);
         lv_label_set_text(blabs[i], buf);
-        lv_obj_set_style_bg_color(btns[i], lv_color_hex(0x3498DB), 0);
+        lv_obj_set_style_bg_color(btns[i], NINO_COLOR_PRIMARY, 0);
     }
 
     char buf[16];
@@ -156,40 +157,13 @@ static void start_q(void)
 
 static void show_congrats(void)
 {
-    overlay = lv_obj_create(lv_obj_get_parent(body[0]));
-    lv_obj_remove_style_all(overlay);
-    lv_obj_set_size(overlay, 480, 276);
-    lv_obj_align(overlay, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
-    lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
-    lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_t *ml = lv_label_create(overlay);
-    lv_label_set_text(ml, "Great Job!\nYou matched all the numbers!");
-    lv_obj_set_style_text_font(ml, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(ml, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(ml, LV_ALIGN_CENTER, 0, -30);
-
-    lv_obj_t *pb = lv_btn_create(overlay);
-    lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
-    lv_obj_set_size(pb, 160, 52);
-    lv_obj_set_style_radius(pb, 26, 0);
-    lv_obj_set_style_shadow_width(pb, 0, 0);
-    lv_obj_align(pb, LV_ALIGN_CENTER, 0, 50);
-    lv_obj_add_event_cb(pb, [](lv_event_t *e) {
-        (void)e;
-        lv_obj_del(overlay);
-        overlay = NULL;
-        qn = 0;
-        start_q();
-    }, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t *pl = lv_label_create(pb);
-    lv_label_set_text(pl, "Play Again");
-    lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-    lv_obj_center(pl);
+    overlay = nino_congrats_create(lv_obj_get_parent(body[0]),
+        "Great Job!\nYou matched all the numbers!", 0, NULL,
+        NINO_COLOR_SUCCESS, 160, [](lv_event_t *) {
+            lv_obj_del(overlay); overlay = NULL;
+            qn = 0;
+            start_q();
+        });
 }
 
 static void next_q(void)
@@ -212,7 +186,7 @@ static void on_btn_tap(lv_event_t *e)
         rst_tmr = NULL;
         lv_label_set_text(fb_lab, "");
         for (int i = 0; i < 4; i++)
-            lv_obj_set_style_bg_color(btns[i], lv_color_hex(0x3498DB), 0);
+            lv_obj_set_style_bg_color(btns[i], NINO_COLOR_PRIMARY, 0);
     }
 
     if (idx == cidx) {
@@ -229,16 +203,16 @@ static void on_btn_tap(lv_event_t *e)
         }, 1000, NULL);
         lv_timer_set_repeat_count(adv_tmr, 1);
     } else {
-        lv_obj_set_style_bg_color(btns[idx], lv_color_hex(0xE74C3C), 0);
+        lv_obj_set_style_bg_color(btns[idx], NINO_COLOR_DANGER, 0);
         lv_label_set_text(fb_lab, "Try Again");
-        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0xE74C3C), 0);
+        lv_obj_set_style_text_color(fb_lab, NINO_COLOR_DANGER, 0);
         lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_16, 0);
 
         rst_tmr = lv_timer_create([](lv_timer_t *tm) {
             lv_timer_del(tm);
             rst_tmr = NULL;
             int idx2 = (int)(intptr_t)lv_timer_get_user_data(tm);
-            lv_obj_set_style_bg_color(btns[idx2], lv_color_hex(0x3498DB), 0);
+            lv_obj_set_style_bg_color(btns[idx2], NINO_COLOR_PRIMARY, 0);
             lv_label_set_text(fb_lab, "");
         }, 600, (void *)(intptr_t)idx);
         lv_timer_set_repeat_count(rst_tmr, 1);
@@ -306,7 +280,7 @@ void app_ten_frame_create(lv_obj_t *content)
 
     for (int i = 0; i < 4; i++) {
         btns[i] = lv_btn_create(content);
-        lv_obj_set_style_bg_color(btns[i], lv_color_hex(0x3498DB), 0);
+        lv_obj_set_style_bg_color(btns[i], NINO_COLOR_PRIMARY, 0);
         lv_obj_set_size(btns[i], bw, bh);
         lv_obj_set_pos(btns[i], bx + i * (bw + bg), 154);
         lv_obj_set_style_radius(btns[i], 10, 0);

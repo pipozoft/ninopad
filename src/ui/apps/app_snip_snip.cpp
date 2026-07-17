@@ -166,7 +166,7 @@ static void on_trace_event(lv_event_t *e)
         if (stroke_count < MAX_STROKES) {
             strokes[stroke_count] = lv_line_create(trace_area);
             lv_obj_set_style_line_width(strokes[stroke_count], 6, 0);
-            lv_obj_set_style_line_color(strokes[stroke_count], lv_color_hex(0x27AE60), 0);
+            lv_obj_set_style_line_color(strokes[stroke_count], NINO_COLOR_SUCCESS, 0);
             lv_obj_set_style_line_rounded(strokes[stroke_count], 1, 0);
             stroke_start[stroke_count] = pt_count;
             stroke_end[stroke_count] = pt_count;
@@ -254,7 +254,7 @@ void app_snip_snip_create(lv_obj_t *content)
 
     // Clear button — below next
     lv_obj_t *clear_btn = lv_btn_create(content);
-    lv_obj_set_style_bg_color(clear_btn, lv_color_hex(0xE74C3C), 0);
+    lv_obj_set_style_bg_color(clear_btn, NINO_COLOR_DANGER, 0);
     lv_obj_set_size(clear_btn, 80, 44);
     lv_obj_align(clear_btn, LV_ALIGN_CENTER, 185, 64);
     lv_obj_set_style_radius(clear_btn, 22, 0);

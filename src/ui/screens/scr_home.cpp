@@ -102,6 +102,12 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
     lv_obj_t *btn = lv_obj_create(parent);
     lv_obj_add_style(btn, &nino_style_app_btn, 0);
     lv_obj_set_style_bg_color(btn, app->color, 0);
+    lv_obj_set_style_bg_grad_color(btn, lv_color_lighten(app->color, 80), 0);
+    lv_obj_set_style_bg_grad_dir(btn, LV_GRAD_DIR_VER, 0);
+    lv_obj_set_style_shadow_width(btn, 5, 0);
+    lv_obj_set_style_shadow_color(btn, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_shadow_opa(btn, LV_OPA_30, 0);
+    lv_obj_set_style_shadow_offset_y(btn, 3, 0);
     lv_obj_set_size(btn, btn_w, btn_h);
 
     lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
@@ -111,6 +117,7 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
     lv_obj_set_flex_align(btn, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_all(btn, 2, 0);
     lv_obj_set_style_pad_row(btn, 2, 0);
+    lv_obj_add_style(btn, &nino_style_app_btn_pressed, LV_STATE_PRESSED);
     lv_obj_add_event_cb(btn, on_app_tap, LV_EVENT_CLICKED, (void *)(intptr_t)id);
 
     lv_obj_t *icon = lv_label_create(btn);

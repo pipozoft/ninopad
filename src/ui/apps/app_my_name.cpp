@@ -23,12 +23,12 @@ static lv_obj_t *guide = NULL;
 static lv_obj_t *pal_btns[PAL_SZ];
 static lv_obj_t *mode_btn[2];
 static const lv_color_t palette[PAL_SZ] = {
-    lv_color_hex(0xE74C3C),
+    NINO_COLOR_DANGER,
     lv_color_hex(0xE67E22),
-    lv_color_hex(0xF1C40F),
+    NINO_COLOR_STAR_GOLD,
     lv_color_hex(0x2ECC71),
     lv_color_hex(0x1ABC9C),
-    lv_color_hex(0x3498DB),
+    NINO_COLOR_PRIMARY,
     lv_color_hex(0x9B59B6),
     lv_color_hex(0x222222),
 };
@@ -214,7 +214,7 @@ void app_my_name_create(lv_obj_t *content)
     const char *mode_labels[2] = {"Draw", "Trace"};
     for (int i = 0; i < 2; i++) {
         mode_btn[i] = lv_btn_create(nr);
-        lv_obj_set_style_bg_color(mode_btn[i], lv_color_hex(0x3498DB), 0);
+        lv_obj_set_style_bg_color(mode_btn[i], NINO_COLOR_PRIMARY, 0);
         lv_obj_set_style_bg_opa(mode_btn[i], i == 0 ? LV_OPA_COVER : LV_OPA_30, 0);
         lv_obj_set_size(mode_btn[i], 58, 28);
         lv_obj_set_style_radius(mode_btn[i], 14, 0);

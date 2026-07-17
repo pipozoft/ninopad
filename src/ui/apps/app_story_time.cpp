@@ -1,5 +1,7 @@
 #include "app_story_time.h"
 #include "nino_colors.h"
+#include "utils/anim_utils.h"
+#include "scr_congrats.h"
 #include <Arduino.h>
 #include <string.h>
 
@@ -166,26 +168,6 @@ static void draw_illus(int id)
 
 // ---- Shake ----
 
-static void shake_obj(lv_obj_t *obj)
-{
-    lv_coord_t ox = lv_obj_get_x(obj);
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, obj);
-    lv_anim_set_exec_cb(&a, [](void *var, int32_t v) {
-        lv_obj_set_x((lv_obj_t *)var, v);
-    });
-    lv_anim_set_values(&a, ox - 6, ox + 6);
-    lv_anim_set_time(&a, 40);
-    lv_anim_set_reverse_duration(&a, 40);
-    lv_anim_set_repeat_count(&a, 2);
-    lv_anim_set_ready_cb(&a, [](lv_anim_t *a) {
-        lv_obj_set_x((lv_obj_t *)a->var, (intptr_t)lv_anim_get_user_data(a));
-    });
-    lv_anim_set_user_data(&a, (void *)(intptr_t)ox);
-    lv_anim_start(&a);
-}
-
 // ---- Game ----
 
 static void show_q(void);
@@ -201,7 +183,7 @@ static void on_choice(lv_event_t *e)
         const char *word = ((const char *[]){q->c0, q->c1, q->c2})[q->correct];
 
         lv_label_set_text(sent_blank, word);
-        lv_obj_set_style_text_color(sent_blank, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_text_color(sent_blank, NINO_COLOR_SUCCESS, 0);
         lv_obj_set_style_text_font(sent_blank, &lv_font_montserrat_28, 0);
 
         lv_obj_add_flag(btn_cont, LV_OBJ_FLAG_HIDDEN);
@@ -214,20 +196,20 @@ static void on_choice(lv_event_t *e)
         lv_label_set_text(score_lab, buf);
 
         lv_label_set_text(fb_lab, "Great Reading!");
-        lv_obj_set_style_text_color(fb_lab, lv_color_hex(0x27AE60), 0);
+        lv_obj_set_style_text_color(fb_lab, NINO_COLOR_SUCCESS, 0);
         lv_obj_set_style_text_font(fb_lab, &lv_font_montserrat_20, 0);
 
         lv_obj_clear_flag(next_btn, LV_OBJ_FLAG_HIDDEN);
     } else {
-        shake_obj(lv_obj_get_child(btn_cont, idx));
-        lv_obj_set_style_bg_color(lv_obj_get_child(btn_cont, idx), lv_color_hex(0xE74C3C), 0);
+        nino_anim_shake(lv_obj_get_child(btn_cont, idx));
+        lv_obj_set_style_bg_color(lv_obj_get_child(btn_cont, idx), NINO_COLOR_DANGER, 0);
 
         if (rst_tmr) lv_timer_del(rst_tmr);
         rst_tmr = lv_timer_create([](lv_timer_t *tm) {
             lv_timer_del(tm);
             rst_tmr = NULL;
             int idx = (int)(intptr_t)lv_timer_get_user_data(tm);
-            lv_obj_set_style_bg_color(lv_obj_get_child(btn_cont, idx), lv_color_hex(0x3498DB), 0);
+            lv_obj_set_style_bg_color(lv_obj_get_child(btn_cont, idx), NINO_COLOR_PRIMARY, 0);
         }, 400, (void *)(intptr_t)idx);
         lv_timer_set_repeat_count(rst_tmr, 1);
     }
@@ -267,7 +249,7 @@ static void show_q(void)
     for (int i = 0; i < 3; i++) {
         lv_obj_t *btn = lv_btn_create(btn_cont);
         lv_obj_set_size(btn, bw, bh);
-        lv_obj_set_style_bg_color(btn, lv_color_hex(0x3498DB), 0);
+        lv_obj_set_style_bg_color(btn, NINO_COLOR_PRIMARY, 0);
         lv_obj_set_style_radius(btn, LV_RADIUS_CIRCLE, 0);
         lv_obj_set_style_shadow_width(btn, 0, 0);
         lv_obj_set_style_text_color(btn, lv_color_hex(0xFFFFFF), 0);
@@ -292,54 +274,17 @@ static void next_q(void)
 {
     qn++;
     if (qn >= Q_PER_GAME) {
-        overlay = lv_obj_create(parent_content);
-        lv_obj_remove_style_all(overlay);
-        lv_obj_set_size(overlay, 480, 276);
-        lv_obj_set_pos(overlay, 0, 0);
-        lv_obj_set_style_bg_color(overlay, lv_color_hex(0xF0FFF0), 0);
-        lv_obj_set_style_bg_opa(overlay, LV_OPA_COVER, 0);
-        lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
-
-        char stars[16];
         int n = (score * 5 + Q_PER_GAME / 2) / Q_PER_GAME;
         if (n < 1) n = 1;
-        snprintf(stars, sizeof(stars), "%.*s", n, "***");
-
-        lv_obj_t *sl = lv_label_create(overlay);
-        lv_label_set_text(sl, stars);
-        lv_obj_set_style_text_font(sl, &lv_font_montserrat_28, 0);
-        lv_obj_set_style_text_color(sl, lv_color_hex(0xF1C40F), 0);
-        lv_obj_align(sl, LV_ALIGN_TOP_MID, 0, 24);
-
         char msg[40];
         snprintf(msg, sizeof(msg), "You read %d sentences!", Q_PER_GAME);
-        lv_obj_t *ml = lv_label_create(overlay);
-        lv_label_set_text(ml, msg);
-        lv_obj_set_style_text_font(ml, &lv_font_montserrat_20, 0);
-        lv_obj_set_style_text_color(ml, lv_color_hex(0x444444), 0);
-        lv_obj_set_style_text_align(ml, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_align(ml, LV_ALIGN_TOP_MID, 0, 80);
-
-        lv_obj_t *pb = lv_btn_create(overlay);
-        lv_obj_set_style_bg_color(pb, lv_color_hex(0x27AE60), 0);
-        lv_obj_set_size(pb, 200, 52);
-        lv_obj_set_style_radius(pb, 26, 0);
-        lv_obj_set_style_shadow_width(pb, 0, 0);
-        lv_obj_align(pb, LV_ALIGN_TOP_MID, 0, 140);
-
-        lv_obj_add_event_cb(pb, [](lv_event_t *) {
-            lv_obj_del(overlay);
-            overlay = NULL;
-            qn = 0; score = 0;
-            shuf(game_qs, Q_PER_GAME);
-            show_q();
-        }, LV_EVENT_CLICKED, NULL);
-
-        lv_obj_t *pl = lv_label_create(pb);
-        lv_label_set_text(pl, "Play Again");
-        lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
-        lv_obj_set_style_text_font(pl, &lv_font_montserrat_20, 0);
-        lv_obj_center(pl);
+        overlay = nino_congrats_create(parent_content, msg, n, NULL,
+            NINO_COLOR_SUCCESS, 200, [](lv_event_t *) {
+                lv_obj_del(overlay); overlay = NULL;
+                qn = 0; score = 0;
+                shuf(game_qs, Q_PER_GAME);
+                show_q();
+            });
         return;
     }
     show_q();
@@ -474,7 +419,7 @@ void app_story_time_create(lv_obj_t *content)
 
     next_btn = lv_btn_create(content);
     lv_obj_set_size(next_btn, 160, 44);
-    lv_obj_set_style_bg_color(next_btn, lv_color_hex(0x3498DB), 0);
+    lv_obj_set_style_bg_color(next_btn, NINO_COLOR_PRIMARY, 0);
     lv_obj_set_style_radius(next_btn, 22, 0);
     lv_obj_set_style_shadow_width(next_btn, 0, 0);
     lv_obj_align(next_btn, LV_ALIGN_TOP_MID, 0, 200);
