@@ -30,6 +30,7 @@
 #define NINO_COLOR_SNIP       NINO_COLOR_PURPLE
 #define NINO_COLOR_STORY      NINO_COLOR_PINK
 #define NINO_COLOR_TIC_TAC_TOE lv_color_hex(0x00CEC9)
+#define NINO_COLOR_WORD_HUNT  lv_color_hex(0xFFD166)
 #define NINO_COLOR_SETTINGS   lv_color_hex(0xFFF066)
 
 // Status bar / chrome
@@ -48,4 +49,3 @@
 #define NINO_COLOR_SUCCESS    lv_color_hex(0x27AE60)
 #define NINO_COLOR_DANGER     lv_color_hex(0xE74C3C)
 #define NINO_COLOR_STAR_GOLD  lv_color_hex(0xF1C40F)
-

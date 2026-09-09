@@ -1,5 +1,5 @@
 /**
- * scr_home.cpp — home screen: status bar (logo, time, wifi) + 3×3 app grid.
+ * scr_home.cpp — home screen: status bar (logo, time, wifi) + scrollable app grid.
  *
  * Timer lifecycle: a 5-second LVGL timer (status_timer) updates time and wifi.
  *
@@ -23,6 +23,10 @@
 #include "debugging/sysmon/lv_sysmon.h"
 
 #define STATUS_H    26
+#define APP_COLS     3
+#define APP_BTN_H   84
+#define APP_GAP      8
+#define HOME_ROWS   ((HOME_APP_COUNT + APP_COLS - 1) / APP_COLS)
 
 static const char *icon_chars[HOME_APP_COUNT] = {
     "\xEE\xA8\x85",   // ICON_FACE_SMILE  → APP_MY_NAME
@@ -34,6 +38,7 @@ static const char *icon_chars[HOME_APP_COUNT] = {
     "\xEE\xA8\x89",   // ICON_SCISSORS    → APP_SNIP_SNIP
     "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
     "\xEE\xA8\x87",   // ICON_X_MARK      → APP_TIC_TAC_TOE
+    LV_SYMBOL_LIST,    // word list          → APP_WORD_HUNT
 };
 
 static lv_obj_t *time_label = NULL;
@@ -128,7 +133,9 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
 
     lv_obj_t *icon = lv_label_create(btn);
     lv_label_set_text(icon, icon_chars[id]);
-    lv_obj_set_style_text_font(icon, &icons_font, 0);
+    lv_obj_set_style_text_font(icon,
+                               id == APP_WORD_HUNT ? &lv_font_montserrat_28 : &icons_font,
+                               0);
     lv_obj_set_style_text_color(icon, NINO_COLOR_BG, 0);
 
     lv_obj_t *lab = lv_label_create(btn);
@@ -161,9 +168,9 @@ void scr_home_create(lv_obj_t *scr)
 
     int w = 480;
     int pad_sides = 10;
-    int gap = 8;
-    int btn_w = (w - 2 * pad_sides - 2 * gap) / 3;
-    int btn_h = 84;
+    int gap = APP_GAP;
+    int btn_w = (w - 2 * pad_sides - 2 * gap) / APP_COLS;
+    int btn_h = APP_BTN_H;
     int grid_top = STATUS_H + 8;
 
     // ---- Status bar ----
@@ -205,28 +212,36 @@ void scr_home_create(lv_obj_t *scr)
     lv_obj_set_style_text_font(wifi_label, &lv_font_montserrat_12, 0);
     lv_obj_align(wifi_label, LV_ALIGN_RIGHT_MID, -pad_sides, 0);
 
-    // ---- 3x3 App grid ----
+    // ---- Scrollable three-column app grid ----
     lv_obj_t *grid = lv_obj_create(scr);
     lv_obj_remove_style_all(grid);
-    lv_obj_set_size(grid, w - 2 * pad_sides, 3 * btn_h + 2 * gap);
+    lv_obj_set_size(grid, w - 2 * pad_sides, 320 - grid_top);
     lv_obj_align(grid, LV_ALIGN_TOP_MID, 0, grid_top);
     lv_obj_set_style_bg_opa(grid, LV_OPA_TRANSP, 0);
     lv_obj_set_style_pad_all(grid, 0, 0);
     lv_obj_set_style_pad_row(grid, gap, 0);
     lv_obj_set_style_pad_column(grid, gap, 0);
-    lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(grid, LV_DIR_VER);
+    lv_obj_set_scrollbar_mode(grid, LV_SCROLLBAR_MODE_ACTIVE);
+    lv_obj_set_style_pad_bottom(grid, 8, 0);
+    lv_obj_set_style_bg_color(grid, NINO_COLOR_BAR_FG, LV_PART_SCROLLBAR);
+    lv_obj_set_style_bg_opa(grid, LV_OPA_50, LV_PART_SCROLLBAR);
+    lv_obj_set_style_width(grid, 4, LV_PART_SCROLLBAR);
     lv_obj_set_layout(grid, LV_LAYOUT_GRID);
 
     static lv_coord_t col_dsc[] = {btn_w, btn_w, btn_w, LV_GRID_TEMPLATE_LAST};
-    static lv_coord_t row_dsc[] = {btn_h, btn_h, btn_h, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[HOME_ROWS + 1];
+    for (int i = 0; i < HOME_ROWS; i++) row_dsc[i] = btn_h;
+    row_dsc[HOME_ROWS] = LV_GRID_TEMPLATE_LAST;
     lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
 
     for (int i = 0; i < HOME_APP_COUNT; i++)
     {
         const nino_app_t *app = nino_app_get((nino_app_id_t)i);
         lv_obj_t *btn = create_app_button(grid, app, (nino_app_id_t)i, btn_w, btn_h);
-        lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_CENTER, i % 3, 1,
-                                  LV_GRID_ALIGN_CENTER, i / 3, 1);
+        lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_CENTER, i % APP_COLS, 1,
+                                  LV_GRID_ALIGN_CENTER, i / APP_COLS, 1);
     }
 
     status_timer = lv_timer_create(update_status_cb, 5000, NULL);

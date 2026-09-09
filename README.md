@@ -26,6 +26,8 @@ sd_card/
 │   └── logo.bin          # Boot logo (320×240 RGB565A8)
 ├── words/
 │   ├── ant.bin … wolf.bin  # 113 OpenMoji word images (128×96 RGB565A8)
+├── word_lists/
+│   └── dolch_words_all.json # Teacher-provided words used by Word Hunt
 └── wifi_networks.json    # WiFi credentials
 ```
 
@@ -91,10 +93,10 @@ ninopad/
 │   │   ├── screen_manager.* # scr_boot → scr_home → scr_app transitions
 │   │   ├── screens/
 │   │   │   ├── scr_boot.*   # Colored "NinoPad" logo, status label, auto-advance
-│   │   │   ├── scr_home.*   # Status bar (wifi/time), 3×3 app grid, debug sysmon
+│   │   │   ├── scr_home.*   # Status bar, scrollable app grid, debug sysmon
 │   │   │   └── scr_app_base.* # Colored header, back button, content area
 │   │   ├── apps/
-│   │   │   ├── app_registry.* # 9 app entries (name, color, icon, create-callback)
+│   │   │   ├── app_registry.* # App entries (name, color, icon, create-callback)
 │   │   │   ├── app_my_name.*  # "My name is" + textarea + canvas placeholder
 │   │   │   ├── app_settings.* # Textarea + keyboard → NVS save
 │   │   │   └── app_placeholder.* # "Coming soon!" (7 placeholder apps)
