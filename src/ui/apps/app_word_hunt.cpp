@@ -8,12 +8,12 @@
 #include <string.h>
 
 #define WORD_LIST_PATH "/word_lists/dolch_words_all.json"
-#define GRID_SIZE       6
+#define GRID_SIZE       8
 #define TARGET_COUNT    4
 #define MAX_SOURCE    160
 #define MAX_WORD_LEN    6
-#define CELL_SIZE      38
-#define CELL_GAP        3
+#define CELL_SIZE      30
+#define CELL_GAP        2
 #define CELL_PITCH     (CELL_SIZE + CELL_GAP)
 #define BOARD_SIZE     (GRID_SIZE * CELL_SIZE + (GRID_SIZE - 1) * CELL_GAP)
 
@@ -94,16 +94,23 @@ static void choose_targets(void)
 
 static bool place_word(const char *word)
 {
+    static const int directions[][2] = {
+        {0, 1},   // left to right
+        {1, 0},   // top to bottom
+        {1, 1},   // diagonal down-right
+    };
     int len = strlen(word);
     for (int attempt = 0; attempt < 100; attempt++) {
-        bool vertical = random(2) == 1;
-        int row = random(vertical ? GRID_SIZE - len + 1 : GRID_SIZE);
-        int col = random(vertical ? GRID_SIZE : GRID_SIZE - len + 1);
+        int direction = random(3);
+        int dr = directions[direction][0];
+        int dc = directions[direction][1];
+        int row = random(dr ? GRID_SIZE - len + 1 : GRID_SIZE);
+        int col = random(dc ? GRID_SIZE - len + 1 : GRID_SIZE);
         bool fits = true;
 
         for (int i = 0; i < len; i++) {
-            int r = row + (vertical ? i : 0);
-            int c = col + (vertical ? 0 : i);
+            int r = row + dr * i;
+            int c = col + dc * i;
             if (letters[r][c] && letters[r][c] != word[i]) {
                 fits = false;
                 break;
@@ -112,8 +119,8 @@ static bool place_word(const char *word)
         if (!fits) continue;
 
         for (int i = 0; i < len; i++) {
-            int r = row + (vertical ? i : 0);
-            int c = col + (vertical ? 0 : i);
+            int r = row + dr * i;
+            int c = col + dc * i;
             letters[r][c] = word[i];
         }
         return true;
@@ -326,7 +333,7 @@ static void create_game_ui(lv_obj_t *content)
     board_area = lv_obj_create(content);
     lv_obj_remove_style_all(board_area);
     lv_obj_set_size(board_area, BOARD_SIZE, BOARD_SIZE);
-    lv_obj_set_pos(board_area, 0, 8);
+    lv_obj_set_pos(board_area, 0, 3);
     lv_obj_add_flag(board_area, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(board_area, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_event_cb(board_area, on_board_event, LV_EVENT_PRESSED, nullptr);
@@ -339,7 +346,7 @@ static void create_game_ui(lv_obj_t *content)
             cells[r][c] = lv_obj_create(board_area);
             lv_obj_set_size(cells[r][c], CELL_SIZE, CELL_SIZE);
             lv_obj_set_pos(cells[r][c], c * CELL_PITCH, r * CELL_PITCH);
-            lv_obj_set_style_radius(cells[r][c], 8, 0);
+            lv_obj_set_style_radius(cells[r][c], 6, 0);
             lv_obj_set_style_border_width(cells[r][c], 1, 0);
             lv_obj_set_style_border_color(cells[r][c], lv_color_hex(0xDDDDDD), 0);
             lv_obj_set_style_pad_all(cells[r][c], 0, 0);
@@ -349,7 +356,7 @@ static void create_game_ui(lv_obj_t *content)
             cell_labels[r][c] = lv_label_create(cells[r][c]);
             char text[2] = {letters[r][c], '\0'};
             lv_label_set_text(cell_labels[r][c], text);
-            lv_obj_set_style_text_font(cell_labels[r][c], &lv_font_montserrat_20, 0);
+            lv_obj_set_style_text_font(cell_labels[r][c], &lv_font_montserrat_16, 0);
             lv_obj_set_style_text_color(cell_labels[r][c], lv_color_hex(0x333333), 0);
             lv_obj_center(cell_labels[r][c]);
             lv_obj_clear_flag(cell_labels[r][c], LV_OBJ_FLAG_CLICKABLE);
@@ -360,7 +367,7 @@ static void create_game_ui(lv_obj_t *content)
     lv_label_set_text(prompt, "Find these words");
     lv_obj_set_style_text_font(prompt, &lv_font_montserrat_16, 0);
     lv_obj_set_style_text_color(prompt, lv_color_hex(0x555555), 0);
-    lv_obj_set_pos(prompt, 270, 12);
+    lv_obj_set_pos(prompt, 278, 12);
 
     for (int i = 0; i < TARGET_COUNT; i++) {
         word_labels[i] = lv_label_create(content);
@@ -374,11 +381,11 @@ static void create_game_ui(lv_obj_t *content)
     lv_obj_set_style_text_align(feedback_label, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_style_text_font(feedback_label, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(feedback_label, lv_color_hex(0x777777), 0);
-    lv_obj_set_pos(feedback_label, 266, 200);
+    lv_obj_set_pos(feedback_label, 266, 190);
 
     lv_obj_t *new_button = lv_btn_create(content);
     lv_obj_set_size(new_button, 140, 36);
-    lv_obj_set_pos(new_button, 290, 224);
+    lv_obj_set_pos(new_button, 290, 214);
     lv_obj_set_style_radius(new_button, 18, 0);
     lv_obj_set_style_shadow_width(new_button, 0, 0);
     lv_obj_set_style_bg_color(new_button, NINO_COLOR_WORD_HUNT, 0);

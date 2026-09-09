@@ -38,7 +38,7 @@ static const char *icon_chars[HOME_APP_COUNT] = {
     "\xEE\xA8\x89",   // ICON_SCISSORS    → APP_SNIP_SNIP
     "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
     "\xEE\xA8\x87",   // ICON_X_MARK      → APP_TIC_TAC_TOE
-    LV_SYMBOL_LIST,    // word list          → APP_WORD_HUNT
+    "\xEE\xA8\x8B",   // ICON_WORD_HUNT   → APP_WORD_HUNT
 };
 
 static lv_obj_t *time_label = NULL;
@@ -133,9 +133,7 @@ static lv_obj_t *create_app_button(lv_obj_t *parent, const nino_app_t *app, nino
 
     lv_obj_t *icon = lv_label_create(btn);
     lv_label_set_text(icon, icon_chars[id]);
-    lv_obj_set_style_text_font(icon,
-                               id == APP_WORD_HUNT ? &lv_font_montserrat_28 : &icons_font,
-                               0);
+    lv_obj_set_style_text_font(icon, &icons_font, 0);
     lv_obj_set_style_text_color(icon, NINO_COLOR_BG, 0);
 
     lv_obj_t *lab = lv_label_create(btn);
