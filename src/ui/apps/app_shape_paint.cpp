@@ -457,7 +457,7 @@ static void show_summary(void)
     }
 
     overlay = nino_congrats_create(parent_content,
-        "Great Painting!\nYou painted all the shapes!", 0, subtitle,
+        "Great Painting!", 0, subtitle,
         NINO_COLOR_SUCCESS, 160, [](lv_event_t *) {
             lv_obj_del(overlay); overlay = NULL;
             clear_shapes();

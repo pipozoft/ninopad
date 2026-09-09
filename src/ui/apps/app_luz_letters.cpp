@@ -9,10 +9,23 @@
 static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 #define CHAR_COUNT (sizeof(chars) - 1)
 
+typedef enum {
+    FILTER_ALL = 0,
+    FILTER_UPPER,
+    FILTER_LOWER,
+    FILTER_NUM,
+    FILTER_COUNT
+} filter_mode_t;
+
+static const char *filter_labels[] = { "All", "A-Z", "a-z", "0-9" };
+static const int filter_start[] = { 0, 0, 26, 52 };
+static const int filter_end[]   = { (int)CHAR_COUNT, 26, 52, (int)CHAR_COUNT };
+
 static int current_idx = 0;
+static int filter_mode = FILTER_ALL;
 static lv_obj_t *trace_area;
 static lv_obj_t *guide_label;
-static lv_obj_t *letter_label;
+static lv_obj_t *filter_btns[FILTER_COUNT];
 static lv_obj_t *next_btn;
 
 // Shared point buffer + per-stroke line objects
@@ -59,13 +72,26 @@ static void draw_char(int idx)
 {
     char c[2] = { chars[idx], '\0' };
     lv_label_set_text(guide_label, c);
-    lv_obj_center(guide_label);
 
     clear_strokes();
 
-    char buf[8];
-    snprintf(buf, sizeof(buf), "\"%c\"", chars[idx]);
-    lv_label_set_text(letter_label, buf);
+    // Lowercase sits on x-height (brown -> blue); uppercase/digits fill
+    // the full cap band (green -> blue). Baseline always lands on the blue line.
+    bool lower = (idx >= 26 && idx < 52);
+    int s = lower ? 992 : 1095;   // 256 = 1x: 62px/16 for lowercase, 124px/29 for cap
+
+    lv_font_glyph_dsc_t gd;
+    if (!lv_font_get_glyph_dsc(&KG, &gd, chars[idx], '\0')) {
+        gd.box_w = 22; gd.box_h = 29; gd.ofs_x = 0; gd.ofs_y = 0;
+    }
+
+    int x = (360 - gd.box_w * s / 256) / 2 - gd.ofs_x * s / 256;
+    int y = 180 - 29 * s / 256;
+
+    lv_obj_set_style_transform_pivot_x(guide_label, 0, 0);
+    lv_obj_set_style_transform_pivot_y(guide_label, 0, 0);
+    lv_obj_set_style_transform_scale(guide_label, s, 0);
+    lv_obj_set_pos(guide_label, x, y);
 }
 
 // ---- Touch tracking ----
@@ -117,19 +143,37 @@ static void on_trace_event(lv_event_t *e)
     }
 }
 
+// ---- Filter selector ----
+
+static void on_filter_tap(lv_event_t *e)
+{
+    int m = (int)(intptr_t)lv_event_get_user_data(e);
+    if (m == filter_mode) return;
+    filter_mode = m;
+    current_idx = filter_start[filter_mode];
+    for (int i = 0; i < FILTER_COUNT; i++) {
+        lv_obj_set_style_bg_opa(filter_btns[i], i == m ? LV_OPA_COVER : LV_OPA_30, 0);
+    }
+    draw_char(current_idx);
+}
+
 // ---- Navigation ----
 
 static void on_prev(lv_event_t *e)
 {
     (void)e;
-    current_idx = (current_idx - 1 + CHAR_COUNT) % CHAR_COUNT;
+    int start = filter_start[filter_mode];
+    int len = filter_end[filter_mode] - start;
+    current_idx = start + (current_idx - start - 1 + len) % len;
     draw_char(current_idx);
 }
 
 static void on_next(lv_event_t *e)
 {
     (void)e;
-    current_idx = (current_idx + 1) % CHAR_COUNT;
+    int start = filter_start[filter_mode];
+    int len = filter_end[filter_mode] - start;
+    current_idx = start + (current_idx - start + 1) % len;
     draw_char(current_idx);
 }
 
@@ -149,11 +193,32 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_set_style_text_color(title, lv_color_hex(0x555555), 0);
     lv_obj_align(title, LV_ALIGN_TOP_LEFT, 10, 6);
 
-    letter_label = lv_label_create(content);
-    lv_label_set_text(letter_label, "\"A\"");
-    lv_obj_set_style_text_font(letter_label, &lv_font_montserrat_24, 0);
-    lv_obj_set_style_text_color(letter_label, lv_color_hex(0x333333), 0);
-    lv_obj_align(letter_label, LV_ALIGN_TOP_RIGHT, -10, 4);
+    lv_obj_t *filter_row = lv_obj_create(content);
+    lv_obj_remove_style_all(filter_row);
+    lv_obj_set_size(filter_row, 4 * 52 + 3 * 4, 30);
+    lv_obj_align(filter_row, LV_ALIGN_TOP_RIGHT, -10, 3);
+    lv_obj_set_layout(filter_row, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(filter_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(filter_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_all(filter_row, 0, 0);
+    lv_obj_set_style_pad_column(filter_row, 4, 0);
+    lv_obj_clear_flag(filter_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    for (int i = 0; i < FILTER_COUNT; i++) {
+        lv_obj_t *pb = lv_btn_create(filter_row);
+        lv_obj_set_style_bg_color(pb, NINO_COLOR_PRIMARY, 0);
+        lv_obj_set_style_bg_opa(pb, i == FILTER_ALL ? LV_OPA_COVER : LV_OPA_30, 0);
+        lv_obj_set_size(pb, 52, 28);
+        lv_obj_set_style_radius(pb, 14, 0);
+        lv_obj_set_style_shadow_width(pb, 0, 0);
+        lv_obj_add_event_cb(pb, on_filter_tap, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+        lv_obj_t *pl = lv_label_create(pb);
+        lv_label_set_text(pl, filter_labels[i]);
+        lv_obj_set_style_text_color(pl, lv_color_hex(0xFFFFFF), 0);
+        lv_obj_set_style_text_font(pl, &lv_font_montserrat_12, 0);
+        lv_obj_center(pl);
+        filter_btns[i] = pb;
+    }
 
     // Tracing area — left side
     trace_area = lv_obj_create(content);
@@ -168,15 +233,33 @@ void app_luz_letters_create(lv_obj_t *content)
     lv_obj_clear_flag(trace_area, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(trace_area, LV_OBJ_FLAG_CLICKABLE);
 
+    // Handwriting guide lines — behind the dotted letter and strokes
+    static const lv_point_precise_t top_pts[2] = {{4, 56}, {356, 56}};
+    static const lv_point_precise_t mid_pts[2] = {{4, 118}, {356, 118}};
+    static const lv_point_precise_t bot_pts[2] = {{4, 180}, {356, 180}};
+
+    lv_obj_t *guide = lv_line_create(trace_area);
+    lv_line_set_points(guide, top_pts, 2);
+    lv_obj_set_style_line_width(guide, 3, 0);
+    lv_obj_set_style_line_color(guide, lv_color_hex(0x2E7D32), 0);
+
+    guide = lv_line_create(trace_area);
+    lv_line_set_points(guide, mid_pts, 2);
+    lv_obj_set_style_line_width(guide, 3, 0);
+    lv_obj_set_style_line_color(guide, lv_color_hex(0x8B4513), 0);
+    lv_obj_set_style_line_dash_width(guide, 10, 0);
+    lv_obj_set_style_line_dash_gap(guide, 6, 0);
+
+    guide = lv_line_create(trace_area);
+    lv_line_set_points(guide, bot_pts, 2);
+    lv_obj_set_style_line_width(guide, 3, 0);
+    lv_obj_set_style_line_color(guide, lv_color_hex(0x1565C0), 0);
+
     // Guide label (KG dots font, scaled up) — behind trace lines
     guide_label = lv_label_create(trace_area);
     lv_label_set_text(guide_label, "A");
     lv_obj_set_style_text_font(guide_label, &KG, 0);
     lv_obj_set_style_text_color(guide_label, lv_color_hex(0xCCCCCC), 0);
-    lv_obj_set_style_transform_pivot_x(guide_label, LV_PCT(50), 0);
-    lv_obj_set_style_transform_pivot_y(guide_label, LV_PCT(50), 0);
-    lv_obj_set_style_transform_scale(guide_label, 1200, 0);
-    lv_obj_center(guide_label);
 
     // Touch events on trace area
     lv_obj_add_event_cb(trace_area, on_trace_event, LV_EVENT_PRESSED, NULL);
