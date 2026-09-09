@@ -231,7 +231,7 @@ If you switch from `Arduino_GFX` to the `OneFrame` family of LVGL display driver
 ## Customizing the Child's Name
 
 On-device:
-1. Tap **SETTINGS** on home screen
+1. Tap **NinoPad** in the top status bar (home screen)
 2. Type name in the textarea
 3. Tap ✓ (keyboard Ready) — persists across reboots via NVS
 

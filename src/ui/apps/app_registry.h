@@ -18,8 +18,10 @@ typedef enum {
     APP_SHAPE_PAINT,
     APP_SNIP_SNIP,
     APP_STORY_TIME,
-    APP_SETTINGS,
-    APP_COUNT
+    APP_TIC_TAC_TOE,
+    APP_SETTINGS,           // hidden from home grid, accessible via NinoPad logo
+    APP_COUNT,
+    HOME_APP_COUNT = APP_SETTINGS
 } nino_app_id_t;
 
 typedef void (*nino_app_create_fn)(lv_obj_t *content);

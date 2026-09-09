@@ -29,6 +29,7 @@
 #define NINO_COLOR_SHAPE      NINO_COLOR_BLUE
 #define NINO_COLOR_SNIP       NINO_COLOR_PURPLE
 #define NINO_COLOR_STORY      NINO_COLOR_PINK
+#define NINO_COLOR_TIC_TAC_TOE lv_color_hex(0x00CEC9)
 #define NINO_COLOR_SETTINGS   lv_color_hex(0xFFF066)
 
 // Status bar / chrome

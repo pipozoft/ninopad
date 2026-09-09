@@ -24,7 +24,7 @@
 
 #define STATUS_H    26
 
-static const char *icon_chars[APP_COUNT] = {
+static const char *icon_chars[HOME_APP_COUNT] = {
     "\xEE\xA8\x85",   // ICON_FACE_SMILE  → APP_MY_NAME
     "\xEE\xA8\x86",   // ICON_FIRE        → APP_LUZ_LETTERS
     "\xEE\xA8\x84",   // ICON_EYE         → APP_WORD_SPY
@@ -33,7 +33,7 @@ static const char *icon_chars[APP_COUNT] = {
     "\xEE\xA8\x88",   // ICON_PAINT_BRUSH → APP_SHAPE_PAINT
     "\xEE\xA8\x89",   // ICON_SCISSORS    → APP_SNIP_SNIP
     "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
-    "\xEE\xA8\x82",   // ICON_COG         → APP_SETTINGS
+    "\xEE\xA8\x87",   // ICON_X_MARK      → APP_TIC_TAC_TOE
 };
 
 static lv_obj_t *time_label = NULL;
@@ -54,6 +54,12 @@ static void on_time_tap(lv_event_t *e)
         lv_sysmon_performance_pause(d);
         sysmon_showing = true;
     }
+}
+
+static void on_logo_tap(lv_event_t *e)
+{
+    (void)e;
+    lv_async_call([](void *) { nino_screen_show_app(APP_SETTINGS); }, NULL);
 }
 
 static void on_app_tap(lv_event_t *e)
@@ -179,6 +185,8 @@ void scr_home_create(lv_obj_t *scr)
     lv_obj_set_style_text_font(logo_lab, &lv_font_montserrat_12, 0);
     lv_obj_set_style_text_opa(logo_lab, LV_OPA_50, 0);
     lv_obj_align(logo_lab, LV_ALIGN_LEFT_MID, pad_sides, 0);
+    lv_obj_add_flag(logo_lab, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(logo_lab, on_logo_tap, LV_EVENT_CLICKED, NULL);
 
     time_label = lv_label_create(status_bar);
     lv_label_set_text(time_label, "--:-- --");
@@ -213,7 +221,7 @@ void scr_home_create(lv_obj_t *scr)
     static lv_coord_t row_dsc[] = {btn_h, btn_h, btn_h, LV_GRID_TEMPLATE_LAST};
     lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
 
-    for (int i = 0; i < APP_COUNT; i++)
+    for (int i = 0; i < HOME_APP_COUNT; i++)
     {
         const nino_app_t *app = nino_app_get((nino_app_id_t)i);
         lv_obj_t *btn = create_app_button(grid, app, (nino_app_id_t)i, btn_w, btn_h);

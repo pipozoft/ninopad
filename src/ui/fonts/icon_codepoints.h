@@ -12,3 +12,4 @@
 #define ICON_SCISSORS    0xEA09  /* APP_SNIP_SNIP */
 #define ICON_BOOK_OPEN   0xEA01  /* APP_STORY_TIME */
 #define ICON_COG         0xEA02  /* APP_SETTINGS */
+#define ICON_X_MARK      0xEA07  /* APP_TIC_TAC_TOE */
