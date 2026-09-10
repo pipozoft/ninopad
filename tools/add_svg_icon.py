@@ -34,14 +34,17 @@ def main():
     for path in paths:
         parse_path(path.attrib["d"], transform_pen)
 
+    glyph_name = font.getBestCmap().get(args.codepoint, args.glyph_name)
     glyph_order = font.getGlyphOrder()
-    if args.glyph_name not in glyph_order:
-        font.setGlyphOrder(glyph_order + [args.glyph_name])
-    font["glyf"][args.glyph_name] = pen.glyph()
-    font["hmtx"][args.glyph_name] = (font["head"].unitsPerEm, 0)
+    if glyph_name not in glyph_order:
+        font.setGlyphOrder(glyph_order + [glyph_name])
+    glyph = pen.glyph()
+    glyph.recalcBounds(font["glyf"])
+    font["glyf"][glyph_name] = glyph
+    font["hmtx"][glyph_name] = (font["head"].unitsPerEm, glyph.xMin)
     for table in font["cmap"].tables:
         if table.isUnicode():
-            table.cmap[args.codepoint] = args.glyph_name
+            table.cmap[args.codepoint] = glyph_name
     font.save(args.font)
 
 
