@@ -1,0 +1,218 @@
+[
+  {
+    "id": "block-house",
+    "level": 1,
+    "theme": "Block World",
+    "title": "Ben's Block House",
+    "image": "/reading/images/block-house.bin",
+    "image_large": "/reading/images/block-house-large.bin",
+    "sentences": [
+      "Ben has a big red block.",
+      "He can make a little house.",
+      "A yellow cat goes in the house."
+    ],
+    "questions": [
+      {"prompt": "What color is the block?", "choices": ["Red", "Blue", "Green"], "answer": 0, "skill": "detail"},
+      {"prompt": "What does Ben make?", "choices": ["A house", "A car", "A boat"], "answer": 0, "skill": "detail"},
+      {"prompt": "What happens after Ben makes the house?", "choices": ["A cat goes in", "Ben runs away", "The block is lost"], "answer": 0, "skill": "sequence"}
+    ]
+  },
+  {
+    "id": "red-racer",
+    "level": 1,
+    "theme": "Racing Crew",
+    "title": "The Red Racer",
+    "image": "/reading/images/red-racer.bin",
+    "image_large": "/reading/images/red-racer-large.bin",
+    "sentences": [
+      "Mia has a fast red car.",
+      "She sees a blue car stop.",
+      "Mia goes back to help."
+    ],
+    "questions": [
+      {"prompt": "What does Mia have?", "choices": ["A red car", "A blue bike", "A yellow bus"], "answer": 0, "skill": "detail"},
+      {"prompt": "Which car stops?", "choices": ["The blue car", "The red car", "The green car"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why does Mia go back?", "choices": ["To help", "To eat", "To sleep"], "answer": 0, "skill": "cause"}
+    ]
+  },
+  {
+    "id": "pip-jumps",
+    "level": 1,
+    "theme": "Creature Camp",
+    "title": "Pip Can Jump",
+    "image": "/reading/images/pip-jumps.bin",
+    "image_large": "/reading/images/pip-jumps-large.bin",
+    "sentences": [
+      "Ana has a little pet named Pip.",
+      "Pip can jump up and down.",
+      "Ana and Pip play by the tree."
+    ],
+    "questions": [
+      {"prompt": "What is the pet's name?", "choices": ["Pip", "Max", "Sam"], "answer": 0, "skill": "detail"},
+      {"prompt": "What can Pip do?", "choices": ["Jump", "Read", "Drive"], "answer": 0, "skill": "detail"},
+      {"prompt": "Where should Ana look for Pip?", "choices": ["By the tree", "In a car", "At school"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "helper-mess",
+    "level": 1,
+    "theme": "Silly Helpers",
+    "title": "The Big Mess",
+    "image": "/reading/images/helper-mess.bin",
+    "image_large": "/reading/images/helper-mess-large.bin",
+    "sentences": [
+      "Three little helpers make a big mess.",
+      "They put yellow socks on the bed.",
+      "Then they help clean it up."
+    ],
+    "questions": [
+      {"prompt": "How many helpers are there?", "choices": ["Three", "One", "Five"], "answer": 0, "skill": "detail"},
+      {"prompt": "What is on the bed?", "choices": ["Yellow socks", "A red hat", "A blue book"], "answer": 0, "skill": "detail"},
+      {"prompt": "What do the helpers do last?", "choices": ["Clean the mess", "Make the mess", "Jump on the bed"], "answer": 0, "skill": "sequence"}
+    ]
+  },
+  {
+    "id": "ball-robot",
+    "level": 2,
+    "theme": "Gadget Lab",
+    "title": "Mia's Robot",
+    "image": "/reading/images/ball-robot.bin",
+    "image_large": "/reading/images/ball-robot-large.bin",
+    "sentences": [
+      "Mia made a little robot.",
+      "The robot went under the table to find a red ball.",
+      "Mia was happy when it came back."
+    ],
+    "questions": [
+      {"prompt": "What did Mia make?", "choices": ["A robot", "A kite", "A cake"], "answer": 0, "skill": "detail"},
+      {"prompt": "Where did the robot go?", "choices": ["Under the table", "Into the yard", "On the bed"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why was Mia happy?", "choices": ["The robot came back", "The ball was blue", "The table was big"], "answer": 0, "skill": "cause"}
+    ]
+  },
+  {
+    "id": "wind-temple",
+    "level": 2,
+    "theme": "Brick Ninjas",
+    "title": "The Wind Temple",
+    "image": "/reading/images/wind-temple.bin",
+    "image_large": "/reading/images/wind-temple-large.bin",
+    "sentences": [
+      "Ren and Lila built a tall block temple.",
+      "A strong wind made the top fall down.",
+      "They worked together and made it strong."
+    ],
+    "questions": [
+      {"prompt": "What did Ren and Lila build?", "choices": ["A temple", "A ship", "A train"], "answer": 0, "skill": "detail"},
+      {"prompt": "What made the top fall?", "choices": ["The wind", "A bird", "The rain"], "answer": 0, "skill": "detail"},
+      {"prompt": "How did they fix the temple?", "choices": ["They worked together", "They left it down", "They hid the blocks"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "moon-light",
+    "level": 2,
+    "theme": "Star Pilots",
+    "title": "Light on the Moon",
+    "image": "/reading/images/moon-light.bin",
+    "image_large": "/reading/images/moon-light-large.bin",
+    "sentences": [
+      "Nova saw a blue light on the moon.",
+      "She flew her small ship down to look.",
+      "A lost robot was there asking for help."
+    ],
+    "questions": [
+      {"prompt": "What color was the light?", "choices": ["Blue", "Red", "Yellow"], "answer": 0, "skill": "detail"},
+      {"prompt": "Who was on the moon?", "choices": ["A lost robot", "A racing car", "A little cat"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why did Nova fly down?", "choices": ["To look at the light", "To go to sleep", "To find her book"], "answer": 0, "skill": "cause"}
+    ]
+  },
+  {
+    "id": "castle-gate",
+    "level": 2,
+    "theme": "Power Castle",
+    "title": "The Castle Gate",
+    "image": "/reading/images/castle-gate.bin",
+    "image_large": "/reading/images/castle-gate-large.bin",
+    "sentences": [
+      "Tara heard a little roar by the castle gate.",
+      "She found a scared green cub under a cart.",
+      "Tara held out food, and the cub came to her."
+    ],
+    "questions": [
+      {"prompt": "Where did Tara hear a roar?", "choices": ["By the gate", "In her room", "On a ship"], "answer": 0, "skill": "detail"},
+      {"prompt": "Where was the cub hiding?", "choices": ["Under a cart", "Behind a tree", "Inside the gate"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why did the cub come to Tara?", "choices": ["She offered food", "She ran away", "She made a loud sound"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "rain-machine",
+    "level": 3,
+    "theme": "Gadget Lab",
+    "title": "The Rain Machine",
+    "image": "/reading/images/rain-machine.bin",
+    "image_large": "/reading/images/rain-machine-large.bin",
+    "sentences": [
+      "Owen made a machine to water every plant in the yard.",
+      "At first, one tube pointed at his open window instead.",
+      "Owen shut the water off and turned the tube toward the flowers."
+    ],
+    "questions": [
+      {"prompt": "What was the machine made to water?", "choices": ["The plants", "The windows", "The sidewalk"], "answer": 0, "skill": "detail"},
+      {"prompt": "Where did one tube point?", "choices": ["At a window", "At a car", "At a tree"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why did Owen turn the tube?", "choices": ["To keep water outside", "To make more rain", "To wash the window"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "cave-bridge",
+    "level": 3,
+    "theme": "Block World",
+    "title": "The Cave Bridge",
+    "image": "/reading/images/cave-bridge.bin",
+    "image_large": "/reading/images/cave-bridge-large.bin",
+    "sentences": [
+      "Zoe found a deep hole while she was looking through a cave.",
+      "She put strong blocks over the hole to make a safe bridge.",
+      "Her friends crossed slowly, and everyone reached the other side."
+    ],
+    "questions": [
+      {"prompt": "What did Zoe find in the cave?", "choices": ["A deep hole", "A lost car", "A tall tree"], "answer": 0, "skill": "detail"},
+      {"prompt": "What did Zoe make?", "choices": ["A bridge", "A robot", "A castle"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why did her friends cross slowly?", "choices": ["They wanted to be safe", "They were going to sleep", "They carried a race car"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "last-lap",
+    "level": 3,
+    "theme": "Racing Crew",
+    "title": "The Last Lap",
+    "image": "/reading/images/last-lap.bin",
+    "image_large": "/reading/images/last-lap-large.bin",
+    "sentences": [
+      "Ravi was leading the race when he saw a car with a flat tire.",
+      "He stopped to share a tool even though the other cars went ahead.",
+      "Both drivers fixed the tire and crossed the finish line together."
+    ],
+    "questions": [
+      {"prompt": "Why did Ravi stop?", "choices": ["A car had a flat tire", "The race was over", "He lost the road"], "answer": 0, "skill": "detail"},
+      {"prompt": "What did Ravi share?", "choices": ["A tool", "A snack", "A map"], "answer": 0, "skill": "detail"},
+      {"prompt": "What does the story show about Ravi?", "choices": ["He helps others", "He dislikes racing", "He wants every tool"], "answer": 0, "skill": "inference"}
+    ]
+  },
+  {
+    "id": "lost-egg",
+    "level": 3,
+    "theme": "Creature Camp",
+    "title": "The Lost Egg",
+    "image": "/reading/images/lost-egg.bin",
+    "image_large": "/reading/images/lost-egg-large.bin",
+    "sentences": [
+      "Lena found a spotted egg beside the path after a windy night.",
+      "She followed tiny tracks until she saw a nest under the old tree.",
+      "Lena placed the egg inside, and a bright bird sang above her."
+    ],
+    "questions": [
+      {"prompt": "What did Lena find?", "choices": ["A spotted egg", "A bright flower", "A little robot"], "answer": 0, "skill": "detail"},
+      {"prompt": "Where was the nest?", "choices": ["Under the old tree", "Beside a car", "Inside a cave"], "answer": 0, "skill": "detail"},
+      {"prompt": "Why did the bird sing?", "choices": ["Lena returned the egg", "The wind was strong", "The path was long"], "answer": 0, "skill": "inference"}
+    ]
+  }
+]

@@ -132,12 +132,16 @@ Full specs for 9 apps on ESP32 (no PSRAM) + ST7796 480×320 + XPT2046 + LVGL v9.
 
 ## App 8: Story Time
 
-- Drawing canvas ("My Favorite Part") + record button (deferred)
-- Book Parts Quiz: tap front cover, start reading, space between words, letter/word/sentence/punctuation
-- "I Can Read Words": picture + 2 word sun choices
-- Summer reading tracker: log books, earn badges
+- Three reading levels using progressively harder Dolch vocabulary
+- Theme cards plus a random "Surprise Me" story
+- Three-sentence passages with an optional 128×96 SD-card illustration
+- Three questions per story: two direct details and one reasoning or sequence question
+- "Read Again" returns to the passage without losing question progress
+- Wrong answers prompt rereading and retrying; correct answers advance
+- Completion awards 1–3 stars based on first-try answers
+- Passages and questions load from SD `reading/stories.json`
 
-**LVGL elements:** `lv_canvas` (drawing, deferred), `lv_label` (instructions), `lv_btn` (sun choices, log book), `lv_anim` (badge award)
+**LVGL elements:** `lv_label` (wrapped passage and questions), `lv_btn` (levels, stories, answers), `lv_img` (optional illustration), `lv_anim` (answer feedback)
 
 ## App 9: Settings
 
