@@ -73,6 +73,7 @@ static lv_fs_res_t fs_seek_cb(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_f
         return LV_FS_RES_INV_PARAM;
     }
 
+    if (f->position() == target) return LV_FS_RES_OK;
     return f->seek(target) ? LV_FS_RES_OK : LV_FS_RES_UNKNOWN;
 }
 

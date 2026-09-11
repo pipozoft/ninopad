@@ -1,5 +1,5 @@
 /**
- * app_registry.h — the 9 NinoPad apps and their metadata.
+ * app_registry.h — the NinoPad apps and their metadata.
  * Built on top of scr_app_base: each app defines a create(content) callback.
  */
 #pragma once
@@ -18,8 +18,11 @@ typedef enum {
     APP_SHAPE_PAINT,
     APP_SNIP_SNIP,
     APP_STORY_TIME,
-    APP_SETTINGS,
-    APP_COUNT
+    APP_TIC_TAC_TOE,
+    APP_WORD_HUNT,
+    APP_SETTINGS,           // hidden from home grid, accessible via NinoPad logo
+    APP_COUNT,
+    HOME_APP_COUNT = APP_SETTINGS
 } nino_app_id_t;
 
 typedef void (*nino_app_create_fn)(lv_obj_t *content);

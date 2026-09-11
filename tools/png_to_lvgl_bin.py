@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Convert PNG images to LVGL v9 RGB565A8 binary (.bin) format.
+Convert PNG images to LVGL v9 RGB565 or RGB565A8 binary (.bin) format.
 
-RGB565A8 stores 16-bit color pixels followed by 8-bit alpha values,
-giving proper transparency without chroma-key hacks.
+Opaque images use RGB565. Images with transparency use RGB565A8, which stores
+16-bit color pixels followed by an 8-bit alpha plane.
 
 Usage:
     python3 tools/png_to_lvgl_bin.py assets/images/*.png
@@ -16,6 +16,7 @@ import os
 from PIL import Image
 
 LV_IMAGE_HEADER_MAGIC = 0x19
+LV_COLOR_FORMAT_RGB565 = 0x12
 LV_COLOR_FORMAT_RGB565A8 = 0x14  # RGB565 pixel data + A8 alpha map
 
 def rgb888_to_rgb565(r, g, b):
@@ -25,6 +26,7 @@ def convert_png_to_bin(png_path):
     img = Image.open(png_path).convert("RGBA")
     w, h = img.width, img.height
     pixels = img.load()
+    has_alpha = img.getextrema()[3][0] < 255
 
     rgb_raw = bytearray()
     alpha_raw = bytearray()
@@ -32,12 +34,13 @@ def convert_png_to_bin(png_path):
         for x in range(w):
             r, g, b, a = pixels[x, y]
             rgb_raw += struct.pack("<H", rgb888_to_rgb565(r, g, b))
-            alpha_raw += struct.pack("B", a)
+            if has_alpha:
+                alpha_raw += struct.pack("B", a)
 
     header = struct.pack(
         "<BBHHHHH",
         LV_IMAGE_HEADER_MAGIC,
-        LV_COLOR_FORMAT_RGB565A8,
+        LV_COLOR_FORMAT_RGB565A8 if has_alpha else LV_COLOR_FORMAT_RGB565,
         0,
         w, h,
         0,
@@ -48,8 +51,10 @@ def convert_png_to_bin(png_path):
     with open(bin_path, "wb") as f:
         f.write(header + rgb_raw + alpha_raw)
 
+    image_format = "RGB565A8" if has_alpha else "RGB565"
     size_kb = len(header + rgb_raw + alpha_raw) / 1024
-    print(f"  {os.path.basename(png_path):40s} → {os.path.basename(bin_path):40s}  ({w}x{h}, {size_kb:.1f}KB)")
+    print(f"  {os.path.basename(png_path):40s} → {os.path.basename(bin_path):40s}  "
+          f"({w}x{h}, {image_format}, {size_kb:.1f}KB)")
     return bin_path
 
 def main():

@@ -26,6 +26,11 @@ sd_card/
 │   └── logo.bin          # Boot logo (320×240 RGB565A8)
 ├── words/
 │   ├── ant.bin … wolf.bin  # 113 OpenMoji word images (128×96 RGB565A8)
+├── word_lists/
+│   └── dolch_words_all.json # Teacher-provided words used by Word Hunt
+├── reading/
+│   ├── stories.json         # Leveled passages and comprehension questions
+│   └── images/              # Optional RGB565 story illustrations
 └── wifi_networks.json    # WiFi credentials
 ```
 
@@ -35,6 +40,14 @@ sd_card/
 4. Insert the card into the CYD slot
 
 To regenerate word images from OpenMoji SVGs: `assets/scripts/make_words.py`
+
+Story Time loads its passages from `reading/stories.json`. Each story can set
+`image` (128×96 thumbnail) and `image_large` (320×240 tap-to-open view) paths.
+When artwork is missing, the app shows a colored theme card instead. Source PNG
+artwork is kept in `assets/reading/`; convert both sizes with
+`tools/png_to_lvgl_bin.py` before copying the binaries to the SD card. The
+converter uses RGB565 for opaque artwork and only adds an alpha plane when the
+source actually contains transparency.
 
 ## Hardware
 
@@ -91,13 +104,14 @@ ninopad/
 │   │   ├── screen_manager.* # scr_boot → scr_home → scr_app transitions
 │   │   ├── screens/
 │   │   │   ├── scr_boot.*   # Colored "NinoPad" logo, status label, auto-advance
-│   │   │   ├── scr_home.*   # Status bar (wifi/time), 3×3 app grid, debug sysmon
+│   │   │   ├── scr_home.*   # Status bar, scrollable app grid, debug sysmon
 │   │   │   └── scr_app_base.* # Colored header, back button, content area
 │   │   ├── apps/
-│   │   │   ├── app_registry.* # 9 app entries (name, color, icon, create-callback)
+│   │   │   ├── app_registry.* # App entries (name, color, icon, create-callback)
 │   │   │   ├── app_my_name.*  # "My name is" + textarea + canvas placeholder
 │   │   │   ├── app_settings.* # Textarea + keyboard → NVS save
-│   │   │   └── app_placeholder.* # "Coming soon!" (7 placeholder apps)
+│   │   │   ├── app_story_time.* # SD-backed reading comprehension stories
+│   │   │   └── app_placeholder.* # Reusable "Coming soon!" fallback
 │   │   └── icons/
 │   │       └── nino_icons.*  # LVGL line-art primitives (smiley, flame, gear, etc.)
 │   ├── utils/
@@ -231,7 +245,7 @@ If you switch from `Arduino_GFX` to the `OneFrame` family of LVGL display driver
 ## Customizing the Child's Name
 
 On-device:
-1. Tap **SETTINGS** on home screen
+1. Tap **NinoPad** in the top status bar (home screen)
 2. Type name in the textarea
 3. Tap ✓ (keyboard Ready) — persists across reboots via NVS
 

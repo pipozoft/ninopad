@@ -12,21 +12,26 @@
 #include "app_settings.h"
 #include "app_counting_jar.h"
 #include "app_shape_paint.h"
+#include "app_tic_tac_toe.h"
+#include "app_word_hunt.h"
 #include "app_placeholder.h"
 
 static const nino_app_t apps[APP_COUNT] = {
     // Row 1
-    { "MY NAME",      NINO_COLOR_MYNAME,    app_my_name_create     },
-    { "LUZ LETTERS",  NINO_COLOR_LUZ,       app_luz_letters_create },
-    { "WORD SPY",     NINO_COLOR_WORDSPY,   app_word_spy_create   },
+    { "MY NAME",      NINO_COLOR_MYNAME,      app_my_name_create      },
+    { "LUZ LETTERS",  NINO_COLOR_LUZ,         app_luz_letters_create  },
+    { "WORD SPY",     NINO_COLOR_WORDSPY,     app_word_spy_create     },
     // Row 2
-    { "ICE CREAM",   NINO_COLOR_ICE_CREAM,  app_counting_jar_create },
-    { "10-FRAME SUN", NINO_COLOR_TENFRAME,  app_ten_frame_create  },
-    { "SHAPE PAINT",  NINO_COLOR_SHAPE,     app_shape_paint_create },
+    { "ICE CREAM",    NINO_COLOR_ICE_CREAM,   app_counting_jar_create },
+    { "10-FRAME SUN", NINO_COLOR_TENFRAME,    app_ten_frame_create    },
+    { "SHAPE PAINT",  NINO_COLOR_SHAPE,       app_shape_paint_create  },
     // Row 3
-    { "SNIP SNIP",    NINO_COLOR_SNIP,      app_snip_snip_create   },
-    { "STORY TIME",   NINO_COLOR_STORY,     app_story_time_create },
-    { "SETTINGS",     NINO_COLOR_SETTINGS,  app_settings_create    },
+    { "SNIP SNIP",    NINO_COLOR_SNIP,        app_snip_snip_create    },
+    { "STORY TIME",   NINO_COLOR_STORY,       app_story_time_create   },
+    { "TIC TAC TOE",  NINO_COLOR_TIC_TAC_TOE, app_tic_tac_toe_create  },
+    { "WORD HUNT",    NINO_COLOR_WORD_HUNT,   app_word_hunt_create     },
+    // Hidden (accessible via NinoPad logo in status bar)
+    { "SETTINGS",     NINO_COLOR_SETTINGS,    app_settings_create     },
 };
 
 const nino_app_t *nino_app_get(nino_app_id_t id)

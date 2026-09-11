@@ -1,0 +1,530 @@
+[
+  {
+    "word": "and",
+    "sentence": "Peanut butter and jelly"
+  },
+  {
+    "word": "away",
+    "sentence": "Fly away!"
+  },
+  {
+    "word": "big",
+    "sentence": "The storm is big."
+  },
+  {
+    "word": "blue",
+    "sentence": "The balloon and the water are blue."
+  },
+  {
+    "word": "can",
+    "sentence": "I can ski!"
+  },
+  {
+    "word": "come",
+    "sentence": "Come to my house."
+  },
+  {
+    "word": "down",
+    "sentence": "(point down)"
+  },
+  {
+    "word": "find",
+    "sentence": "Can you find my dog?"
+  },
+  {
+    "word": "for",
+    "sentence": "This is for you."
+  },
+  {
+    "word": "funny",
+    "sentence": "The clown is funny."
+  },
+  {
+    "word": "go",
+    "sentence": "Let’s go!"
+  },
+  {
+    "word": "help",
+    "sentence": "Help me clean up this mess?"
+  },
+  {
+    "word": "here",
+    "sentence": "Sit here."
+  },
+  {
+    "word": "I",
+    "sentence": "(point to self)"
+  },
+  {
+    "word": "in",
+    "sentence": "“In” is in the bubble."
+  },
+  {
+    "word": "is",
+    "sentence": "He is a firefighter."
+  },
+  {
+    "word": "it",
+    "sentence": "It is a monster."
+  },
+  {
+    "word": "jump",
+    "sentence": "Jump!"
+  },
+  {
+    "word": "little",
+    "sentence": "The little brother wants to be as big as his brothers."
+  },
+  {
+    "word": "look",
+    "sentence": "Look!"
+  },
+  {
+    "word": "make",
+    "sentence": "I can make a __________."
+  },
+  {
+    "word": "me",
+    "sentence": "(point to self)"
+  },
+  {
+    "word": "my",
+    "sentence": "This is my “y”."
+  },
+  {
+    "word": "not",
+    "sentence": "You should not ________."
+  },
+  {
+    "word": "one",
+    "sentence": "One dot."
+  },
+  {
+    "word": "play",
+    "sentence": "I like to play ball."
+  },
+  {
+    "word": "red",
+    "sentence": "Strawberries are red."
+  },
+  {
+    "word": "run",
+    "sentence": "He can run fast."
+  },
+  {
+    "word": "said",
+    "sentence": "(talking hands motion)"
+  },
+  {
+    "word": "see",
+    "sentence": "I see ______."
+  },
+  {
+    "word": "the",
+    "sentence": "t-h-e, t-h-e, t-h-e, the, the, the"
+  },
+  {
+    "word": "three",
+    "sentence": "3 little pigs"
+  },
+  {
+    "word": "to",
+    "sentence": "We are going to the _______."
+  },
+  {
+    "word": "two",
+    "sentence": "How many hearts? How many dots?"
+  },
+  {
+    "word": "up",
+    "sentence": "(Point up.)"
+  },
+  {
+    "word": "we",
+    "sentence": "We play games."
+  },
+  {
+    "word": "where",
+    "sentence": "Where are you going?"
+  },
+  {
+    "word": "yellow",
+    "sentence": "Monkeys like yellow bananas."
+  },
+  {
+    "word": "you",
+    "sentence": "Y-O-U spells you!"
+  },
+  {
+    "word": "all",
+    "sentence": "We are all in a circle."
+  },
+  {
+    "word": "am",
+    "sentence": "I am happy!"
+  },
+  {
+    "word": "are",
+    "sentence": "I like to drive the “ar” car."
+  },
+  {
+    "word": "at",
+    "sentence": "I am at the lake."
+  },
+  {
+    "word": "ate",
+    "sentence": "I ate all my food!"
+  },
+  {
+    "word": "be",
+    "sentence": "Be a bee."
+  },
+  {
+    "word": "black",
+    "sentence": "The cat is black."
+  },
+  {
+    "word": "brown",
+    "sentence": "The brown dog jumped high."
+  },
+  {
+    "word": "but",
+    "sentence": "I want to go outside, but there is rain in the sky."
+  },
+  {
+    "word": "came",
+    "sentence": "She came to my house."
+  },
+  {
+    "word": "did",
+    "sentence": "Did you bring an umbrella?"
+  },
+  {
+    "word": "do",
+    "sentence": "There is so much to do."
+  },
+  {
+    "word": "eat",
+    "sentence": "Let’s eat some corn!"
+  },
+  {
+    "word": "four",
+    "sentence": "The four leaves are green."
+  },
+  {
+    "word": "get",
+    "sentence": "Got milk? Get milk."
+  },
+  {
+    "word": "good",
+    "sentence": "Chocolate chip cookies are so good."
+  },
+  {
+    "word": "have",
+    "sentence": "I have a jack-o-lantern for Halloween."
+  },
+  {
+    "word": "he",
+    "sentence": "He is going trick or treating."
+  },
+  {
+    "word": "into",
+    "sentence": "Put it into the box."
+  },
+  {
+    "word": "like",
+    "sentence": "I like pizza."
+  },
+  {
+    "word": "must",
+    "sentence": "We must follow the teacher."
+  },
+  {
+    "word": "new",
+    "sentence": "There is a tag on my new shirt."
+  },
+  {
+    "word": "no",
+    "sentence": "I said no."
+  },
+  {
+    "word": "now",
+    "sentence": "We have to go now."
+  },
+  {
+    "word": "on",
+    "sentence": "The sombrero is on my head."
+  },
+  {
+    "word": "our",
+    "sentence": "We have to take care of our world."
+  },
+  {
+    "word": "out",
+    "sentence": "The man is climbing out."
+  },
+  {
+    "word": "please",
+    "sentence": "Please, please give me a bone."
+  },
+  {
+    "word": "pretty",
+    "sentence": "The jewelry is so pretty."
+  },
+  {
+    "word": "ran",
+    "sentence": "He ran fast!"
+  },
+  {
+    "word": "ride",
+    "sentence": "It’s fun to ride my motorcycle!"
+  },
+  {
+    "word": "saw",
+    "sentence": "I saw a saw."
+  },
+  {
+    "word": "say",
+    "sentence": "He can say lots of things."
+  },
+  {
+    "word": "she",
+    "sentence": "She has a flower for her mother."
+  },
+  {
+    "word": "so",
+    "sentence": "I’m so excited!"
+  },
+  {
+    "word": "soon",
+    "sentence": "We will go soon."
+  },
+  {
+    "word": "that",
+    "sentence": "That is an apple."
+  },
+  {
+    "word": "there",
+    "sentence": "The spider is right over there."
+  },
+  {
+    "word": "they",
+    "sentence": "They will come to my party."
+  },
+  {
+    "word": "this",
+    "sentence": "This is an orange."
+  },
+  {
+    "word": "too",
+    "sentence": "It is too hot here."
+  },
+  {
+    "word": "under",
+    "sentence": "Is there something under the bed?"
+  },
+  {
+    "word": "want",
+    "sentence": "I want a treat."
+  },
+  {
+    "word": "was",
+    "sentence": "He was so silly."
+  },
+  {
+    "word": "well",
+    "sentence": "Get well soon."
+  },
+  {
+    "word": "went",
+    "sentence": "We went on a plane!"
+  },
+  {
+    "word": "what",
+    "sentence": "What is that smell?"
+  },
+  {
+    "word": "white",
+    "sentence": "The clouds are white."
+  },
+  {
+    "word": "who",
+    "sentence": "Who is on my head?"
+  },
+  {
+    "word": "will",
+    "sentence": "We will blow out the candles."
+  },
+  {
+    "word": "with",
+    "sentence": "The dog and cat are friends with each other."
+  },
+  {
+    "word": "yes",
+    "sentence": "Yes, that's my name."
+  },
+  {
+    "word": "after",
+    "sentence": "After breakfast, I’m going to ride my skateboard."
+  },
+  {
+    "word": "again",
+    "sentence": "The basketball player dunked the ball again and again and again."
+  },
+  {
+    "word": "an",
+    "sentence": "An apple"
+  },
+  {
+    "word": "any",
+    "sentence": "Do you have any popcorn?"
+  },
+  {
+    "word": "as",
+    "sentence": "It’s as cold as ice."
+  },
+  {
+    "word": "ask",
+    "sentence": "I can ask a question?"
+  },
+  {
+    "word": "by",
+    "sentence": "Down by the bay…."
+  },
+  {
+    "word": "could",
+    "sentence": "The Little Engine That Could"
+  },
+  {
+    "word": "every",
+    "sentence": "Every day I drink a glass of milk."
+  },
+  {
+    "word": "fly",
+    "sentence": "Fly away!"
+  },
+  {
+    "word": "from",
+    "sentence": "From here to there"
+  },
+  {
+    "word": "give",
+    "sentence": "I give my mom flowers."
+  },
+  {
+    "word": "going",
+    "sentence": "We are going to…"
+  },
+  {
+    "word": "had",
+    "sentence": "He had a balloon."
+  },
+  {
+    "word": "has",
+    "sentence": "He has a balloon."
+  },
+  {
+    "word": "her",
+    "sentence": "That belongs to her."
+  },
+  {
+    "word": "him",
+    "sentence": "That is him!"
+  },
+  {
+    "word": "his",
+    "sentence": "This is his."
+  },
+  {
+    "word": "how",
+    "sentence": "How now, brown cow?"
+  },
+  {
+    "word": "just",
+    "sentence": "He just about got the ball."
+  },
+  {
+    "word": "know",
+    "sentence": "I know how to read."
+  },
+  {
+    "word": "let",
+    "sentence": "Let me help you!"
+  },
+  {
+    "word": "live",
+    "sentence": "Sharks live in the water."
+  },
+  {
+    "word": "may",
+    "sentence": "May I help you?"
+  },
+  {
+    "word": "of",
+    "sentence": "If you give a mouse a glass of milk…"
+  },
+  {
+    "word": "old",
+    "sentence": "The wagon is old."
+  },
+  {
+    "word": "once",
+    "sentence": "Once upon a time…."
+  },
+  {
+    "word": "open",
+    "sentence": "The window is open."
+  },
+  {
+    "word": "over",
+    "sentence": "The cow jumped over the moon."
+  },
+  {
+    "word": "put",
+    "sentence": "Put the paper in the trash can."
+  },
+  {
+    "word": "round",
+    "sentence": "The soccer ball is round."
+  },
+  {
+    "word": "some",
+    "sentence": "I have some money."
+  },
+  {
+    "word": "stop",
+    "sentence": "The sign says stop."
+  },
+  {
+    "word": "take",
+    "sentence": "Take my picture!"
+  },
+  {
+    "word": "thank",
+    "sentence": "Thank You!"
+  },
+  {
+    "word": "them",
+    "sentence": "Took at them."
+  },
+  {
+    "word": "then",
+    "sentence": "First we work, then we play."
+  },
+  {
+    "word": "think",
+    "sentence": "I think about the answer."
+  },
+  {
+    "word": "walk",
+    "sentence": "I walk with my feet."
+  },
+  {
+    "word": "were",
+    "sentence": "We were jumping in the leaves."
+  },
+  {
+    "word": "when",
+    "sentence": "When will we go?"
+  }
+]

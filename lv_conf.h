@@ -127,7 +127,8 @@
 /*================
  * DRAW
  *================*/
-#define LV_BIN_DECODER_RAM_LOAD 1
+/* Stream SD images one scanline at a time; full-frame loads exceed ESP32 RAM. */
+#define LV_BIN_DECODER_RAM_LOAD 0
 
 /* CACHE: image cache keeps decoded image in RAM so decoders don't re-read SD. */
 /* 72KB holds 9 icons (50×50 RGB565A8 @ 7.5KB each = 67.5KB) but NOT the logo
