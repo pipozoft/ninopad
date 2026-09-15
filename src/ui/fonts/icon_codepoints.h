@@ -14,3 +14,4 @@
 #define ICON_COG         0xEA02  /* APP_SETTINGS */
 #define ICON_X_MARK      0xEA07  /* APP_TIC_TAC_TOE */
 #define ICON_WORD_HUNT   0xEA0B  /* APP_WORD_HUNT */
+#define ICON_PHONICS     0xEA0C  /* APP_PHONICS */

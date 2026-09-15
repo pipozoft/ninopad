@@ -1,6 +1,6 @@
 # NinoPad App Designs
 
-Full specs for 9 apps on ESP32 (no PSRAM) + ST7796 480×320 + XPT2046 + LVGL v9.
+Full specs for 12 apps on ESP32 (no PSRAM) + ST7796 480×320 + XPT2046 + LVGL v9.
 
 ## Hardware Constraints
 
@@ -143,7 +143,34 @@ Full specs for 9 apps on ESP32 (no PSRAM) + ST7796 480×320 + XPT2046 + LVGL v9.
 
 **LVGL elements:** `lv_label` (wrapped passage and questions), `lv_btn` (levels, stories, answers), `lv_img` (optional illustration), `lv_anim` (answer feedback)
 
-## App 9: Settings
+## App 9: Tic Tac Toe
+
+- Play against the computer or with two players
+- Uses large touch targets and tracks wins across rounds
+- Optional custom X/O artwork loaded from SD
+
+## App 10: Word Hunt
+
+- Find hidden school words in a letter grid
+- Highlights selections and tracks the remaining word list
+- Uses teacher-provided Dolch content from SD
+
+## App 11: Phonics
+
+- Three explicit steps: initial sounds, short-vowel blending, and CVC reading
+- Sound Match pairs 12 common consonant sounds with familiar picture choices
+- Build Words asks the child to complete 15 CVC words with `a`, `e`, `i`, `o`, or `u`
+- Read Words asks the child to distinguish each target from similar decodable words
+- Eight shuffled rounds per session with no repeated targets
+- Gentle retry feedback and stars based on first-try answers
+- Uses opaque RGB565 copies of existing OpenMoji pictures from `/phonics/images`
+  plus 80×60 `/phonics/sounds` choices, avoiding alpha-plane seeks and keeping
+  three-picture rounds within the fragmented ESP32 heap
+- Audio pronunciation remains deferred until speaker hardware is available
+
+**LVGL elements:** `lv_label` (sound and blend prompts), `lv_btn` (skill and answer choices), `lv_img` (picture cues), `lv_timer` (round progression), `lv_anim` (retry feedback)
+
+## App 12: Settings
 
 - **Child profile:** Name entry (keyboard → SD `settings.json`)
 - **Word list manager:** View pre-primer words, add custom, toggle on/off

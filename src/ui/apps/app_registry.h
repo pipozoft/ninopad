@@ -20,6 +20,7 @@ typedef enum {
     APP_STORY_TIME,
     APP_TIC_TAC_TOE,
     APP_WORD_HUNT,
+    APP_PHONICS,
     APP_SETTINGS,           // hidden from home grid, accessible via NinoPad logo
     APP_COUNT,
     HOME_APP_COUNT = APP_SETTINGS

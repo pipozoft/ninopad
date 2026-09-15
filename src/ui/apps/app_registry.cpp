@@ -14,6 +14,7 @@
 #include "app_shape_paint.h"
 #include "app_tic_tac_toe.h"
 #include "app_word_hunt.h"
+#include "app_phonics.h"
 #include "app_placeholder.h"
 
 static const nino_app_t apps[APP_COUNT] = {
@@ -30,6 +31,7 @@ static const nino_app_t apps[APP_COUNT] = {
     { "STORY TIME",   NINO_COLOR_STORY,       app_story_time_create   },
     { "TIC TAC TOE",  NINO_COLOR_TIC_TAC_TOE, app_tic_tac_toe_create  },
     { "WORD HUNT",    NINO_COLOR_WORD_HUNT,   app_word_hunt_create     },
+    { "PHONICS",      NINO_COLOR_PHONICS,     app_phonics_create       },
     // Hidden (accessible via NinoPad logo in status bar)
     { "SETTINGS",     NINO_COLOR_SETTINGS,    app_settings_create     },
 };

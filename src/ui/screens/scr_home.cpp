@@ -39,6 +39,7 @@ static const char *icon_chars[HOME_APP_COUNT] = {
     "\xEE\xA8\x81",   // ICON_BOOK_OPEN   → APP_STORY_TIME
     "\xEE\xA8\x87",   // ICON_X_MARK      → APP_TIC_TAC_TOE
     "\xEE\xA8\x8B",   // ICON_WORD_HUNT   → APP_WORD_HUNT
+    "\xEE\xA8\x8C",   // ICON_PHONICS     → APP_PHONICS
 };
 
 static lv_obj_t *time_label = NULL;

@@ -31,6 +31,9 @@ sd_card/
 ├── reading/
 │   ├── stories.json         # Leveled passages and comprehension questions
 │   └── images/              # Optional RGB565 story illustrations
+├── phonics/
+│   ├── images/              # Full-size opaque phonics picture cards
+│   └── sounds/              # Small three-choice Sound Match cards
 └── wifi_networks.json    # WiFi credentials
 ```
 
@@ -40,6 +43,7 @@ sd_card/
 4. Insert the card into the CYD slot
 
 To regenerate word images from OpenMoji SVGs: `assets/scripts/make_words.py`
+To regenerate the optimized phonics copies: `tools/make_phonics_images.py`
 
 Story Time loads its passages from `reading/stories.json`. Each story can set
 `image` (128×96 thumbnail) and `image_large` (320×240 tap-to-open view) paths.
@@ -111,6 +115,7 @@ ninopad/
 │   │   │   ├── app_my_name.*  # "My name is" + textarea + canvas placeholder
 │   │   │   ├── app_settings.* # Textarea + keyboard → NVS save
 │   │   │   ├── app_story_time.* # SD-backed reading comprehension stories
+│   │   │   ├── app_phonics.*  # Sounds, short-vowel blending, and CVC reading
 │   │   │   └── app_placeholder.* # Reusable "Coming soon!" fallback
 │   │   └── icons/
 │   │       └── nino_icons.*  # LVGL line-art primitives (smiley, flame, gear, etc.)
@@ -257,9 +262,10 @@ Programmatically — edit the NVS default in `src/storage/settings.cpp`.
 2. Create matching `.h` including `app_registry.h`
 3. Add the entry in `src/ui/apps/app_registry.cpp`:
    ```c
-   { "MY THING", NINO_COLOR_MYNAME, nino_icon_sun, app_mything_create }
+   { "MY THING", NINO_COLOR_MYNAME, app_mything_create }
    ```
-4. (Optional) Add a new `nino_icon_*` function in `src/ui/icons/nino_icons.cpp`
+4. Add its icon glyph to `assets/fonts/icons.ttf`, `icon_codepoints.h`, and
+   the `icon_chars` array in `scr_home.cpp`
 
 The app base template handles the colored header bar and back button; `content` is the container below it.
 
