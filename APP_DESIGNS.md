@@ -135,6 +135,7 @@ Full specs for 12 apps on ESP32 (no PSRAM) + ST7796 480×320 + XPT2046 + LVGL v9
 - Three reading levels using progressively harder Dolch vocabulary
 - Theme cards plus a random "Surprise Me" story
 - Three-sentence passages with an optional 128×96 SD-card illustration
+- Guided reading highlights one word per second with Play/Pause and Restart controls
 - Three questions per story: two direct details and one reasoning or sequence question
 - "Read Again" returns to the passage without losing question progress
 - Wrong answers prompt rereading and retrying; correct answers advance

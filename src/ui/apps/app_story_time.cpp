@@ -11,6 +11,8 @@
 #define MAX_STORIES        16
 #define QUESTIONS_PER_STORY 3
 #define CHOICES_PER_QUESTION 3
+#define MAX_READING_WORDS  96
+#define READING_WORD_MS    1000
 
 struct StorySummary {
     uint16_t source_index;
@@ -34,6 +36,11 @@ struct ReadingStory {
     ReadingQuestion questions[QUESTIONS_PER_STORY];
 };
 
+struct WordRange {
+    uint16_t start;
+    uint16_t end;
+};
+
 static StorySummary library[MAX_STORIES];
 static int library_count;
 static int current_level;
@@ -54,11 +61,140 @@ static lv_obj_t *overlay;
 static lv_obj_t *image_dialog;
 static char image_source[84];
 static char large_image_source[84];
+static WordRange reading_words[MAX_READING_WORDS];
+static int reading_word_count;
+static int reading_word_index;
+static bool reading_playing;
+static lv_obj_t *passage_label;
+static lv_obj_t *play_button_label;
+static lv_timer_t *reading_timer;
 
 static void show_level_picker(void);
 static void show_story_picker(void);
 static void show_reading(bool review);
 static void show_question(bool new_question);
+
+static void cancel_reading_timer(void)
+{
+    if (reading_timer) {
+        lv_timer_del(reading_timer);
+        reading_timer = nullptr;
+    }
+    reading_playing = false;
+}
+
+static void set_play_button_text(const char *text)
+{
+    if (play_button_label && lv_obj_is_valid(play_button_label)) {
+        lv_label_set_text(play_button_label, text);
+    }
+}
+
+static void highlight_reading_word(int index)
+{
+    if (!passage_label || !lv_obj_is_valid(passage_label) ||
+        index < 0 || index >= reading_word_count) return;
+    lv_label_set_text_selection_start(passage_label, reading_words[index].start);
+    lv_label_set_text_selection_end(passage_label, reading_words[index].end);
+}
+
+static uint32_t next_codepoint(const char *text, int *byte_index)
+{
+    const uint8_t *bytes = (const uint8_t *)text;
+    uint8_t first = bytes[(*byte_index)++];
+    if (first < 0x80) return first;
+
+    int extra = (first & 0xE0) == 0xC0 ? 1 :
+                (first & 0xF0) == 0xE0 ? 2 :
+                (first & 0xF8) == 0xF0 ? 3 : 0;
+    uint32_t codepoint = first & (0x7F >> extra);
+    for (int i = 0; i < extra; i++) {
+        uint8_t next = bytes[*byte_index];
+        if ((next & 0xC0) != 0x80) return first;
+        (*byte_index)++;
+        codepoint = (codepoint << 6) | (next & 0x3F);
+    }
+    return codepoint;
+}
+
+static bool is_word_codepoint(uint32_t value)
+{
+    if (value < 0x80) {
+        return (value >= 'A' && value <= 'Z') ||
+               (value >= 'a' && value <= 'z') ||
+               (value >= '0' && value <= '9') || value == '\'';
+    }
+    if (value == 0x2018 || value == 0x2019) return true;
+    return value < 0x2000 || value > 0x206F;
+}
+
+static void index_reading_words(void)
+{
+    reading_word_count = 0;
+    reading_word_index = 0;
+    int byte_index = 0;
+    uint16_t character_index = 0;
+    bool in_word = false;
+
+    while (story.passage[byte_index] && reading_word_count < MAX_READING_WORDS) {
+        uint32_t codepoint = next_codepoint(story.passage, &byte_index);
+        bool word_character = is_word_codepoint(codepoint);
+        if (word_character && !in_word) {
+            reading_words[reading_word_count].start = character_index;
+            in_word = true;
+        } else if (!word_character && in_word) {
+            reading_words[reading_word_count++].end = character_index;
+            in_word = false;
+        }
+        character_index++;
+    }
+    if (in_word && reading_word_count < MAX_READING_WORDS) {
+        reading_words[reading_word_count++].end = character_index;
+    }
+}
+
+static void on_reading_tick(lv_timer_t *)
+{
+    reading_word_index++;
+    if (reading_word_index >= reading_word_count) {
+        cancel_reading_timer();
+        set_play_button_text("Replay");
+        return;
+    }
+    highlight_reading_word(reading_word_index);
+}
+
+static void start_reading_timer(void)
+{
+    reading_playing = true;
+    set_play_button_text("Pause");
+    reading_timer = lv_timer_create(on_reading_tick, READING_WORD_MS, nullptr);
+}
+
+static void on_play_reading(lv_event_t *)
+{
+    if (!reading_word_count) return;
+    if (reading_playing) {
+        cancel_reading_timer();
+        set_play_button_text("Play");
+        return;
+    }
+
+    if (reading_word_index >= reading_word_count) reading_word_index = 0;
+    highlight_reading_word(reading_word_index);
+    start_reading_timer();
+}
+
+static void on_restart_reading(lv_event_t *)
+{
+    if (!reading_word_count) return;
+    bool resume = reading_playing;
+    cancel_reading_timer();
+    reading_word_index = 0;
+    highlight_reading_word(reading_word_index);
+    if (resume) start_reading_timer();
+    else set_play_button_text("Play");
+}
 
 static bool copy_text(char *dest, size_t size, const char *source)
 {
@@ -96,6 +232,11 @@ static lv_obj_t *make_button(lv_obj_t *parent, const char *text,
 static bool reset_content(void)
 {
     if (!g_content || !lv_obj_is_valid(g_content)) return false;
+    cancel_reading_timer();
+    passage_label = nullptr;
+    play_button_label = nullptr;
+    reading_word_count = 0;
+    reading_word_index = 0;
     image_dialog = nullptr;
     lv_obj_clean(g_content);
     lv_obj_set_style_bg_color(g_content, lv_color_hex(0xFFF8F0), 0);
@@ -338,6 +479,11 @@ static void on_story_image(lv_event_t *)
     if (image_dialog || !story.image_large[0] ||
         !nino_storage_exists(story.image_large)) return;
 
+    if (reading_playing) {
+        cancel_reading_timer();
+        set_play_button_text("Play");
+    }
+
     image_dialog = lv_obj_create(g_content);
     lv_obj_remove_style_all(image_dialog);
     lv_obj_set_size(image_dialog, 480, 276);
@@ -447,14 +593,24 @@ static void show_reading(bool review)
 
     create_story_art();
 
-    lv_obj_t *passage = lv_label_create(g_content);
-    lv_label_set_text(passage, story.passage);
-    lv_obj_set_width(passage, 310);
-    lv_label_set_long_mode(passage, LV_LABEL_LONG_WRAP);
-    lv_obj_set_style_text_font(passage, &lv_font_montserrat_16, 0);
-    lv_obj_set_style_text_color(passage, lv_color_hex(0x333333), 0);
-    lv_obj_set_style_text_line_space(passage, 5, 0);
-    lv_obj_set_pos(passage, 146, 40);
+    passage_label = lv_label_create(g_content);
+    lv_label_set_text(passage_label, story.passage);
+    lv_obj_set_width(passage_label, 310);
+    lv_label_set_long_mode(passage_label, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_font(passage_label, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_color(passage_label, lv_color_hex(0x333333), 0);
+    lv_obj_set_style_text_line_space(passage_label, 5, 0);
+    lv_obj_set_style_bg_color(passage_label, level_color(current_level), LV_PART_SELECTED);
+    lv_obj_set_style_bg_opa(passage_label, LV_OPA_COVER, LV_PART_SELECTED);
+    lv_obj_set_style_text_color(passage_label, lv_color_hex(0xFFFFFF), LV_PART_SELECTED);
+    lv_obj_set_pos(passage_label, 146, 40);
+    index_reading_words();
+
+    lv_obj_t *play_button = make_button(g_content, "Play", 4, 164, 62, 36,
+                                        level_color(current_level), on_play_reading, nullptr);
+    play_button_label = lv_obj_get_child(play_button, 0);
+    make_button(g_content, "Restart", 70, 164, 72, 36,
+                lv_color_hex(0x6C7A89), on_restart_reading, nullptr);
 
     if (review) {
         make_button(g_content, "Back to Question", 246, 214, 200, 38,
@@ -581,10 +737,17 @@ void app_story_time_create(lv_obj_t *content)
     g_content = content;
     overlay = nullptr;
     image_dialog = nullptr;
+    passage_label = nullptr;
+    play_button_label = nullptr;
+    reading_timer = nullptr;
+    reading_word_count = 0;
+    reading_word_index = 0;
+    reading_playing = false;
     library_count = 0;
     current_level = 1;
     lv_obj_clear_flag(content, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_event_cb(content, [](lv_event_t *) {
+        cancel_reading_timer();
         g_content = nullptr;
         overlay = nullptr;
         image_dialog = nullptr;

@@ -47,6 +47,8 @@ To regenerate the optimized phonics copies: `tools/make_phonics_images.py`
 
 Story Time loads its passages from `reading/stories.json`. Each story can set
 `image` (128×96 thumbnail) and `image_large` (320×240 tap-to-open view) paths.
+Its reading view includes visual Play/Pause and Restart controls that highlight
+one word per second; spoken audio is not required.
 When artwork is missing, the app shows a colored theme card instead. Source PNG
 artwork is kept in `assets/reading/`; convert both sizes with
 `tools/png_to_lvgl_bin.py` before copying the binaries to the SD card. The
